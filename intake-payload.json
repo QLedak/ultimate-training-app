@@ -1,0 +1,22 @@
+﻿{
+  "athleteId": "4feecb11-a691-4a71-a026-182d34bb4204",
+  "age": 24,
+  "benchmark_set": "male_typical",
+  "years_playing_ultimate": 5,
+  "years_structured_training": 4,
+  "lifting_experience_selfdescribe": "very_experienced",
+  "season_start": "2026-09-28",
+  "season_end": "2027-05-30",
+  "training_days_per_week": 5,
+  "equipment": ["barbell_rack", "bench", "dumbbells", "pullup_bar"],
+  "bodyweight_lb": 170,
+  "back_squat_weight": 205,
+  "back_squat_reps": 1,
+  "bench_press_weight": 155,
+  "bench_press_reps": 1,
+  "goals": "Get faster and stronger for winter league",
+  "injuryReports": [
+    {"location": "achilles_calf", "report_type": "history"},
+    {"location": "groin_adductor", "report_type": "history"}
+  ]
+}
