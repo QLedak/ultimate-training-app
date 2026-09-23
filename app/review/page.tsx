@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { NavBar } from "@/components/nav/NavBar";
 
@@ -30,6 +30,14 @@ const CALL_TYPE_LABEL: Record<string, string> = {
 };
 
 export default function ReviewListPage() {
+  return (
+    <Suspense fallback={null}>
+      <ReviewList />
+    </Suspense>
+  );
+}
+
+function ReviewList() {
   const searchParams = useSearchParams();
   const athleteId = searchParams.get("athleteId");
 
