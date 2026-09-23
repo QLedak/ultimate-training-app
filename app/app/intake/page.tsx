@@ -383,14 +383,11 @@ export default function IntakePage() {
       const intakeData = await intakeRes.json();
       if (intakeData.error) throw new Error(intakeData.error);
 
-      const plannerRes = await fetch("/api/macrocycle-planner", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ athleteId }),
-      });
-      const plannerData = await plannerRes.json();
-      if (plannerData.error) throw new Error(plannerData.error);
-
+      // Building the season plan (Call 1, the Macrocycle Planner) is a
+      // coach-triggered action, not an athlete one — it always writes a
+      // pending_review draft for the coach to approve, never auto-publishes,
+      // and the API route itself requires a coach session. The coach builds
+      // it from their dashboard once this athlete's intake shows up there.
       setDone(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -404,8 +401,8 @@ export default function IntakePage() {
       <main className="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center px-6 text-center">
         <h1 className="text-2xl font-bold text-brand-dark">You&apos;re all set, {state.name.split(" ")[0]}.</h1>
         <p className="mt-3 text-slate-600">
-          Your answers are in and your season plan is being built. Your coach reviews every plan before it&apos;s
-          finalized, so check back soon.
+          Your answers are in. Your coach builds and reviews your season plan next, so check back soon — you&apos;ll
+          see it on your dashboard once it&apos;s ready.
         </p>
         <Link href="/app" className="mt-6 text-sm text-brand underline">
           Go to your dashboard

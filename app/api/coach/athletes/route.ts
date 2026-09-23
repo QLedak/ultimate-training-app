@@ -30,7 +30,7 @@ export async function GET() {
 
   const roster = await Promise.all(
     (athletes ?? []).map(async (athlete) => {
-      const [{ data: skeleton }, { data: pendingDrafts }] = await Promise.all([
+      const [{ data: skeleton }, { data: pendingDrafts }, { data: intake }] = await Promise.all([
         supabase
           .from("macrocycle_skeletons")
           .select("id")
@@ -42,6 +42,12 @@ export async function GET() {
           .select("id")
           .eq("athlete_id", athlete.id)
           .eq("status", "pending_review"),
+        supabase
+          .from("athlete_intake")
+          .select("id")
+          .eq("athlete_id", athlete.id)
+          .limit(1)
+          .maybeSingle(),
       ]);
 
       let activePhase: { id: string; phase_number: number; phase_name: string } | null = null;
@@ -72,6 +78,8 @@ export async function GET() {
         active_phase: activePhase,
         pending_drafts_count: pendingDrafts?.length ?? 0,
         last_logged_at: lastLoggedAt,
+        has_intake: Boolean(intake),
+        has_skeleton: Boolean(skeleton),
       };
     })
   );
