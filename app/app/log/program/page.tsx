@@ -22,7 +22,7 @@ type Phase = {
   weekly_template_label: string;
   status: "upcoming" | "active" | "completed" | "superseded";
 };
-type Tournament = { start_date: string; end_date: string; label?: string };
+type Tournament = { start_date: string; end_date: string; label?: string; is_priority?: boolean };
 
 const GOAL_LABELS: Record<string, string> = {
   gpp_reacclimation: "Reacclimation / base building",
@@ -157,11 +157,23 @@ export default function ProgramOverviewPage() {
                 <span className="text-purple-600">
                   {t.start_date} → {t.end_date}
                 </span>
+                {t.is_priority && (
+                  <span className="ml-2 rounded-full bg-purple-200 px-2 py-0.5 text-xs font-medium text-purple-800">
+                    Peaking for this one
+                  </span>
+                )}
               </div>
             ))}
           </div>
         </div>
       )}
+
+      <Link
+        href="/app/schedule"
+        className="mt-8 block rounded-md border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700 hover:border-brand hover:text-brand"
+      >
+        Edit schedule / add a tournament
+      </Link>
       </main>
     </>
   );

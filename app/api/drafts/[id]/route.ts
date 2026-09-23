@@ -42,5 +42,30 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   if (versionsError) return dbError("drafts/[id]", versionsError);
   if (threadError) return dbError("drafts/[id]", threadError);
 
-  return NextResponse.json({ draft, versions, thread });
+  // Phase Builder output only carries exercise_id (see corpus-retrieval-spec.md
+  // / the AI's own output format) -- the review screen wants the human-readable
+  // name alongside it, so look those up here rather than making the coach
+  // cross-reference the Exercise Library by hand.
+  let exerciseNames: Record<string, string> = {};
+  if (draft.call_type === "phase_builder") {
+    const weeks = ((draft.output as Record<string, unknown>)?.weeks ?? []) as Array<{
+      days: Array<{ exercises: Array<{ exercise_id?: string }> }>;
+    }>;
+    const exerciseIds = Array.from(
+      new Set(
+        weeks.flatMap((w) => w.days.flatMap((d) => d.exercises.map((e) => e.exercise_id).filter(Boolean)))
+      )
+    ) as string[];
+
+    if (exerciseIds.length) {
+      const { data: libraryRows, error: libraryError } = await supabase
+        .from("exercise_library")
+        .select("exercise_id, exercise_name")
+        .in("exercise_id", exerciseIds);
+      if (libraryError) return dbError("drafts/[id]", libraryError);
+      exerciseNames = Object.fromEntries((libraryRows ?? []).map((r) => [r.exercise_id, r.exercise_name]));
+    }
+  }
+
+  return NextResponse.json({ draft, versions, thread, exerciseNames });
 }

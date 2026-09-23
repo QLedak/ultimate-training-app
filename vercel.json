@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/phase-transitions",
+      "schedule": "0 10 * * *"
+    }
+  ]
+}

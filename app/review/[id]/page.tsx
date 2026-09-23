@@ -103,7 +103,13 @@ function MacrocycleOutput({ output }: { output: Record<string, unknown> }) {
   );
 }
 
-function PhaseBuilderOutput({ output }: { output: Record<string, unknown> }) {
+function PhaseBuilderOutput({
+  output,
+  exerciseNames,
+}: {
+  output: Record<string, unknown>;
+  exerciseNames: Record<string, string>;
+}) {
   const weeks = (output.weeks ?? []) as Array<{
     week_number: number;
     week_type: string;
@@ -131,7 +137,7 @@ function PhaseBuilderOutput({ output }: { output: Record<string, unknown> }) {
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="text-left text-slate-500">
-                        <th className="py-1 pr-2">Exercise ID</th>
+                        <th className="py-1 pr-2">Exercise</th>
                         <th className="py-1 pr-2">Sets x reps</th>
                         <th className="py-1 pr-2">Tempo</th>
                         <th className="py-1 pr-2">Rest</th>
@@ -141,7 +147,10 @@ function PhaseBuilderOutput({ output }: { output: Record<string, unknown> }) {
                     <tbody>
                       {day.exercises.map((ex, ei) => (
                         <tr key={ei} className="border-t border-slate-100">
-                          <td className="py-1 pr-2 font-mono">{ex.exercise_id as string}</td>
+                          <td className="py-1 pr-2">
+                            <span>{exerciseNames[ex.exercise_id as string] ?? "Unknown exercise"}</span>
+                            <span className="ml-1 font-mono text-slate-400">({ex.exercise_id as string})</span>
+                          </td>
                           <td className="py-1 pr-2">{ex.sets_reps as string}</td>
                           <td className="py-1 pr-2">{(ex.tempo as string) ?? "—"}</td>
                           <td className="py-1 pr-2">{(ex.rest as string) ?? "—"}</td>
@@ -163,6 +172,7 @@ function PhaseBuilderOutput({ output }: { output: Record<string, unknown> }) {
 export default function ReviewDetailPage({ params }: { params: { id: string } }) {
   const [coach, setCoach] = useState<Coach | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
+  const [exerciseNames, setExerciseNames] = useState<Record<string, string>>({});
   const [versions, setVersions] = useState<VersionSummary[]>([]);
   const [thread, setThread] = useState<ThreadEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -184,6 +194,7 @@ export default function ReviewDetailPage({ params }: { params: { id: string } })
           setDraft(data.draft);
           setVersions(data.versions);
           setThread(data.thread);
+          setExerciseNames(data.exerciseNames ?? {});
         }
       })
       .catch((e) => setError(String(e)));
@@ -350,7 +361,7 @@ export default function ReviewDetailPage({ params }: { params: { id: string } })
       {draft.call_type === "macrocycle_planner" ? (
         <MacrocycleOutput output={draft.output} />
       ) : (
-        <PhaseBuilderOutput output={draft.output} />
+        <PhaseBuilderOutput output={draft.output} exerciseNames={exerciseNames} />
       )}
 
       {/* Version history */}

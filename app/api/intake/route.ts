@@ -66,9 +66,8 @@ export async function POST(req: NextRequest) {
 
   const currentActiveInjuries = injuryReports
     .filter((r: { report_type: string }) => r.report_type === "current_active")
-    .map((r: { location: string; character: string }) => ({
+    .map((r: { location: string }) => ({
       location: r.location,
-      character: r.character,
       since: new Date().toISOString(),
     }));
 

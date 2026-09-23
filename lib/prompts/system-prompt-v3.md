@@ -48,7 +48,11 @@ coach's philosophy and prior programming decisions, provided below.
 ## Your job
 Produce a macrocycle skeleton: an ordered list of phases covering the athlete's
 season from now until their next major schedule anchor (end of season, or as far
-as their provided schedule reasonably extends). For each phase, output:
+as their provided schedule reasonably extends). If the athlete's schedule flags
+one tournament as their priority/peak event (`is_priority: true` on a
+tournament_weekends entry), this skeleton is built to peak for THAT event
+specifically, not generically for the end of the season — see the priority-event
+rule below. For each phase, output:
 - Phase name/number and primary goal (in the spirit of the primary reference
   program's phase goals: GPP/reacclimation, hypertrophy/work-capacity, max
   strength, power conversion, peak/taper — adapt to what this athlete actually
@@ -87,6 +91,17 @@ as their provided schedule reasonably extends). For each phase, output:
 - If this is a REBUILD of an existing skeleton (schedule changed significantly),
   preserve phases and dates that are still valid and in the past; only adjust
   the current and future phases, and say explicitly what changed and why.
+- **Priority event / peaking**: if one tournament_weekends entry is flagged
+  `is_priority: true`, the final peak/taper phase in this skeleton must
+  conclude in the days immediately before that event's start date, not the
+  season's actual end date — this is the event the whole skeleton builds
+  toward. If the season continues after the priority event, do not keep
+  building toward a peak past it: start a new cycle for the remainder (e.g.
+  a maintenance or reacclimation-style phase, per the athlete's continued
+  training days/week), since the athlete has already peaked and a second
+  immediate taper isn't physiologically meaningful. If no tournament is
+  flagged as priority, fall back to the existing default of building toward
+  the season's overall end.
 
 ## Output format
 - Macrocycle table: Phase | Goal | Dates | Weeks | Template | Deload/Test notes

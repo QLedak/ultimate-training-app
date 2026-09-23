@@ -211,7 +211,7 @@ async function buildPhaseContext(supabase: SupabaseClient, params: { athleteId: 
  * published chunk never counts as "already generated." Returns 0 if nothing
  * of this phase has been scheduled yet.
  */
-async function lastGeneratedWeek(supabase: SupabaseClient, phaseId: string): Promise<number> {
+export async function lastGeneratedWeek(supabase: SupabaseClient, phaseId: string): Promise<number> {
   const { data, error } = await supabase
     .from("scheduled_sessions")
     .select("week_number")

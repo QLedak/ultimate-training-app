@@ -28,10 +28,10 @@ const INJURY_LOCATIONS = [
   { value: "acl_knee", label: "ACL/knee (post-surgical or otherwise)" },
   { value: "hamstring", label: "Hamstring" },
   { value: "groin_adductor", label: "Groin/adductor" },
+  { value: "abdominal", label: "Abdominal" },
   { value: "shoulder", label: "Shoulder" },
   { value: "lower_back", label: "Lower back" },
   { value: "ankle", label: "Ankle" },
-  { value: "other", label: "Other" },
 ];
 
 const GOAL_CHIPS = [
@@ -45,7 +45,6 @@ const GOAL_CHIPS = [
 
 const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-type CurrentInjury = { location: string; locationOther: string; character: string; durationText: string };
 type RecurringCommitment = {
   dayOfWeek: string;
   time: string;
@@ -53,7 +52,7 @@ type RecurringCommitment = {
   startDate: string;
   endDate: string;
 };
-type TournamentWeekend = { startDate: string; endDate: string; label: string };
+type TournamentWeekend = { startDate: string; endDate: string; label: string; isPriority: boolean };
 type MaxEntry = { weight: string; reps: string; skip: boolean };
 
 type IntakeState = {
@@ -81,8 +80,7 @@ type IntakeState = {
   pullupMaxReps: string;
   pullupSkip: boolean;
   verticalJumpIn: string;
-  currentPain: "yes" | "no" | "";
-  currentInjuries: CurrentInjury[];
+  currentInjuries: string[];
   injuryHistory: string[];
   catchall: string;
   goals: string;
@@ -114,7 +112,6 @@ const initialState: IntakeState = {
   pullupMaxReps: "",
   pullupSkip: false,
   verticalJumpIn: "",
-  currentPain: "",
   currentInjuries: [],
   injuryHistory: [],
   catchall: "",
@@ -237,6 +234,15 @@ export default function IntakePage() {
     );
   }
 
+  function toggleCurrentInjury(value: string) {
+    update(
+      "currentInjuries",
+      state.currentInjuries.includes(value)
+        ? state.currentInjuries.filter((v) => v !== value)
+        : [...state.currentInjuries, value]
+    );
+  }
+
   function next() {
     setError(null);
     setStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
@@ -266,15 +272,6 @@ export default function IntakePage() {
         return null;
       case 4:
         if (state.equipment.length === 0) return "Select at least one piece of equipment.";
-        return null;
-      case 6:
-        if (!state.currentPain) return "Please answer this question.";
-        if (state.currentPain === "yes") {
-          for (const inj of state.currentInjuries) {
-            if (!inj.location) return "Each reported area needs a location.";
-            if (!inj.character) return "Each reported area needs how it feels.";
-          }
-        }
         return null;
       case 8:
         if (!state.agreedToTerms) return "Please agree to the Terms and Privacy Policy to continue.";
@@ -322,13 +319,7 @@ export default function IntakePage() {
       if (signInError) throw new Error(signInError.message);
 
       const injuryReports = [
-        ...state.currentInjuries.map((inj) => ({
-          location: inj.location,
-          location_other_text: inj.location === "other" ? inj.locationOther : undefined,
-          report_type: "current_active",
-          character: inj.character,
-          duration_text: inj.durationText,
-        })),
+        ...state.currentInjuries.map((loc) => ({ location: loc, report_type: "current_active" })),
         ...state.injuryHistory.map((loc) => ({ location: loc, report_type: "history" })),
       ];
       const catchallRestrictions = state.catchall.trim() ? [state.catchall.trim()] : [];
@@ -355,6 +346,7 @@ export default function IntakePage() {
           start_date: t.startDate,
           end_date: t.endDate,
           label: t.label,
+          is_priority: t.isPriority,
         })),
         season_calendar_confirmed: state.calendarConfirmed === "yes",
         training_days_per_week: num(state.trainingDaysPerWeek),
@@ -647,51 +639,74 @@ export default function IntakePage() {
           </Field>
 
           <Field label="Tournament weekends">
+            <p className="mb-2 text-xs text-slate-500">
+              Check &ldquo;Most important&rdquo; on the one event you most want to peak for (Regionals, Nationals,
+              etc.) — only one can be checked, and it's fine to leave none checked if nothing stands out yet.
+              You can add more tournaments or change this later from your Season page.
+            </p>
             <div className="space-y-2">
               {state.tournamentWeekends.map((t, i) => (
-                <div key={i} className="flex gap-2">
-                  <input
-                    type="date"
-                    className={inputClass}
-                    value={t.startDate}
-                    onChange={(e) => {
-                      const copy = [...state.tournamentWeekends];
-                      copy[i] = { ...t, startDate: e.target.value };
-                      update("tournamentWeekends", copy);
-                    }}
-                  />
-                  <input
-                    type="date"
-                    className={inputClass}
-                    value={t.endDate}
-                    onChange={(e) => {
-                      const copy = [...state.tournamentWeekends];
-                      copy[i] = { ...t, endDate: e.target.value };
-                      update("tournamentWeekends", copy);
-                    }}
-                  />
-                  <input
-                    placeholder="Label"
-                    className={inputClass}
-                    value={t.label}
-                    onChange={(e) => {
-                      const copy = [...state.tournamentWeekends];
-                      copy[i] = { ...t, label: e.target.value };
-                      update("tournamentWeekends", copy);
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() =>
-                      update(
-                        "tournamentWeekends",
-                        state.tournamentWeekends.filter((_, idx) => idx !== i)
-                      )
-                    }
-                    className="text-slate-400 hover:text-red-600"
-                  >
-                    ✕
-                  </button>
+                <div key={i} className="space-y-2 rounded-md border border-slate-200 p-3">
+                  <div className="flex gap-2">
+                    <input
+                      type="date"
+                      className={inputClass}
+                      value={t.startDate}
+                      onChange={(e) => {
+                        const copy = [...state.tournamentWeekends];
+                        copy[i] = { ...t, startDate: e.target.value };
+                        update("tournamentWeekends", copy);
+                      }}
+                    />
+                    <input
+                      type="date"
+                      className={inputClass}
+                      value={t.endDate}
+                      onChange={(e) => {
+                        const copy = [...state.tournamentWeekends];
+                        copy[i] = { ...t, endDate: e.target.value };
+                        update("tournamentWeekends", copy);
+                      }}
+                    />
+                    <input
+                      placeholder="Label"
+                      className={inputClass}
+                      value={t.label}
+                      onChange={(e) => {
+                        const copy = [...state.tournamentWeekends];
+                        copy[i] = { ...t, label: e.target.value };
+                        update("tournamentWeekends", copy);
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        update(
+                          "tournamentWeekends",
+                          state.tournamentWeekends.filter((_, idx) => idx !== i)
+                        )
+                      }
+                      className="text-slate-400 hover:text-red-600"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={t.isPriority}
+                      onChange={() =>
+                        update(
+                          "tournamentWeekends",
+                          state.tournamentWeekends.map((tt, idx) => ({
+                            ...tt,
+                            isPriority: idx === i ? !tt.isPriority : false,
+                          }))
+                        )
+                      }
+                    />
+                    Most important — peak for this one
+                  </label>
                 </div>
               ))}
               <button
@@ -699,7 +714,7 @@ export default function IntakePage() {
                 onClick={() =>
                   update("tournamentWeekends", [
                     ...state.tournamentWeekends,
-                    { startDate: "", endDate: "", label: "" },
+                    { startDate: "", endDate: "", label: "", isPriority: false },
                   ])
                 }
                 className="text-sm text-brand underline"
@@ -851,113 +866,25 @@ export default function IntakePage() {
 
       {step === 6 && (
         <Screen title="Injury screening" subtitle="This never blocks your program — it just helps us build it right.">
-          <Field label="Do you currently have any pain or an active injury?">
-            <div className="space-y-2">
-              {[
-                { value: "yes", label: "Yes" },
-                { value: "no", label: "No" },
-              ].map((opt) => (
-                <label key={opt.value} className="flex items-center gap-2 text-sm">
+          <Field label="Do you currently have any pain or an active injury in any of these areas? Check all that apply.">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {INJURY_LOCATIONS.map((loc) => (
+                <label
+                  key={loc.value}
+                  className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm ${
+                    state.currentInjuries.includes(loc.value) ? "border-brand bg-blue-50" : "border-slate-200"
+                  }`}
+                >
                   <input
-                    type="radio"
-                    name="currentPain"
-                    checked={state.currentPain === opt.value}
-                    onChange={() => {
-                      update("currentPain", opt.value as IntakeState["currentPain"]);
-                      if (opt.value === "no") update("currentInjuries", []);
-                    }}
+                    type="checkbox"
+                    checked={state.currentInjuries.includes(loc.value)}
+                    onChange={() => toggleCurrentInjury(loc.value)}
                   />
-                  {opt.label}
+                  {loc.label}
                 </label>
               ))}
             </div>
           </Field>
-
-          {state.currentPain === "yes" && (
-            <div className="space-y-3">
-              {state.currentInjuries.map((inj, i) => (
-                <div key={i} className="space-y-2 rounded-md border border-slate-200 p-3">
-                  <select
-                    className={inputClass}
-                    value={inj.location}
-                    onChange={(e) => {
-                      const copy = [...state.currentInjuries];
-                      copy[i] = { ...inj, location: e.target.value };
-                      update("currentInjuries", copy);
-                    }}
-                  >
-                    <option value="">Location</option>
-                    {INJURY_LOCATIONS.map((loc) => (
-                      <option key={loc.value} value={loc.value}>
-                        {loc.label}
-                      </option>
-                    ))}
-                  </select>
-                  {inj.location === "other" && (
-                    <input
-                      placeholder="Describe the location"
-                      className={inputClass}
-                      value={inj.locationOther}
-                      onChange={(e) => {
-                        const copy = [...state.currentInjuries];
-                        copy[i] = { ...inj, locationOther: e.target.value };
-                        update("currentInjuries", copy);
-                      }}
-                    />
-                  )}
-                  <div className="space-y-1">
-                    {[
-                      { value: "sharp_sudden", label: "Sharp/sudden onset" },
-                      { value: "tight_sore_gradual", label: "Tight/sore, comes on gradually or after activity" },
-                    ].map((opt) => (
-                      <label key={opt.value} className="flex items-center gap-2 text-sm">
-                        <input
-                          type="radio"
-                          name={`character-${i}`}
-                          checked={inj.character === opt.value}
-                          onChange={() => {
-                            const copy = [...state.currentInjuries];
-                            copy[i] = { ...inj, character: opt.value };
-                            update("currentInjuries", copy);
-                          }}
-                        />
-                        {opt.label}
-                      </label>
-                    ))}
-                  </div>
-                  <input
-                    placeholder="How long has this been present?"
-                    className={inputClass}
-                    value={inj.durationText}
-                    onChange={(e) => {
-                      const copy = [...state.currentInjuries];
-                      copy[i] = { ...inj, durationText: e.target.value };
-                      update("currentInjuries", copy);
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => update("currentInjuries", state.currentInjuries.filter((_, idx) => idx !== i))}
-                    className="text-xs text-red-600 underline"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-              <button
-                type="button"
-                onClick={() =>
-                  update("currentInjuries", [
-                    ...state.currentInjuries,
-                    { location: "", locationOther: "", character: "", durationText: "" },
-                  ])
-                }
-                className="text-sm text-brand underline"
-              >
-                + Add an area
-              </button>
-            </div>
-          )}
 
           <Field label="Have you ever been diagnosed with or treated for any of the following — even if you're fully recovered and pain-free now?">
             <p className="mb-2 text-xs text-slate-500">
@@ -965,7 +892,7 @@ export default function IntakePage() {
               these areas built into every phase, the way a coach would for an athlete with your history.
             </p>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {INJURY_LOCATIONS.filter((l) => l.value !== "other").map((loc) => (
+              {INJURY_LOCATIONS.map((loc) => (
                 <label key={loc.value} className="flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
@@ -1049,7 +976,7 @@ export default function IntakePage() {
               <p>Pull-up max: {state.pullupSkip ? "skipped" : state.pullupMaxReps || "—"} · Vertical jump: {state.verticalJumpIn || "—"}</p>
             </SummarySection>
             <SummarySection title="Injury screening" onEdit={() => setStep(6)}>
-              <p>Current pain: {state.currentPain || "—"} ({state.currentInjuries.length} area(s))</p>
+              <p>Current: {state.currentInjuries.join(", ") || "none reported"}</p>
               <p>History: {state.injuryHistory.join(", ") || "none reported"}</p>
               {state.catchall && <p>Note: {state.catchall}</p>}
             </SummarySection>
