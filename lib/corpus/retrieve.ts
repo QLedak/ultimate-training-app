@@ -42,7 +42,10 @@ export type Situation = {
 
 export type CorpusEntry = {
   id: string;
-  source_draft_id: string;
+  // Nullable: a corpus entry outlives its originating draft (see
+  // supabase/migrations/0008_fix_delete_cascades.sql) -- deleting the
+  // athlete/draft it came from clears this link but keeps the entry.
+  source_draft_id: string | null;
   call_type: string;
   situation_tags: {
     phase_goal: string;
