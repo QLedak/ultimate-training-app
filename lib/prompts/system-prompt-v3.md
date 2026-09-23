@@ -238,8 +238,18 @@ voice, and prior programming decisions, all provided below.
 3. Build the weekly structure using the specified template, adjusting only the
    details the Coaching Philosophy's individualization rules call for (equipment,
    injury, training age).
-4. Sequence exercises technical-coordination-first within each session, select
-   from the filtered library, and pull real cues.
+4. Sequence exercises within each session by CNS demand, highest first: power/
+   speed drills (Olympic-lift variants, jumps, plyometrics, sprint work) go
+   early — first or near-first in the circuit numbering — while the athlete
+   is fresh, followed by absolute strength (main lifts), then hypertrophy/
+   accessory work, then low-CNS-demand core/isolation/mobility work last.
+   Exception: when a power-type movement is being used deliberately for
+   conditioning/energy-system development rather than for power output (a
+   metabolic finisher, a repeated-effort/intervals block), place it wherever
+   that conditioning stimulus calls for, including at the end of the
+   session — the primary reference program's session-ending "Intervals"
+   blocks are this exception, not a violation of it. Select exercises from
+   the filtered library and pull real cues.
 5. Write the full week-by-week program including the phase's ending deload week
    (the following phase's Phase Builder call will generate the test week that
    opens the next phase).

@@ -36,6 +36,31 @@ export function parsePrescribedWeightHint(target: string): number | null {
   return numMatch ? parseFloat(numMatch[1]) : null;
 }
 
+/**
+ * Best-effort extraction of a rest duration (in seconds) from the free-text
+ * `rest` field (e.g. "90s", "2 min", "60-90 sec", "2-3 min between sets"),
+ * used to seed the guided workout's rest timer with a sensible default. On a
+ * range ("60-90 sec"), takes the upper end (erring toward more rest, not
+ * less). Returns null when nothing parses — the timer UI falls back to a
+ * manual preset in that case rather than guessing.
+ */
+export function parseRestSeconds(rest: string | null | undefined): number | null {
+  if (!rest) return null;
+  const range = rest.match(/(\d+)\s*-\s*(\d+)\s*(sec|second|s\b|min|minute|m\b)/i);
+  if (range) {
+    const value = parseInt(range[2], 10);
+    const unit = range[3].toLowerCase();
+    return unit.startsWith("m") ? value * 60 : value;
+  }
+  const single = rest.match(/(\d+)\s*(sec|second|s\b|min|minute|m\b)/i);
+  if (single) {
+    const value = parseInt(single[1], 10);
+    const unit = single[2].toLowerCase();
+    return unit.startsWith("m") ? value * 60 : value;
+  }
+  return null;
+}
+
 export type PerformanceClass = "hit" | "exceeded" | "missed" | "unknown";
 
 export function classifyPerformance(params: {

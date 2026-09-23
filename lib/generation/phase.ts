@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { runPhaseBuilder, PhaseBuilderInput, PhaseBuilderOutput } from "../prompts/phase-builder";
+import { runPhaseBuilder, PhaseBuilderInput, PhaseBuilderOutput, PhaseWeek } from "../prompts/phase-builder";
 import { Situation } from "../corpus/retrieve";
 import { deriveTrainingAge } from "../training/training-age";
 import { bucketEquipment } from "../training/equipment";
@@ -9,50 +9,82 @@ import { bucketEquipment } from "../training/equipment";
 // enough for a full 8-week phase's worth of detailed exercises in one shot.
 const SPLIT_THRESHOLD_WEEKS = 5;
 
-function weekRanges(totalWeeks: number, startWeek = 1): Array<{ start: number; end: number }> {
-  const remainingWeeks = totalWeeks - startWeek + 1;
-  if (remainingWeeks <= SPLIT_THRESHOLD_WEEKS) return [{ start: startWeek, end: totalWeeks }];
+// Business rule, not a training-methodology one (see DELIVERY_CHUNK_WEEKS
+// below the imports for the full rationale): caps how many weeks a SINGLE
+// call to runPhaseBuilder is asked to produce in one shot. Kept distinct
+// from DELIVERY_CHUNK_WEEKS — one is "how much the model writes per API
+// call" (a token-budget concern), the other is "how much the athlete gets
+// per Phase Builder generation" (a product/billing concern) — they happen
+// to both be small numbers but for unrelated reasons.
+function weekRanges(startWeek: number, endWeek: number): Array<{ start: number; end: number }> {
+  const remainingWeeks = endWeek - startWeek + 1;
+  if (remainingWeeks <= SPLIT_THRESHOLD_WEEKS) return [{ start: startWeek, end: endWeek }];
   const firstHalfEnd = startWeek + Math.ceil(remainingWeeks / 2) - 1;
   return [
     { start: startWeek, end: firstHalfEnd },
-    { start: firstHalfEnd + 1, end: totalWeeks },
+    { start: firstHalfEnd + 1, end: endWeek },
   ];
 }
+
+/**
+ * Workouts are delivered to the athlete at most this many weeks at a time,
+ * regardless of how many weeks the phase itself spans in the Macrocycle
+ * Skeleton. This is a delivery/billing decision, not a coaching one — a
+ * phase's actual length, goal, deload/test placement, and progression are
+ * still whatever the Macrocycle Planner laid out; a phase longer than this
+ * just has its remaining weeks generated as a separate, later chunk (its own
+ * program_draft, reviewed and approved the same way) instead of the whole
+ * phase landing on the athlete the moment the first chunk is approved. The
+ * eventual monthly subscription is meant to bill on exactly this cadence.
+ */
+const DELIVERY_CHUNK_WEEKS = 4;
 
 type BaseInput = Omit<
   PhaseBuilderInput,
   "weekRange" | "priorWeeksContext" | "currentDraftOutput" | "editRequest"
 >;
 
+type SeedContext = { rationaleSoFar?: string; lastWeek: PhaseWeek };
+
 /**
- * Generates a phase's full output, splitting into multiple runPhaseBuilder
- * calls when the phase is long enough that one call risks truncation
+ * Generates a phase's output for the week range [startWeek, endWeek] —
+ * which may be the whole phase (short phase, or an old-style call) or a
+ * single delivery chunk of it — splitting into multiple runPhaseBuilder
+ * calls when that range alone is long enough to risk truncation
  * (SPLIT_THRESHOLD_WEEKS above), and merging the results back into a single
  * PhaseBuilderOutput — so everything downstream (draft storage, the review
  * screen, materialization into scheduled_sessions) stays unaware a split
- * ever happened.
+ * (or a chunk boundary) ever happened.
  *
- * Pass `edit` to regenerate an edited version (the "chat edit" path):  each
+ * `totalWeeks` (the phase's real, full length) is always passed to the
+ * model as context even when startWeek/endWeek cover only part of it, so
+ * deload/test placement and overall progression stay correct across chunk
+ * boundaries — only how much gets WRITTEN in this call is bounded.
+ *
+ * `seedContext`, when given, carries the last already-approved chunk's final
+ * week (and its rationale) into this call's very first runPhaseBuilder
+ * request — the same mechanism used internally to stitch together a
+ * multi-call split, reused here to stitch together separate delivery
+ * chunks generated potentially days apart, so a later chunk continues load
+ * progression naturally and doesn't re-introduce the phase from scratch.
+ *
+ * Pass `edit` to regenerate an edited version (the "chat edit" path): the
  * call gets the coach's edit request plus only the slice of the CURRENT
  * draft that falls in its own week range.
- *
- * Pass `startWeek` (> 1) for a phase-scoped rebuild (data-architecture-spec.md
- * step 7(b)): only weeks from `startWeek` through the phase's end get
- * (re)generated, using the phase's real absolute week numbers, so
- * materializeScheduledSessions's upsert-by-date only ever touches those
- * future days — earlier weeks' ScheduledSession rows (and any logs already
- * against them) are never included in the output and so are left alone.
  */
 async function buildFullPhaseOutput(
   supabase: SupabaseClient,
   baseInput: BaseInput,
   edit?: { currentDraftOutput: PhaseBuilderOutput; editRequest: string },
-  startWeek = 1
+  startWeek = 1,
+  endWeek?: number,
+  seedContext?: SeedContext
 ): Promise<PhaseBuilderOutput> {
   const totalWeeks = baseInput.phase.week_count as number;
-  const ranges = weekRanges(totalWeeks, startWeek);
+  const genEnd = endWeek ?? totalWeeks;
+  const ranges = weekRanges(startWeek, genEnd);
 
-  if (ranges.length === 1 && startWeek === 1) {
+  if (ranges.length === 1 && startWeek === 1 && genEnd === totalWeeks && !seedContext) {
     return runPhaseBuilder(supabase, {
       ...baseInput,
       ...(edit ? { currentDraftOutput: edit.currentDraftOutput, editRequest: edit.editRequest } : {}),
@@ -60,7 +92,7 @@ async function buildFullPhaseOutput(
   }
 
   const merged: PhaseBuilderOutput = { weeks: [], coach_review_flags: [] };
-  let rationaleSoFar: string | undefined;
+  let rationaleSoFar: string | undefined = seedContext?.rationaleSoFar;
 
   for (const range of ranges) {
     const weekRange = { start: range.start, end: range.end, totalWeeks };
@@ -80,7 +112,7 @@ async function buildFullPhaseOutput(
     const priorWeeksContext =
       merged.weeks.length > 0
         ? { rationaleSoFar, lastWeek: merged.weeks[merged.weeks.length - 1] }
-        : undefined;
+        : seedContext;
 
     const result = await runPhaseBuilder(supabase, {
       ...baseInput,
@@ -92,12 +124,15 @@ async function buildFullPhaseOutput(
     merged.weeks.push(...result.weeks);
     merged.coach_review_flags = [...(merged.coach_review_flags ?? []), ...(result.coach_review_flags ?? [])];
     // The FIRST call in this sequence carries the rationale/athlete_intro —
-    // true whether that's week 1 of a fresh phase or the first regenerated
-    // week of a mid-phase rebuild (range.start > 1).
+    // true whether that's week 1 of a fresh phase, the first regenerated
+    // week of a mid-phase rebuild, or (per the prompt's own instruction to
+    // skip repeating it when priorWeeksContext/seedContext is present) left
+    // blank for a later delivery chunk, in which case fall back to the
+    // seed's rationale so the draft/review screen never shows nothing.
     if (range === ranges[0]) {
-      merged.rationale = result.rationale;
+      merged.rationale = result.rationale || seedContext?.rationaleSoFar;
       merged.athlete_intro = result.athlete_intro;
-      rationaleSoFar = result.rationale;
+      rationaleSoFar = result.rationale || rationaleSoFar;
     }
   }
 
@@ -169,7 +204,62 @@ async function buildPhaseContext(supabase: SupabaseClient, params: { athleteId: 
   return { phase, intake: intake ?? {}, currentState, latestSummary: latestSummary ?? null, situation };
 }
 
-/** POST /api/phase-builder and the "reject & regenerate" path both call this for a fresh v1. */
+/**
+ * How far into this phase has actually been delivered to the athlete —
+ * ground truth is scheduled_sessions (only an APPROVED, publish_to_athlete
+ * draft writes those), not draft status, so a rejected or approved-but-not-
+ * published chunk never counts as "already generated." Returns 0 if nothing
+ * of this phase has been scheduled yet.
+ */
+async function lastGeneratedWeek(supabase: SupabaseClient, phaseId: string): Promise<number> {
+  const { data, error } = await supabase
+    .from("scheduled_sessions")
+    .select("week_number")
+    .eq("phase_id", phaseId)
+    .order("week_number", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return data?.week_number ?? 0;
+}
+
+/**
+ * Continuity context for a delivery chunk that isn't the phase's first:
+ * pulls the most recently APPROVED phase_builder draft for this phase and
+ * hands its rationale + final week forward as this call's seed, the same
+ * shape buildFullPhaseOutput already uses to stitch together a multi-call
+ * split. Returns undefined for the phase's first-ever chunk, or if nothing
+ * approved is found (shouldn't happen in practice, but generation should
+ * still proceed — just without a continuity note — rather than fail).
+ */
+async function findChunkContinuity(supabase: SupabaseClient, phaseId: string): Promise<SeedContext | undefined> {
+  const { data: approved, error } = await supabase
+    .from("program_drafts")
+    .select("output")
+    .eq("phase_id", phaseId)
+    .eq("call_type", "phase_builder")
+    .eq("status", "approved")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error || !approved) return undefined;
+
+  const output = approved.output as PhaseBuilderOutput;
+  if (!output?.weeks || output.weeks.length === 0) return undefined;
+
+  const lastWeek = [...output.weeks].sort((a, b) => b.week_number - a.week_number)[0];
+  return { rationaleSoFar: output.rationale, lastWeek };
+}
+
+/**
+ * POST /api/phase-builder and the "reject & regenerate" path both call this.
+ * Generates the NEXT not-yet-delivered chunk of this phase — up to
+ * DELIVERY_CHUNK_WEEKS weeks, starting right after whatever's already been
+ * approved and published for it (lastGeneratedWeek above). For a phase
+ * that fits within one chunk, this is exactly the whole phase, same as
+ * before chunking existed. Throws if the phase has already been fully
+ * generated.
+ */
 export async function generatePhaseDraft(
   supabase: SupabaseClient,
   params: { athleteId: string; phaseId: string }
@@ -180,13 +270,30 @@ export async function generatePhaseDraft(
     phaseId,
   });
 
-  const output = await buildFullPhaseOutput(supabase, {
-    phase,
-    athleteIntake: intake,
-    currentAthleteState: currentState,
-    phasePerformanceSummary: latestSummary,
-    situation,
-  });
+  const totalWeeks = phase.week_count as number;
+  const startWeek = (await lastGeneratedWeek(supabase, phaseId)) + 1;
+  if (startWeek > totalWeeks) {
+    throw new Error(
+      `This phase's full ${totalWeeks} week${totalWeeks === 1 ? "" : "s"} have already been generated — nothing left to build.`
+    );
+  }
+  const endWeek = Math.min(startWeek + DELIVERY_CHUNK_WEEKS - 1, totalWeeks);
+  const seedContext = startWeek > 1 ? await findChunkContinuity(supabase, phaseId) : undefined;
+
+  const output = await buildFullPhaseOutput(
+    supabase,
+    {
+      phase,
+      athleteIntake: intake,
+      currentAthleteState: currentState,
+      phasePerformanceSummary: latestSummary,
+      situation,
+    },
+    undefined,
+    startWeek,
+    endWeek,
+    seedContext
+  );
 
   const { data: draft, error: draftError } = await supabase
     .from("program_drafts")
@@ -200,6 +307,8 @@ export async function generatePhaseDraft(
         phase_id: phaseId,
         phase_performance_summary_id: latestSummary?.id ?? null,
         situation,
+        chunk_start_week: startWeek,
+        chunk_end_week: endWeek,
       },
       output,
     })
@@ -221,6 +330,12 @@ export async function generatePhaseDraft(
  * untouched" — and the new draft becomes the next VERSION of the phase's
  * existing approved lineage (edit_source: "rebuild"), not a fresh lineage,
  * matching "New ProgramDraft version, same review/approval mechanics."
+ *
+ * Unlike a fresh generatePhaseDraft chunk, a rebuild is not capped at
+ * DELIVERY_CHUNK_WEEKS — it's responding to something already scheduled
+ * changing underneath the athlete (injury, missed week), not a new delivery
+ * cycle, so it regenerates everything from startWeek through the phase's
+ * true end, same as before chunked delivery existed.
  */
 export async function generatePhaseRebuildDraft(
   supabase: SupabaseClient,
@@ -258,6 +373,7 @@ export async function generatePhaseRebuildDraft(
 
   const lastPastOrTodayWeek = (sessionsSoFar ?? []).find((s) => s.date <= todayStr)?.week_number;
   const startWeek = lastPastOrTodayWeek ?? 1;
+  const totalWeeks = phase.week_count as number;
 
   const output = await buildFullPhaseOutput(
     supabase,
@@ -287,6 +403,8 @@ export async function generatePhaseRebuildDraft(
         phase_performance_summary_id: latestSummary?.id ?? null,
         situation,
         rebuild_start_week: startWeek,
+        chunk_start_week: startWeek,
+        chunk_end_week: totalWeeks,
       },
       output,
       edit_source: "rebuild",
@@ -299,7 +417,13 @@ export async function generatePhaseRebuildDraft(
   return newDraft;
 }
 
-/** The "chat edit" path in review-approval-flow-spec.md — regenerates a full new version of an existing draft lineage. */
+/**
+ * The "chat edit" path in review-approval-flow-spec.md — regenerates a full
+ * new version of an existing draft lineage, over the SAME week range that
+ * draft already covers (its chunk_start_week/chunk_end_week — pre-chunking
+ * drafts had none, so this falls back to the whole phase, matching the
+ * original behavior for those).
+ */
 export async function revisePhaseBuilderDraft(
   supabase: SupabaseClient,
   draft: Record<string, unknown>,
@@ -310,6 +434,10 @@ export async function revisePhaseBuilderDraft(
     phaseId: draft.phase_id as string,
   });
 
+  const snapshot = (draft.input_snapshot ?? {}) as { chunk_start_week?: number; chunk_end_week?: number };
+  const startWeek = snapshot.chunk_start_week ?? 1;
+  const endWeek = snapshot.chunk_end_week ?? (phase.week_count as number);
+
   const output = await buildFullPhaseOutput(
     supabase,
     {
@@ -319,7 +447,9 @@ export async function revisePhaseBuilderDraft(
       phasePerformanceSummary: latestSummary,
       situation,
     },
-    { currentDraftOutput: draft.output as PhaseBuilderOutput, editRequest }
+    { currentDraftOutput: draft.output as PhaseBuilderOutput, editRequest },
+    startWeek,
+    endWeek
   );
 
   const { data: newDraft, error: draftError } = await supabase

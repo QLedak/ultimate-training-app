@@ -8,6 +8,13 @@ import { dbError } from "@/lib/api/error-response";
 const VALID_STATUSES = ["completed", "partially_completed", "skipped"];
 const VALID_SKIP_REASONS = ["pain_injury", "schedule_conflict", "illness", "no_equipment", "other"];
 
+type SetResultInput = {
+  set_number: number;
+  weight_used?: number | null;
+  reps_completed?: number | null;
+  rir?: number | null;
+};
+
 type ExerciseInput = {
   exercise_id: string;
   substituted_exercise_id?: string | null;
@@ -19,7 +26,35 @@ type ExerciseInput = {
   load_descriptor?: string | null;
   notes?: string | null;
   is_true_max?: boolean; // test weeks only — also writes a testing_day_results row
+  // Optional per-set breakdown from the guided step-by-step workout flow.
+  // When present, the aggregate fields above (weight_used/reps_completed/
+  // sets_completed/rir) are RECOMPUTED from this server-side rather than
+  // trusted as sent, so the two can never disagree.
+  set_results?: SetResultInput[];
 };
+
+/**
+ * Reduces a per-set breakdown into the same aggregate shape the rest of the
+ * app already reads (Phase Performance Summary, review screens, etc.):
+ * weight_used is the heaviest set logged (with that set's own reps —
+ * "what's the best single set to judge progression off of"), sets_completed
+ * is just how many sets have a result, and rir is the LAST set's — closest
+ * to failure is the most informative one for the app's fatigue-aware rules.
+ */
+function aggregateFromSetResults(sets: SetResultInput[]) {
+  const withWeight = sets.filter((s) => s.weight_used != null);
+  const topSet =
+    withWeight.length > 0
+      ? withWeight.reduce((best, s) => ((s.weight_used ?? 0) > (best.weight_used ?? 0) ? s : best))
+      : sets[sets.length - 1];
+  const lastSet = sets[sets.length - 1];
+  return {
+    weight_used: topSet?.weight_used ?? null,
+    reps_completed: topSet?.reps_completed ?? null,
+    sets_completed: sets.length,
+    rir: lastSet?.rir ?? null,
+  };
+}
 
 /**
  * POST /api/sessions/[id]/log
@@ -119,8 +154,18 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       );
     }
 
+    // When the guided workout submitted a per-set breakdown, that's the
+    // source of truth for the aggregate fields below — recomputed here
+    // rather than trusting whatever aggregate the client also sent.
+    const hasSetResults = !!ex.set_results && ex.set_results.length > 0;
+    const aggregate = hasSetResults ? aggregateFromSetResults(ex.set_results!) : null;
+    const weightUsed = aggregate ? aggregate.weight_used : ex.weight_used ?? null;
+    const repsCompleted = aggregate ? aggregate.reps_completed : ex.reps_completed ?? null;
+    const setsCompleted = aggregate ? aggregate.sets_completed : ex.sets_completed ?? null;
+    const rir = aggregate ? aggregate.rir : ex.rir ?? null;
+
     if (tier === 1) {
-      if (ex.weight_used == null || ex.reps_completed == null || ex.rir == null) {
+      if (weightUsed == null || repsCompleted == null || rir == null) {
         return NextResponse.json(
           {
             error: `${ex.exercise_id} is a Tier 1 lift — weight used, reps completed, and RIR are all required.`,
@@ -130,8 +175,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       }
     }
 
-    const estOneRm =
-      ex.weight_used != null && ex.reps_completed != null ? epley1RM(ex.weight_used, ex.reps_completed) : null;
+    const estOneRm = weightUsed != null && repsCompleted != null ? epley1RM(weightUsed, repsCompleted) : null;
 
     rows.push({
       session_id: sessionId,
@@ -140,25 +184,26 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       prescribed_target: "", // filled in below from the session's own snapshot
       substituted_exercise_id: ex.substituted_exercise_id || null,
       substitution_reason: ex.substitution_reason || null,
-      weight_used: ex.weight_used ?? null,
-      reps_completed: ex.reps_completed ?? null,
-      sets_completed: ex.sets_completed ?? null,
-      rir: ex.rir ?? null,
+      weight_used: weightUsed,
+      reps_completed: repsCompleted,
+      sets_completed: setsCompleted,
+      rir,
       est_1rm: estOneRm,
       load_descriptor: ex.load_descriptor || null,
       notes: ex.notes || null,
+      set_results: ex.set_results ?? null,
     });
 
     // Test weeks: a Tier 1 lift flagged as a true max/PR attempt also feeds
     // testing_day_results, which the Phase Performance Summary compile job
     // prefers over an Epley estimate whenever both exist.
-    if (session.week_type === "test" && tier === 1 && ex.is_true_max && ex.weight_used != null) {
+    if (session.week_type === "test" && tier === 1 && ex.is_true_max && weightUsed != null) {
       testingResultRows.push({
         athlete_id: null, // filled in below once we have it
         phase_id: session.phase_id,
         exercise_id: lookupId,
-        result_weight: ex.weight_used,
-        result_reps: ex.reps_completed ?? null,
+        result_weight: weightUsed,
+        result_reps: repsCompleted,
         is_true_max: true,
       });
     }

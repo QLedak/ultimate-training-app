@@ -4,6 +4,7 @@ import { compilePhasePerformanceSummary } from "@/lib/pps/compile";
 import { generatePhaseRebuildDraft } from "@/lib/generation/phase";
 import { getSessionAthleteId, unauthorized, forbidden } from "@/lib/auth/session";
 import { dbError } from "@/lib/api/error-response";
+import { checkAiGenerationLimit } from "@/lib/api/ai-generation-limit";
 
 const REASON_CATEGORIES = ["schedule_change", "injury_pain", "other"] as const;
 type ReasonCategory = (typeof REASON_CATEGORIES)[number];
@@ -86,6 +87,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
           "Your coach will review this schedule change and rebuild your season plan — you'll see the update once it's approved.",
       });
     }
+
+    const limited = checkAiGenerationLimit(athleteId);
+    if (limited) return limited;
 
     const draft = await generatePhaseRebuildDraft(supabase, {
       athleteId,

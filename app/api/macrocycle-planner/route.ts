@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/db/supabase-admin";
 import { generateMacrocycleDraft } from "@/lib/generation/macrocycle";
 import { getSessionCoachId, unauthorized } from "@/lib/auth/session";
+import { checkAiGenerationLimit } from "@/lib/api/ai-generation-limit";
 
 /**
  * POST /api/macrocycle-planner
@@ -20,6 +21,9 @@ export async function POST(req: NextRequest) {
   if (!athleteId) {
     return NextResponse.json({ error: "athleteId is required" }, { status: 400 });
   }
+
+  const limited = checkAiGenerationLimit(athleteId);
+  if (limited) return limited;
 
   const supabase = getSupabaseAdmin();
 

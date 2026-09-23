@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/db/supabase-admin";
 import { generatePhaseDraft } from "@/lib/generation/phase";
 import { getSessionCoachId, unauthorized } from "@/lib/auth/session";
+import { checkAiGenerationLimit } from "@/lib/api/ai-generation-limit";
 
 /**
  * POST /api/phase-builder
@@ -22,6 +23,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "athleteId and phaseId are required" }, { status: 400 });
   }
 
+  const limited = checkAiGenerationLimit(athleteId);
+  if (limited) return limited;
+
   const supabase = getSupabaseAdmin();
 
   try {
@@ -29,7 +33,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ draft });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Phase Builder call failed";
-    const status = message === "Phase not found" || message.startsWith("No current_athlete_state") ? 404 : 502;
+    const status =
+      message === "Phase not found" || message.startsWith("No current_athlete_state")
+        ? 404
+        : message.includes("already been generated")
+        ? 409
+        : 502;
     return NextResponse.json({ error: message }, { status });
   }
 }

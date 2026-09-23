@@ -86,6 +86,7 @@ type IntakeState = {
   injuryHistory: string[];
   catchall: string;
   goals: string;
+  agreedToTerms: boolean;
 };
 
 const initialState: IntakeState = {
@@ -118,6 +119,7 @@ const initialState: IntakeState = {
   injuryHistory: [],
   catchall: "",
   goals: "",
+  agreedToTerms: false,
 };
 
 const TOTAL_STEPS = 9;
@@ -274,6 +276,9 @@ export default function IntakePage() {
           }
         }
         return null;
+      case 8:
+        if (!state.agreedToTerms) return "Please agree to the Terms and Privacy Policy to continue.";
+        return null;
       default:
         return null;
     }
@@ -289,6 +294,11 @@ export default function IntakePage() {
   }
 
   async function handleSubmit() {
+    const err = validateStep();
+    if (err) {
+      setError(err);
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -1050,6 +1060,26 @@ export default function IntakePage() {
               <p>{state.goals || "—"}</p>
             </SummarySection>
           </div>
+
+          <label className="flex items-start gap-2 rounded-md border border-slate-200 p-3 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              className="mt-0.5"
+              checked={state.agreedToTerms}
+              onChange={(e) => update("agreedToTerms", e.target.checked)}
+            />
+            <span>
+              I&apos;ve read and agree to the{" "}
+              <Link href="/terms" target="_blank" className="text-brand underline">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" target="_blank" className="text-brand underline">
+                Privacy Policy
+              </Link>
+              , including how my training and injury information is used.
+            </span>
+          </label>
         </Screen>
       )}
 
@@ -1076,7 +1106,7 @@ export default function IntakePage() {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={submitting}
+            disabled={submitting || !state.agreedToTerms}
             className="rounded-md bg-brand px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
             {submitting ? "Building your plan…" : "Confirm & build my plan"}

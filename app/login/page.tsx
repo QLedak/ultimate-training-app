@@ -100,6 +100,10 @@ export default function LoginPage() {
         <br />
         Coach, setting up for the first time? <Link href="/coach/signup" className="text-brand underline">Create the coach account</Link>.
       </p>
+
+      <p className="mt-4 text-xs text-slate-400">
+        <Link href="/terms" className="underline">Terms</Link> · <Link href="/privacy" className="underline">Privacy</Link>
+      </p>
     </main>
   );
 }

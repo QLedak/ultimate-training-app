@@ -31,6 +31,31 @@ export default function CoachHomePage() {
   const [coach, setCoach] = useState<Coach | null>(null);
   const [athletes, setAthletes] = useState<AthleteRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [generatingId, setGeneratingId] = useState<string | null>(null);
+  const [generateError, setGenerateError] = useState<string | null>(null);
+
+  async function generatePhaseDraft(athlete: AthleteRow) {
+    if (!athlete.active_phase) return;
+    setGeneratingId(athlete.id);
+    setGenerateError(null);
+    try {
+      const res = await fetch("/api/phase-builder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ athleteId: athlete.id, phaseId: athlete.active_phase.id }),
+      });
+      const data = await res.json();
+      if (data.error) {
+        setGenerateError(`${athlete.name ?? athlete.email}: ${data.error}`);
+      } else {
+        window.location.href = `/review/${data.draft.id}`;
+      }
+    } catch (e) {
+      setGenerateError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setGeneratingId(null);
+    }
+  }
 
   useEffect(() => {
     fetch("/api/me/coach")
@@ -71,6 +96,9 @@ export default function CoachHomePage() {
             {error} — you may be signed in with a non-coach account.
           </p>
         )}
+        {generateError && (
+          <p className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600">{generateError}</p>
+        )}
 
         {totalPending > 0 && (
           <Link
@@ -104,14 +132,31 @@ export default function CoachHomePage() {
                     {formatLastLogged(a.last_logged_at)}
                   </p>
                 </div>
-                {a.pending_drafts_count > 0 && (
-                  <Link
-                    href={`/review?athleteId=${a.id}`}
-                    className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 hover:bg-amber-200"
-                  >
-                    {a.pending_drafts_count} pending
-                  </Link>
-                )}
+                <div className="flex items-center gap-2">
+                  {a.pending_drafts_count > 0 && (
+                    <Link
+                      href={`/review?athleteId=${a.id}`}
+                      className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 hover:bg-amber-200"
+                    >
+                      {a.pending_drafts_count} pending
+                    </Link>
+                  )}
+                  {/* A macrocycle approval only marks a phase "active" — it
+                      doesn't generate that phase's actual workouts. That's a
+                      separate Phase Builder call (Call 2), which has no
+                      other trigger in the UI yet, so it lives here: one
+                      click per phase, landing straight on its review draft. */}
+                  {a.active_phase && a.pending_drafts_count === 0 && (
+                    <button
+                      type="button"
+                      onClick={() => generatePhaseDraft(a)}
+                      disabled={generatingId === a.id}
+                      className="rounded-full border border-brand px-2 py-0.5 text-xs font-medium text-brand hover:bg-blue-50 disabled:opacity-50"
+                    >
+                      {generatingId === a.id ? "Generating…" : "Generate phase draft"}
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>

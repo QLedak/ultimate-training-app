@@ -14,7 +14,7 @@ Build training programs for ultimate frisbee players that a real strength and co
 ## 2. Core Influences & What I Take From Each
 
 **Garage Strength (Dane Miller)**
-- Structure training blocks around **technical coordination → absolute strength → reflexive/explosive strength**, in that order within a training age-appropriate progression. Athletes need to move well before they move heavy, and move heavy before they move fast under load.
+- Structure training blocks (across weeks/phases — a periodization emphasis, not an order exercises appear within one session; see Section 5's "Exercise order within a session" for that) around **technical coordination → absolute strength → reflexive/explosive strength**, in that order within a training age-appropriate progression. Athletes need to move well before they move heavy, and move heavy before they move fast under load.
 - Complex/contrast pairing (a heavy strength movement paired with an explosive movement targeting the same pattern) to convert raw strength into transferable power — highly relevant to ultimate's need for explosive cuts and jumps.
 - Respect training age: a first-year player and a five-year veteran should never get the same base template, even if their goals look similar on paper.
 
@@ -69,7 +69,7 @@ Build training programs for ultimate frisbee players that a real strength and co
    - Off-season: GPP → absolute strength → power conversion
    - Pre-season: SPP, higher-intensity power/speed work, reduced volume as season approaches
    - In-season: maintenance strength, injury resilience, managed fatigue around games/practices
-3. **Weekly structure** — sessions built around technical coordination first, absolute strength second, reflexive/explosive work third, scaled to the athlete's phase and training age.
+3. **Weekly structure** — which qualities this phase emphasizes (technical coordination, absolute strength, reflexive/explosive work), scaled to the athlete's phase and training age. This is a phase-level emphasis, not the order exercises appear within one session — see Section 5, "Exercise order within a session," for that.
 4. **Exercise selection** — pulled from an approved library, not invented per plan, so every exercise has a defined purpose, cue, regression, and progression.
 5. **Deloads** — planned, not reactive — every 4th week as a default, adjusted for game schedule.
 
@@ -92,6 +92,12 @@ Build training programs for ultimate frisbee players that a real strength and co
 - No upper-body training day is exclusively pushing or exclusively pulling — every upper-body day includes both pushing and pulling movements. A dedicated "upper push day" or "upper pull day" is not this coach's convention, regardless of split type.
 - Lower-body strength days balance movement-pattern classes the same way — don't devote an entire day to one dominant pattern (e.g., all squat-dominant or all hinge-dominant); mix squat, hinge, and single-leg/unilateral work across the day's main lifts.
 - This is a session-composition rule, not a volume rule — the day can still emphasize one quality (e.g., a squat-emphasis lower day), but the complementary pattern still gets real working sets, not just a token warm-up movement.
+
+**Exercise order within a session**
+- Order exercises within a session by CNS demand, highest first. Olympic-lift variants, jumps/plyometrics, and other power/speed drills go EARLY in the session — first or near-first in the circuit numbering — while the athlete is freshest. Never bury power/speed work after strength or accessory volume; residual fatigue blunts both the training effect (you can't develop maximal power output while pre-fatigued) and the safety margin (power/speed movements are the least forgiving of degraded technique).
+- After power/speed work: absolute strength (main lifts) next, then hypertrophy/accessory work, then low-CNS-demand core/isolation/mobility work last — same freshness-first logic, descending the CNS-demand ladder.
+- Exception — conditioning intent: when a power-type movement (jumps, throws, sprints, Olympic-lift variants) is being used deliberately for conditioning/energy-system development rather than for its power-output quality — a metabolic finisher, a repeated-effort circuit, an intervals block — place it wherever that conditioning stimulus calls for, including at the end of the session. The question that decides placement is intent: is this exercise here to develop maximal power output (early, fresh), or to develop the athlete's ability to repeat effort under fatigue (wherever that fatigue state naturally falls, often late)? The example programs' "Intervals" and repeated-sprint blocks, placed last in their sessions, are this exception in practice, not a violation of the rule.
+- This is a within-session sequencing rule, distinct from the block-level "technical coordination → absolute strength → reflexive/explosive" periodization in Sections 2 and 4 above, which describes which quality an entire TRAINING BLOCK (weeks/phases) emphasizes — not the order exercises appear on any single day.
 
 **Tendon pain → isometric-first progression**
 - If the athlete reports reactive tendon pain (e.g., patellar, Achilles) tied to a specific movement, shift that pattern to isometric loading (moderate-intensity holds, 30-45s) before reintroducing dynamic loading — isometrics tend to be better tolerated and have an analgesic effect during reactive tendinopathy.

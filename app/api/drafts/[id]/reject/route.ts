@@ -4,6 +4,7 @@ import { generateMacrocycleDraft } from "@/lib/generation/macrocycle";
 import { generatePhaseDraft } from "@/lib/generation/phase";
 import { getSessionCoachId, unauthorized } from "@/lib/auth/session";
 import { dbError } from "@/lib/api/error-response";
+import { checkAiGenerationLimit } from "@/lib/api/ai-generation-limit";
 
 /**
  * POST /api/drafts/[id]/reject
@@ -51,6 +52,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   if (!regenerate) {
     return NextResponse.json({ rejectedDraft: { ...draft, status: "rejected" }, newDraft: null });
   }
+
+  const limited = checkAiGenerationLimit(draft.athlete_id as string);
+  if (limited) return limited;
 
   let newDraft;
   try {
