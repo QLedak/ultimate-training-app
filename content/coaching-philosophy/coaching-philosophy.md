@@ -99,6 +99,23 @@ Build training programs for ultimate frisbee players that a real strength and co
 - Exception — conditioning intent: when a power-type movement (jumps, throws, sprints, Olympic-lift variants) is being used deliberately for conditioning/energy-system development rather than for its power-output quality — a metabolic finisher, a repeated-effort circuit, an intervals block — place it wherever that conditioning stimulus calls for, including at the end of the session. The question that decides placement is intent: is this exercise here to develop maximal power output (early, fresh), or to develop the athlete's ability to repeat effort under fatigue (wherever that fatigue state naturally falls, often late)? The example programs' "Intervals" and repeated-sprint blocks, placed last in their sessions, are this exception in practice, not a violation of the rule.
 - This is a within-session sequencing rule, distinct from the block-level "technical coordination → absolute strength → reflexive/explosive" periodization in Sections 2 and 4 above, which describes which quality an entire TRAINING BLOCK (weeks/phases) emphasizes — not the order exercises appear on any single day.
 
+**Speed and power in every phase — never a strength-only block**
+- Every phase, in every split type, includes dedicated speed/power work — not just in a designated "power" phase. An athlete who goes several weeks of pure strength work with no speed/power exposure starts losing explosiveness, and that's true regardless of which macrocycle phase (`gpp_reacclimation` through `peak_taper`) is currently running. What changes phase to phase is the DOSE (Section 5's existing "Speed and jump training: present year-round, dosed by season" rule) and how much of the session it occupies — never whether it's present at all.
+
+**Standard lower-body day order (the default template for a dedicated lower-body session)**
+1. Speed/power drills (sprint mechanics, jumps, bounds) — freshest point in the session, per the CNS-demand ordering rule above.
+2. Olympic-lift variation — for advanced lifters with barbell/platform access, this gets a heavy emphasis, not a token inclusion; it's the bridge between the speed/power drills above and the heavy squat below, and one of the highest-value exercises this coach programs for translating strength into on-field power. Substitute a dumbbell/kettlebell variant (e.g. DB Hang Clean) for novice or minimal-equipment athletes rather than dropping this slot — the sequencing rule still applies even when the loaded version isn't available.
+3. Heavy squat variation (back squat, front squat, or a heavy unilateral squat-pattern lift like the Rear Foot Elevated Split Squat).
+4. Hinge/posterior-chain variation (trap bar deadlift, RDL, etc.).
+5. Accessory work targeting the athlete's specific areas of weakness (per their intake/current-state profile, injury-history resilience work, or whatever the Phase Performance Summary flags as lagging).
+
+This is the DEFAULT order for a lower day; the movement-pattern-balance rule above (squat + hinge + unilateral work all represented) still governs which lifts actually get chosen, this rule governs what order they're written in once chosen.
+
+**Standard upper-body day structure**
+- Every upper-body day opens with upper-body power work (e.g. plyometric push-up, explosive band-resisted push-up, medicine ball chest pass/overhead slam) before any heavy lifting — same freshness-first logic as the lower-body template above.
+- Heavy pushing and pulling are then paired as supersets (a push set immediately followed by a pull set, rest, repeat) rather than run as two separate blocks back-to-back — this keeps both patterns genuinely balanced within the session (per the movement-pattern-balance rule) and uses the antagonist pairing to maintain bar speed/quality on both lifts.
+- Accessory work (isolation, shoulder/rotator-cuff resilience, arms) closes the session, same descending-CNS-demand logic as everywhere else.
+
 **Tendon pain → isometric-first progression**
 - If the athlete reports reactive tendon pain (e.g., patellar, Achilles) tied to a specific movement, shift that pattern to isometric loading (moderate-intensity holds, 30-45s) before reintroducing dynamic loading — isometrics tend to be better tolerated and have an analgesic effect during reactive tendinopathy.
 - Progress in order: isometric holds → slow, controlled heavy resistance (full range, controlled tempo) → gradual reintroduction of plyometrics/reflexive work, only once the athlete tolerates the prior stage pain-free.
