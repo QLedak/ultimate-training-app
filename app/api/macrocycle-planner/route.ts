@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "athleteId is required" }, { status: 400 });
   }
 
-  const limited = checkAiGenerationLimit(athleteId);
+  const limited = await checkAiGenerationLimit(athleteId);
   if (limited) return limited;
 
   const supabase = getSupabaseAdmin();

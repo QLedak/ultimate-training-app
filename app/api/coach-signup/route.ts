@@ -21,7 +21,7 @@ import { checkRateLimit, getClientIp } from "@/lib/api/rate-limit";
 export async function POST(req: NextRequest) {
   // Stricter than athlete signup — this endpoint is guarding a secret
   // (the setup code), so a low limit matters more than user convenience.
-  const limited = checkRateLimit(`coach-signup:${getClientIp(req)}`, 5, 15 * 60 * 1000);
+  const limited = await checkRateLimit(`coach-signup:${getClientIp(req)}`, 5, 15 * 60 * 1000);
   if (limited) return limited;
 
   const { name, email, password, setup_code } = await req.json();

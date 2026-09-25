@@ -16,10 +16,9 @@ import { checkRateLimit } from "./rate-limit";
  * Keyed per athlete rather than per IP: the coach reviewing/editing drafts
  * and the athlete requesting a rebuild are different callers hitting the
  * same underlying cost for the same athlete, so that's the meaningful unit
- * to cap. Shares the same in-memory limiter as signup (lib/api/rate-limit.ts)
- * — fine for a single-instance deployment, resets on restart/deploy; move to
- * a shared store (e.g. Upstash Redis) if this app moves to multi-instance/
- * serverless-per-request hosting, same caveat as the signup limiter.
+ * to cap. Shares the same limiter as signup (lib/api/rate-limit.ts) — backed
+ * by Upstash Redis when configured, so the count is actually shared across
+ * Vercel's serverless instances instead of silently resetting per-instance.
  */
 const MAX_GENERATIONS_PER_ATHLETE_PER_DAY = 20;
 const WINDOW_MS = 24 * 60 * 60 * 1000;

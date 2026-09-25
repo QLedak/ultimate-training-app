@@ -24,7 +24,7 @@ import { checkRateLimit, getClientIp } from "@/lib/api/rate-limit";
  * (session-based) instead.
  */
 export async function POST(req: NextRequest) {
-  const limited = checkRateLimit(`athlete-signup:${getClientIp(req)}`, 8, 15 * 60 * 1000);
+  const limited = await checkRateLimit(`athlete-signup:${getClientIp(req)}`, 8, 15 * 60 * 1000);
   if (limited) return limited;
 
   const { email, name, password } = await req.json();

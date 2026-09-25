@@ -43,7 +43,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     );
   }
 
-  const limited = checkAiGenerationLimit(draft.athlete_id as string);
+  const limited = await checkAiGenerationLimit(draft.athlete_id as string);
   if (limited) return limited;
 
   let newDraft;

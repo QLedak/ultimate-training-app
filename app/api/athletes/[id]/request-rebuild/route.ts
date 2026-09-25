@@ -88,7 +88,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       });
     }
 
-    const limited = checkAiGenerationLimit(athleteId);
+    const limited = await checkAiGenerationLimit(athleteId);
     if (limited) return limited;
 
     const draft = await generatePhaseRebuildDraft(supabase, {

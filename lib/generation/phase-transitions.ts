@@ -109,7 +109,7 @@ export async function runDailyPhaseTransitionCheck(supabase: SupabaseClient): Pr
       const needsNextChunk = !lastSession || runwayDays <= LEAD_DAYS;
 
       if (needsNextChunk) {
-        if (checkAiGenerationLimit(athleteId)) {
+        if (await checkAiGenerationLimit(athleteId)) {
           actions.push({
             athleteId,
             phaseId: currentPhaseId,
