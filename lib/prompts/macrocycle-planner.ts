@@ -1,6 +1,10 @@
 import { getAnthropicClient, CLAUDE_MODEL } from "../anthropic-client";
 import { getSystemPrompts } from "./extract-system-prompts";
-import { getCoachingPhilosophy, getTrainingTargetsReference } from "./static-content";
+import {
+  getCoachingPhilosophy,
+  getTrainingTargetsReference,
+  getDayStructureTemplates,
+} from "./static-content";
 import { getPrimaryReferenceProgramSummary } from "../corpus/fallback-examples";
 
 // Mirrors the "submit_macrocycle_skeleton" shape stored in macrocycle_phases.
@@ -47,7 +51,14 @@ const SKELETON_TOOL = {
             weekly_template_label: {
               type: "string",
               description:
-                "A generic label for THIS athlete's template, not the primary reference program's own '4A'/'4B' names.",
+                "A generic label built from the DAY STRUCTURE TEMPLATES' six fixed day types " +
+                "(Lower Body Strength, Upper Body Strength, Athlete Day, Impulse Day, Hypertrophy " +
+                "Day, Energy System Day) — e.g. 'Lower/Upper/Athlete (3-day)' or 'Lower/Upper/" +
+                "Athlete/Impulse/Hypertrophy/Energy System (6-day)'. Every template, at every phase, " +
+                "includes exactly the athlete's days/week worth of day types taken in that fixed " +
+                "priority order — never an Upper/Lower-only or full-body-pattern split, and never " +
+                "the primary reference program's own '4A'/'4B'/day-letter names, which describe an " +
+                "older split this app no longer uses.",
             },
             deload_test_note: { type: "string" },
           },
@@ -99,12 +110,35 @@ export async function runMacrocyclePlanner(
   const { planner: systemPrompt } = getSystemPrompts();
   const coachingPhilosophy = getCoachingPhilosophy();
   const primaryReferenceProgram = getPrimaryReferenceProgramSummary();
+  const dayStructureTemplates = getDayStructureTemplates();
+  const daysPerWeek = (input.intake as Record<string, unknown> | undefined)?.[
+    "training_days_per_week"
+  ] as number | undefined;
 
   const userMessage = [
     "# COACHING PHILOSOPHY",
     coachingPhilosophy,
     "",
+    "# DAY STRUCTURE TEMPLATES (six fixed day types — governs weekly_template_label and phase structure)",
+    daysPerWeek
+      ? `This athlete trains ${daysPerWeek} days/week. Every phase's weekly_template_label must reflect ` +
+        `exactly the first ${daysPerWeek} day types from the priority-order table below (Lower Body ` +
+        `Strength, Upper Body Strength, Athlete Day, Impulse Day, Hypertrophy Day, Energy System Day, in ` +
+        `that order) — the same fixed set at every phase in this skeleton, not a different split shape per ` +
+        `phase. A league/game day satisfies the Energy System day's role and is never counted as one of ` +
+        `the athlete's chosen training days.`
+      : "Every phase's weekly_template_label must reflect exactly the athlete's days/week worth of day " +
+        "types from the priority-order table below, taken in that fixed order — the same fixed set at " +
+        "every phase, not a different split shape per phase.",
+    dayStructureTemplates,
+    "",
     "# PRIMARY REFERENCE PROGRAM SUMMARY",
+    "IMPORTANT: this coach's own real program below predates the current methodology. Its structural " +
+      "conventions (deload/test placement anchored to phase boundaries, contrast/complex labeling, wave " +
+      "loading notation, alternating exercises week-to-week, sport-specific day-renaming during taper) " +
+      "still apply and should inform this skeleton. Its weekly template shapes and day labels — '4A'/" +
+      "'4B', 'Lower A/Upper B/Speed-Plyo/Lower C/Upper D' — do NOT apply and must not appear in or shape " +
+      "weekly_template_label; use the DAY STRUCTURE TEMPLATES above for that instead.",
     primaryReferenceProgram,
     "",
     "# TRAINING TARGETS REFERENCE",

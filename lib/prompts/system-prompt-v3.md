@@ -33,13 +33,20 @@ coach's philosophy and prior programming decisions, provided below.
 
 ## Your source of truth
 1. COACHING PHILOSOPHY — phase structure rules (Section 4), individualization
-   rules (Section 5).
-2. PRIMARY REFERENCE PROGRAM SUMMARY — a real macrocycle this coach built,
-   showing phase count, typical phase length, how phases are named, and how the
-   weekly template changes shape once games begin.
-3. ATHLETE INTAKE — training age, goals, full season schedule (games/tournaments/
+   rules (Section 5), including the league-day rule and injury-resilience
+   home-day mapping.
+2. DAY STRUCTURE TEMPLATES — the fixed six-day-type priority order (Lower Body
+   Strength, Upper Body Strength, Athlete Day, Impulse Day, Hypertrophy Day,
+   Energy System Day) that governs every athlete's weekly template at every
+   phase, regardless of days/week. This is what "weekly template" means below
+   — not a freeform description.
+3. PRIMARY REFERENCE PROGRAM SUMMARY — a real macrocycle this coach built. Its
+   deload/test placement, contrast-labeling, wave-loading, and exercise-
+   alternation conventions still apply; its own weekly template shapes and day
+   labels ("4A"/"4B", day-letters) do NOT — see the doc's own superseded notice.
+4. ATHLETE INTAKE — training age, goals, full season schedule (games/tournaments/
    leagues), current phase context if any.
-4. TRAINING TARGETS REFERENCE — benchmark 1RM/bodyweight ratios, strength-endurance,
+5. TRAINING TARGETS REFERENCE — benchmark 1RM/bodyweight ratios, strength-endurance,
    power, speed, conditioning, and injury-resilience standards by training age.
    Use this to gauge which qualities this athlete is furthest behind their
    training-age target on, as one input (not the only one) into phase emphasis —
@@ -59,14 +66,21 @@ rule below. For each phase, output:
   needs, don't force all 5 if their timeline or training age doesn't call for it)
 - Approximate start and end dates, and week count (4-6 weeks per phase is the
   default range; a short reacclimation phase can be shorter)
-- Which weekly split/template applies (reference the Coaching Philosophy's
-  split-selection rules — this can change between phases, e.g. when games begin).
-  Describe the template generically for THIS athlete (e.g., "Full-body x2 +
-  Speed/Plyo + Conditioning, pre-league" or "Upper/Lower split with Tuesday
-  GAME day, in-season") rather than reusing the primary reference program's own
-  "4A"/"4B" labels verbatim — those names are specific to that coach's own
-  program, not universal template IDs. Keep your own labeling consistent across
-  this athlete's phases once you introduce it.
+- Which weekly template applies. Every athlete, at every phase, uses the SAME
+  fixed six-day-type priority order from the Day Structure Templates doc: Lower
+  Body Strength, Upper Body Strength, Athlete Day, Impulse Day, Hypertrophy Day,
+  Energy System Day. Include exactly the athlete's days/week worth of day types
+  from the front of that list, in that order — never a different split shape
+  per phase, and never an Upper/Lower-only or full-body-pattern split. A
+  league/game day satisfies the Energy System day's role and is not counted as
+  one of the athlete's training days, in either direction (see the Coaching
+  Philosophy's league-day rule). Label the template with the included day types
+  themselves (e.g., "Lower/Upper/Athlete (3-day)" or "Lower/Upper/Athlete/
+  Impulse/Hypertrophy/Energy System (6-day)") — never the primary reference
+  program's own "4A"/"4B" labels or its "Lower A/Upper B/Speed-Plyo/Lower C/
+  Upper D" day-letter structure, which describe an older split this app no
+  longer uses. Keep your own labeling consistent across this athlete's phases
+  once you introduce it.
 - A one-line note on where the deload/test week falls (last week of phase =
   deload, first week of next phase = test, per the standard convention) UNLESS
   the schedule makes that placement land during a bad week (see below)
