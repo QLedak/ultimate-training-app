@@ -1,154 +1,169 @@
-# Day Structure Templates — By Training Split & Phase
+# Day Structure Templates — Six Fixed Day Types, By Training Frequency & Phase
 
-*Maintained separately from `coaching-philosophy.md`, same way the Training Targets Reference is — this is the concrete slot-by-slot template the Phase Builder should fill with real exercises from the filtered library. It operationalizes Section 5's existing rules (exercise order within a session, movement-pattern balance, speed/power year-round, injury resilience every phase) into a fixed structure per split, so the AI is choosing WHICH exercise fills a slot, not inventing session structure from scratch each time.*
+*Maintained separately from `coaching-philosophy.md`, same way the Training Targets Reference is — this is the concrete slot-by-slot template the Phase Builder should fill with real exercises from the filtered library. It operationalizes Section 5's rules (exercise order within a session, movement-pattern balance, speed/power year-round, injury resilience every phase, the league-day rule) into a fixed structure, so the AI is choosing WHICH exercise fills a slot, not inventing session structure from scratch each time.*
 
-*Slot ORDER is fixed by training split and day type — it does not change phase to phase, per Section 5's CNS-demand sequencing rule. What changes by phase is dosing (sets/reps/intensity), which slots carry contrast/complex pairing, and overall session volume. That's why this document is organized as "day types per split" (fixed) crossed with "phase dosing" (variable), rather than 25 independently-drawn templates.*
+*Built from the Garage Strength/Peak Strength 5-day framework (garage-strength-style lower/upper/athlete/impulse/hypertrophy day archetypes), extended to 6 days with a dedicated Energy System day and this coach's own single-leg-squat-as-RFESS convention.*
+
+*Slot ORDER is fixed by day type — it does not change phase to phase. What changes by phase is dosing (sets/reps/intensity), which slots carry contrast/complex pairing, and overall session volume.*
+
+---
+
+## The six day types and their priority order
+
+**Every athlete uses these same six day types, in this order, regardless of how many training days/week they picked.** Lower frequency doesn't mean a different split — it means fewer of these appear, dropped from the bottom of the priority list.
+
+| Priority | Day type | Appears at ≥ this many days/week |
+|---|---|---|
+| 1 | **Lower Body Strength** | 2 |
+| 2 | **Upper Body Strength** | 2 |
+| 3 | **Athlete Day** (speed/acceleration + agility) | 3 |
+| 4 | **Impulse Day** (Olympic lift + RFESS + plyometrics) | 4 |
+| 5 | **Hypertrophy Day** | 5 |
+| 6 | **Energy System Day** | 6 |
+
+| Days/week | Days included, in weekly order |
+|---|---|
+| 2 | Lower, Upper |
+| 3 | Lower, Upper, Athlete |
+| 4 | Lower, Upper, Athlete, Impulse |
+| 5 | Lower, Upper, Athlete, Impulse, Hypertrophy |
+| 6 | Lower, Upper, Athlete, Impulse, Hypertrophy, Energy System |
+
+This priority order is also the week's sequence — Lower Body day first, Upper Body day second, and so on. It applies to every athlete at every training age and every phase; only dosing changes, never which days exist at a given frequency.
+
+**League day rule (see `coaching-philosophy.md` Section 5):** if the athlete has a league/game day on their schedule, it satisfies the Energy System day's role entirely — don't program a dedicated Energy System day or fold a conditioning finisher into another day on top of it. The athlete still trains exactly the number of days they chose; the league day covers the conditioning stimulus instead of a training session. Only fold in or dedicate Energy System content per the rules below when the athlete has no league day on their schedule.
 
 ---
 
 ## Slot Vocabulary
 
-Every day type below is built from these generic slots. The Phase Builder fills each slot with a real exercise from the equipment-and-injury-filtered library, matching the slot's intent — never a random exercise of roughly the right muscle group.
-
 | Slot | Intent |
 |---|---|
-| **SPEED_POWER** | Sprint mechanics, jumps/bounds, or a throw-for-distance drill. Freshest slot in the session. Absent only when an athlete's current tendon status requires the isometric-first protocol (Section 5) to temporarily hold it back. |
-| **OLY_OR_EXPLOSIVE** | An Olympic-lift variation for athletes with barbell/platform access and the training age to use one well — this gets a heavy emphasis, not a token inclusion. For novice or minimal-equipment athletes, substitute a dumbbell/kettlebell explosive variant (e.g. a hang clean variation) rather than dropping the slot; for an athlete with neither the equipment nor the technical base for any clean/snatch variant, substitute a non-barbell explosive movement (a loaded jump, a heavy medicine-ball throw) that trains the same triple-extension/explosive-intent quality. |
-| **SQUAT_PATTERN** | The day's primary bilateral squat-pattern lift (back squat, front squat, goblet squat, etc., scaled to training age/equipment). |
-| **HINGE_PATTERN** | The day's primary hinge/posterior-chain lift (deadlift variation, RDL, etc.). |
-| **UNILATERAL** | A single-leg/split-stance lift — this is the slot the Rear Foot Elevated Split Squat and its regressions/progressions live in when it's the day's featured unilateral lift, per this coach's standing preference for loading it as a main strength lift rather than a token accessory. |
-| **UPPER_POWER** | An explosive upper-body movement (plyo push-up, band-resisted explosive push-up, medicine-ball chest pass/throw) — opens every upper-body day, same freshness-first logic as SPEED_POWER. |
-| **UPPER_PUSH_PULL_SUPERSET** | A heavy push paired with a heavy pull as a superset (push set → pull set → rest → repeat), not two separate blocks. This is where the day's main upper-body strength work lives. |
-| **SECONDARY_PUSH_PULL** | A second, lighter push/pull pairing (or a single accessory movement) rounding out upper-body volume beyond the main superset. |
-| **CORE_ROTATIONAL** | Anti-rotation or rotational-power core work — throwing-relevant per the needs analysis (Section 3). |
-| **INJURY_RESILIENCE** | Standing prehab/resilience work for whatever the athlete's injury history or current status flags (Section 5's "every phase, progressed like any other trained quality" rule) — never skipped, never frozen at the same variation all year. |
-| **CONDITIONING** | Energy-system work (repeated-sprint intervals, tempo runs, etc.) — placed by intent per Section 5's exception (early if it's a power-quality movement being trained for output, late/anywhere if it's deliberately a fatigue-repeat stimulus). |
-| **MOBILITY_RECOVERY** | Low-intensity mobility, stretching, or active-recovery work — closes a session or fills a dedicated recovery day. |
+| **SPEED_ACCEL** | Linear acceleration / sprint mechanics. On Lower Body day, this is a brief, technical-focus exposure (the "1 explosive technical movement" opener) — present at every training frequency, since Lower Body day always exists. On Athlete Day, this is the full, dedicated speed session (longer sprints, hill sprints, higher intent). |
+| **NEURO_PRIMING** | Light elastic/reactive prep (skips, pogo hops, ankling drills) that opens Athlete Day — wakes up the nervous system before the higher-intensity plyometric and speed work that follows. |
+| **PLYOMETRICS** | Jumps/bounds. On Athlete Day: bilateral and unilateral bounding for speed-quality development. On Impulse Day: box jumps, hurdle hops — higher-intensity impulse-focused variations. |
+| **AGILITY** | Change-of-direction and cutting work (5-10-5 shuttle, cone drills, curved/banana cuts, reactive mirror and cued-cut drills, mark close-out and backpedal-to-sprint transitions) — added to Athlete Day beyond the source framework, since cutting/COD is one of ultimate's defining movement demands (Section 3). Vary the drill week to week rather than repeating the same one or two every session; several options (juke/hip-turn, lateral shuffle, cone/ladder footwork) are confined-space-friendly for athletes without field access. |
+| **OLY_OR_EXPLOSIVE** | An Olympic-lift variation (power clean, push press, power jerk) for athletes with barbell/platform access and the training age to use one well. For novice or minimal-equipment athletes, substitute a dumbbell/kettlebell explosive variant rather than dropping the slot; with neither the equipment nor the technical base for any clean/snatch/jerk variant, substitute a non-barbell explosive movement (loaded jump, heavy medicine-ball throw) that trains the same triple-extension/explosive-intent quality. |
+| **SQUAT_PATTERN** | The day's primary bilateral squat-pattern lift (back squat, front squat, goblet squat, scaled to training age/equipment). Lives on Lower Body day. |
+| **HINGE_PATTERN** | The day's primary hinge/posterior-chain lift (deadlift variation, RDL). Lives on Lower Body day. |
+| **UNILATERAL** | The Rear Foot Elevated Split Squat, loaded as a genuine main strength-power lift, not a token accessory — this coach's standing convention for the "single-leg squat" this split calls for. Lives on Impulse Day, paired with that day's Olympic-lift and plyometric work. |
+| **ACCESSORY_SUPERSET** | A core-stability or weakness-area accessory pairing on Lower Body day (e.g. ab wheel + hanging leg raise, or a weakness-area movement per the athlete's current-state profile), run as a superset. Two of these close out Lower Body day, per the source framework's "3-4 accessory movements, ideally in supersets." One is replaced by the mandatory INJURY_RESILIENCE slot whenever the athlete has a relevant injury-history area (see `coaching-philosophy.md`'s injury-resilience table) — resilience work is never squeezed out by generic accessory volume. |
+| **UPPER_POWER** | An explosive upper-body movement (push press, power jerk, plyo push-up, medicine-ball chest pass) that opens Upper Body day, same freshness-first logic as SPEED_ACCEL on Lower Body day. |
+| **UPPER_PUSH_PULL_SUPERSET** | A heavy push paired with a heavy pull as a superset (push set → pull set → rest → repeat), not two separate blocks. The day's main upper-body strength work. Appears on both Upper Body day and Hypertrophy day. |
+| **SECONDARY_PUSH_PULL** | A second, lighter push/pull pairing or isolation accessory (face pulls, dips, curls, triceps work) rounding out upper-body volume. Appears twice on Hypertrophy day, once on Upper Body day, per the source framework's "high-volume, arm-focused" description of that day. |
+| **CORE_ROTATIONAL** | Anti-rotation or rotational-power core work — throwing-relevant per the needs analysis (Section 3). Closes Impulse Day as a core finisher. |
+| **INJURY_RESILIENCE** | Standing prehab/resilience work for whatever the athlete's injury history flags — mandatory on that area's home day (`coaching-philosophy.md`'s injury-resilience table), never optional, never frozen at one variation all year. |
+| **CONDITIONING** | Energy-system work (repeated-sprint intervals, tempo runs). Dedicated on Energy System day (6 days/week, no league day); folded as a finisher onto Athlete Day (3-5 days/week) or Upper Body day (2 days/week) when the athlete has no league day; absent entirely when a league day already covers it. |
+| **MOBILITY_RECOVERY** | Low-intensity mobility, stretching, or active-recovery work — closes Lower Body day, Upper Body day, Impulse Day, and Energy System day. |
 
 ---
 
-## Phase Dosing Bands
+## Day 1 — Lower Body Strength
 
-Applied to whichever slots appear on a given day. These are starting bands, adjusted by training age (Section 5) and real logged performance (never the intake estimate past an athlete's first phase).
+**Slot order:** SPEED_ACCEL → SQUAT_PATTERN → HINGE_PATTERN → ACCESSORY_SUPERSET → ACCESSORY_SUPERSET (or INJURY_RESILIENCE, mandatory when the athlete has a home-day injury area) → MOBILITY_RECOVERY
 
-| Phase | Main lifts (SQUAT/HINGE/UNILATERAL) | OLY_OR_EXPLOSIVE | SPEED_POWER | Accessory/Secondary slots | Contrast/complex pairing? | Session volume trend |
-|---|---|---|---|---|---|---|
-| **GPP / Reacclimation** | 3-4 sets x 8-12 reps @ RPE 6-7 (~60-70%) | Technique-priority, 3-4 x 5-6, light-moderate load | Sub-maximal, technical-focus reps | 3 x 10-15 | No — movement quality first | Building from a lower base |
-| **Hypertrophy** | 3-4 x 8-12 @ RPE 7-8 (~65-75%) | 4 x 4-6, building load | Moderate-high intent | 3 x 10-15 | Advanced training age only, introduced late in this phase | Highest volume of the macrocycle |
-| **Max Strength** | Wave-loaded, 4-6 reps building toward 2-3 reps @ RPE 8-9.5 (~80-92%) | 3-5 x 2-4, high intent | Maximal intent, low volume | 3 x 6-10 | Yes, for advanced/intermediate athletes — heavy lift + explosive movement of the same pattern (Section 2's Garage Strength influence) | Intensity up, volume down from Hypertrophy |
-| **Power Conversion** | Intensity held (~75-85%), volume down further; in-season sessions/day-count flex around the game schedule (Section 5) | 3-4 x 3-4, maximal intent | Maximal intent, low volume, backed off the day before/of a game | 2-3 x 8-10 | Yes, prioritized — this phase's whole purpose is converting strength into transferable power | Lowest sustainable volume that still holds strength |
-| **Peak/Taper** | Short sets, moderate-high intensity, sharp volume cut (~40-60% of Power Conversion's volume) | Light-moderate load, technique-clean reps only — present to maintain neural readiness, not to build anything new | Present but very low volume | Minimal — only what maintains injury-resilience dosing | No new pairings introduced | Sharp drop, every slot |
+Present at every training frequency (2-6 days/week) — this is where the injury-resilience guarantee lives for Achilles/calf, groin/adductor, ACL/knee, ankle, hamstring, and low-back history, since it's the one day every athlete always has.
 
----
-
-## 2-Day Split — Full Body A / B
-
-Low frequency: each session has to hit everything, so this split has no separate "oly day" or "upper day" — every slot appears in both sessions, alternating which main-lift pattern gets primary emphasis.
-
-**Day A (squat-emphasis):** SPEED_POWER → OLY_OR_EXPLOSIVE → SQUAT_PATTERN (primary) → HINGE_PATTERN (secondary) → UPPER_PUSH_PULL_SUPERSET → CORE_ROTATIONAL → INJURY_RESILIENCE
-
-**Day B (hinge-emphasis):** SPEED_POWER → OLY_OR_EXPLOSIVE → HINGE_PATTERN (primary) → UNILATERAL → UPPER_PUSH_PULL_SUPERSET → CORE_ROTATIONAL → INJURY_RESILIENCE
-
-*CONDITIONING is typically appended to whichever day has lower same-day fatigue, or scheduled outside these two sessions entirely — at 2 days/week there usually isn't room to add a third dedicated slot without compromising recovery between the two lifting days.*
-
-| Phase | Day A & B — how they change |
+| Phase | Dosing |
 |---|---|
-| GPP/Reacclimation | Both days at GPP dosing; OLY_OR_EXPLOSIVE is pure technique work at this frequency — there's no room to also chase load with only 2 sessions/week. |
-| Hypertrophy | Highest volume this split will see; UPPER_PUSH_PULL_SUPERSET gets a SECONDARY_PUSH_PULL added if the athlete tolerates the extra volume well. |
-| Max Strength | Wave-loaded SQUAT/HINGE per band; contrast pairing only for advanced athletes, and only on the day's PRIMARY pattern (not both squat and hinge same day at this frequency). |
-| Power Conversion | Both days hold intensity, trim accessory volume hardest (a 2-day athlete has the least volume to spare once a game schedule appears). |
-| Peak/Taper | Both days shrink to essentially a touch-up session — same slot order, minimal sets. |
+| GPP/Reacclimation | SQUAT/HINGE 3-4x8-12 @ RPE 6-7 (~60-70%); SPEED_ACCEL sub-maximal, technical-focus; ACCESSORY_SUPERSET 3x10-15 |
+| Hypertrophy | SQUAT/HINGE 3-4x8-12 @ RPE 7-8 (~65-75%); SPEED_ACCEL building toward higher intent; ACCESSORY_SUPERSET 3x10-15 |
+| Max Strength | SQUAT/HINGE wave-loaded 4-6→2-3 reps @ RPE 8-9.5 (~80-92%); SPEED_ACCEL maximal intent, low volume; contrast pairing (heavy squat + jump) for advanced/intermediate athletes; ACCESSORY_SUPERSET 3x6-10 |
+| Power Conversion | SQUAT/HINGE ~75-85%, volume down further; SPEED_ACCEL maximal intent, contrast prioritized; ACCESSORY_SUPERSET 2-3x8-10 |
+| Peak/Taper | Sharp cut (~40-60% of Power Conversion volume) across every slot; SPEED_ACCEL present but very low volume, technique-clean only |
+
+INJURY_RESILIENCE dosing on this day follows `coaching-philosophy.md`'s phase-by-phase progression table for the athlete's specific injury-history area — it does not follow the ACCESSORY_SUPERSET band above.
 
 ---
 
-## 3-Day Split — Full Body A / B / C
+## Day 2 — Upper Body Strength
 
-Same full-body logic as the 2-day split, with a third session that lets each main-lift pattern (squat, hinge, unilateral) get one clear emphasis day across the week instead of always sharing.
+**Slot order:** UPPER_POWER → UPPER_PUSH_PULL_SUPERSET → SECONDARY_PUSH_PULL (or INJURY_RESILIENCE, mandatory for shoulder history) → MOBILITY_RECOVERY
 
-**Day A (squat-emphasis):** SPEED_POWER → OLY_OR_EXPLOSIVE → SQUAT_PATTERN → UPPER_PUSH_PULL_SUPERSET → CORE_ROTATIONAL → INJURY_RESILIENCE
+Present at every training frequency (2-6 days/week) — the guaranteed home day for shoulder-history resilience work.
 
-**Day B (hinge-emphasis):** SPEED_POWER → OLY_OR_EXPLOSIVE → HINGE_PATTERN → UPPER_PUSH_PULL_SUPERSET → SECONDARY_PUSH_PULL → INJURY_RESILIENCE
-
-**Day C (unilateral-emphasis):** SPEED_POWER → UNILATERAL → HINGE_PATTERN (secondary, lighter) → UPPER_PUSH_PULL_SUPERSET → CORE_ROTATIONAL → CONDITIONING
-
-| Phase | How the three days change |
+| Phase | Dosing |
 |---|---|
-| GPP/Reacclimation | All three days at GPP dosing; Day C's secondary hinge stays light — it's there for volume/pattern exposure, not a second heavy hinge stimulus. |
-| Hypertrophy | Full band volume across all three; this is where a first-time-serious-lifter (e.g. an intermediate athlete on this split) typically lives longest, per Section 5's training-age phase-length scaling. |
-| Max Strength | Day A and Day B carry the wave-loaded heavy work; Day C's UNILATERAL can still go heavy (this is the RFESS-as-main-lift slot) but its secondary hinge stays moderate — don't stack two max-effort hinge exposures in one week at this frequency. |
-| Power Conversion | Day C's CONDITIONING slot is the one most likely to get folded into game-day itself once the season starts; Days A/B hold the split's power-conversion intent. |
-| Peak/Taper | All three days shrink together; Day C often becomes the split's lightest/first day to drop a slot (CONDITIONING) if the taper needs to shrink further. |
+| GPP/Reacclimation | UPPER_PUSH_PULL_SUPERSET 3-4x8-12 @ RPE 6-7; UPPER_POWER technique-focus, light-moderate; SECONDARY_PUSH_PULL 3x10-15 |
+| Hypertrophy | UPPER_PUSH_PULL_SUPERSET 3-4x8-12 @ RPE 7-8; a second SECONDARY_PUSH_PULL added if the athlete tolerates the extra volume well |
+| Max Strength | UPPER_PUSH_PULL_SUPERSET wave-loaded 4-6→2-3 @ RPE 8-9.5; UPPER_POWER stays light/technical even as the superset gets heavy; contrast pairing for advanced/intermediate |
+| Power Conversion | UPPER_PUSH_PULL_SUPERSET ~75-85%, volume down; UPPER_POWER maximal intent, low volume |
+| Peak/Taper | Sharp cut across every slot; UPPER_POWER present but minimal |
+
+**At 2 days/week with no league day**, append a CONDITIONING finisher after MOBILITY_RECOVERY — ultimate-relevant repeated-effort work, dosed per the Energy System phase bands below.
 
 ---
 
-## 4-Day Split — Upper/Lower A / B
+## Day 3 — Athlete Day (speed/acceleration + agility)
 
-Per Section 5's tiebreaker, 4 days/week defaults to an upper/lower split rather than full body.
+**Slot order:** NEURO_PRIMING → PLYOMETRICS → SPEED_ACCEL → AGILITY
 
-**Day A — Lower #1:** SPEED_POWER → OLY_OR_EXPLOSIVE → SQUAT_PATTERN → HINGE_PATTERN → INJURY_RESILIENCE
+The dedicated speed/acceleration session — appears at 3+ days/week. Lower Body day's SPEED_ACCEL slot is the year-round baseline exposure that exists even without this day; this is the full, deliberately-trained expression of that quality.
 
-**Day B — Upper #1:** UPPER_POWER → UPPER_PUSH_PULL_SUPERSET → SECONDARY_PUSH_PULL
-
-**Day C — Lower #2:** SPEED_POWER → OLY_OR_EXPLOSIVE → UNILATERAL → HINGE_PATTERN (secondary variation) → CORE_ROTATIONAL → INJURY_RESILIENCE
-
-**Day D — Upper #2:** UPPER_POWER → UPPER_PUSH_PULL_SUPERSET → SECONDARY_PUSH_PULL → CONDITIONING (optional, lower-CNS-cost days only)
-
-| Phase | How the four days change |
+| Phase | Dosing |
 |---|---|
-| GPP/Reacclimation | Standard band on all four days; OLY_OR_EXPLOSIVE technique-priority on both lower days. |
-| Hypertrophy | Highest volume; both upper days can each carry a SECONDARY_PUSH_PULL pairing rather than a single accessory movement. |
-| Max Strength | Day A's SQUAT_PATTERN and Day C's HINGE-as-primary (rotate which lower day carries the true 1RM-chasing wave) get contrast pairing for advanced/intermediate athletes; Day B/D upper supersets also wave-load, with UPPER_POWER staying light/technical even as the superset gets heavy. |
-| Power Conversion | In-season: Day count often compresses to 3 real lifting days + games, per Section 5 — when that happens, drop Day D first and fold its SECONDARY_PUSH_PULL into Day B rather than dropping a lower day. |
-| Peak/Taper | All four days shrink; CONDITIONING is the first slot cut if a game-week needs the taper to compress further. |
+| GPP/Reacclimation | Sub-maximal (~85-95% effort), technical-focus; 4-6 reps of 10-20yd acceleration; PLYOMETRICS low-intensity (pogo hops, low box); AGILITY technical, unhurried |
+| Hypertrophy | Volume builds, intent trending toward 95-100% by the phase's end; PLYOMETRICS moderate intensity (bounds, low-to-moderate depth jumps) |
+| Max Strength | Max-velocity work (95-100%+ effort), full recovery between reps, lower total volume; PLYOMETRICS higher intensity (depth jumps, bounds for distance) |
+| Power Conversion | Maximal intent, contrast-paired plyometrics prioritized, very low volume, highest quality |
+| Peak/Taper | Technique-clean sprint touches only; no new plyometric stimulus |
+
+**At 3-5 days/week with no league day**, append a CONDITIONING finisher after AGILITY.
 
 ---
 
-## 5-Day Split — Upper/Lower A / B + Dedicated Speed/Conditioning Day
+## Day 4 — Impulse Day (Olympic lift + RFESS + plyometrics)
 
-Same upper/lower A/B backbone as the 4-day split, with a fifth day used for extra speed/conditioning volume and resilience work rather than a third upper or lower session — at this frequency the extra day buys dedicated space for qualities that would otherwise compete for slots on a lifting day.
+**Slot order:** OLY_OR_EXPLOSIVE → UNILATERAL (Barbell RFESS) → PLYOMETRICS → CORE_ROTATIONAL → MOBILITY_RECOVERY
 
-**Days A-D:** identical slot order to the 4-day split above.
+Appears at 4+ days/week. This is where the Rear Foot Elevated Split Squat lives as a genuine main strength-power lift.
 
-**Day E — Speed/Conditioning + Resilience:** SPEED_POWER (higher volume than Days A/C) → CONDITIONING → INJURY_RESILIENCE → CORE_ROTATIONAL → MOBILITY_RECOVERY
-
-| Phase | How the five days change |
+| Phase | Dosing |
 |---|---|
-| GPP/Reacclimation | Day E leans toward technical speed work and building an aerobic base (Section 3's needs analysis) rather than max-effort sprint volume yet. |
-| Hypertrophy | Day E's CONDITIONING shifts toward mixed aerobic/anaerobic work; INJURY_RESILIENCE volume here is where most of the season's resilience progression actually happens, since Days A-D's resilience slot stays modest. |
-| Max Strength | Day E's SPEED_POWER goes maximal-intent (short sprints/max jumps) since Days A-D are absorbing the heavy strength load — this is the day that keeps speed/power genuinely trained during the heaviest strength block, per the "never fully remove it" rule. |
-| Power Conversion | Day E is usually the first day compressed or moved once games start (it has no barbell work tying it to a fixed slot in the week), but its CONDITIONING and INJURY_RESILIENCE content should get folded into Days A-D rather than dropped outright. |
-| Peak/Taper | Day E shrinks to essentially just INJURY_RESILIENCE maintenance + MOBILITY_RECOVERY — SPEED_POWER and CONDITIONING volume move to nothing more than what Days A-D already carry. |
+| GPP/Reacclimation | OLY 3-4x5-6, technique-priority, light-moderate load; RFESS 3x8-10, moderate load; PLYOMETRICS low-intensity |
+| Hypertrophy | OLY 4x4-6, building load; RFESS 3-4x6-8; PLYOMETRICS moderate; contrast pairing introduced late, advanced athletes only |
+| Max Strength | OLY 3-5x2-4, high intent; RFESS 3-5x3-5 @ 80-85% — this becomes the primary unilateral strength expression of the macrocycle; contrast pairing (RFESS + a jump variation) for advanced/intermediate |
+| Power Conversion | OLY 3-4x3-4, maximal intent; RFESS 3x3-5, maximal intent, contrast prioritized |
+| Peak/Taper | OLY light-moderate, technique-clean only; RFESS light touch (2x3 @ ~70%) or omitted within the final ~5-7 days before a priority event |
+
+**For an athlete with ACL/knee history**, RFESS load and volume on this day follow `coaching-philosophy.md`'s ACL-history progression table instead of the standard band above, until the athlete has been cleared through that progression.
 
 ---
 
-## 6-Day Split — Three Upper/Lower Cycles
+## Day 5 — Hypertrophy Day
 
-Reserved for full-time-training advanced athletes only, per Section 5's training-age/capacity gating — this is not a default recommendation at 6 days/week, only what the template looks like when an athlete's actual capacity and recovery support it.
+**Slot order:** UPPER_PUSH_PULL_SUPERSET → SECONDARY_PUSH_PULL → SECONDARY_PUSH_PULL (or INJURY_RESILIENCE, second exposure for shoulder history) → MOBILITY_RECOVERY
 
-**Day A — Lower #1 (squat-emphasis):** SPEED_POWER → OLY_OR_EXPLOSIVE → SQUAT_PATTERN → HINGE_PATTERN (secondary) → INJURY_RESILIENCE
+Appears at 5+ days/week. High-volume, arm-focused, per the source framework — this is a day type distinct from the Hypertrophy *phase* (which affects every day's dosing); Hypertrophy Day exists in every phase it's scheduled for, its own dosing just changes phase to phase like everything else.
 
-**Day B — Upper #1 (push/pull-emphasis):** UPPER_POWER → UPPER_PUSH_PULL_SUPERSET → SECONDARY_PUSH_PULL
-
-**Day C — Lower #2 (hinge-emphasis):** SPEED_POWER → OLY_OR_EXPLOSIVE → HINGE_PATTERN → UNILATERAL → CORE_ROTATIONAL → INJURY_RESILIENCE
-
-**Day D — Upper #2 (secondary push/pull-emphasis):** UPPER_POWER → UPPER_PUSH_PULL_SUPERSET → SECONDARY_PUSH_PULL → CONDITIONING (optional)
-
-**Day E — Lower #3 (unilateral + resilience-emphasis, lighter):** SPEED_POWER → UNILATERAL (primary) → INJURY_RESILIENCE → CORE_ROTATIONAL
-
-**Day F — Upper #3 (accessory + conditioning-emphasis, lighter):** UPPER_POWER (light) → SECONDARY_PUSH_PULL → CONDITIONING → MOBILITY_RECOVERY
-
-| Phase | How the six days change |
+| Phase | Dosing |
 |---|---|
-| GPP/Reacclimation | Rarely used at this split — an athlete new enough to need a GPP reacclimation block usually isn't the intended user of a 6-day split yet; if used, all six days stay conservative and technique-priority. |
-| Hypertrophy | Full band volume across Days A-D; Days E/F stay at their lighter, "emphasis" dosing rather than matching A-D's volume — they exist to add targeted work, not double the week's total load. |
-| Max Strength | Days A-D carry the wave-loaded/contrast work; Days E/F hold steady rather than also chasing new heavy numbers — six genuinely maximal-intent sessions a week isn't recoverable even for this split's intended athlete. |
-| Power Conversion | Days E/F are the first compressed once games start — fold their CONDITIONING and INJURY_RESILIENCE content into Days A-D and drop to a 4-5 day week for the in-season stretch rather than forcing 6 around a real game schedule. |
-| Peak/Taper | This split typically collapses toward the 4-day template for the taper itself — Days E/F drop out first, consistent with the "never silently drop a day but reduce sessions when the athlete has actually reduced training days" logic in Section 5 (a rebuild, not a silent skip). |
+| GPP/Reacclimation | 3-4x10-15, moderate load |
+| Hypertrophy | Peak volume of the macrocycle here — 3-4x10-15, some isolation sets to 15-20 |
+| Max Strength | Tapering from peak — 3x8-10, maintenance dosing |
+| Power Conversion | Often the first day cut if the schedule compresses around games, per its lowest-priority ranking |
+| Peak/Taper | Usually dropped entirely — exactly the volume you shed before peaking |
+
+---
+
+## Day 6 — Energy System Day
+
+**Slot order:** CONDITIONING → INJURY_RESILIENCE (if any area still needs a second-exposure touch beyond its home day) → MOBILITY_RECOVERY
+
+Appears only at 6 days/week, and only when the athlete has no league day on their schedule (see the league-day rule above — a league day satisfies this day's role entirely, so it isn't separately programmed).
+
+| Phase | Dosing |
+|---|---|
+| GPP/Reacclimation | Aerobic-base emphasis, tempo runs, longer duration/lower intensity |
+| Hypertrophy | Aerobic-to-mixed transition, tempo intervals |
+| Max Strength | Repeated-sprint ability / anaerobic capacity emphasis — shorter, higher-intensity intervals mimicking point duration |
+| Power Conversion | Game-specific conditioning — repeated high-intensity efforts matching point/tournament demands |
+| Peak/Taper | Minimal — technique/movement-quality reminders only, no fatiguing conditioning within ~5-7 days of a priority event |
 
 ---
 
 ## Notes for implementation
 
-- This document is the slot-level layer between `coaching-philosophy.md` (why) and the Phase Builder's actual exercise selection (what). It should be read alongside both, not in place of either — injury history, equipment, and the athlete's real logged performance still govern which specific exercise fills each slot and at what load.
-- Day counts between the tables above (e.g. an athlete with 4 days/week whose schedule only leaves room for 3 "fresh" sessions in a game week) fall back to the next-lowest split's template for that week rather than forcing the full template into a compressed week — Section 5 already covers this ("combine lower-priority work into practice-adjacent days at reduced intensity rather than force a 4-day heavy split into a 2-day-recovery week").
-- Where OLY_OR_EXPLOSIVE has no real substitute available (no equipment access at all, or a training age too early for any explosive-lift technique work), it becomes a second SPEED_POWER exposure (e.g. a heavier jump variation) rather than an empty slot — the freshness-first, explosive-first sequencing principle still applies even without a barbell in the room.
+- This document is the slot-level layer between `coaching-philosophy.md` (why) and the Phase Builder's actual exercise selection (what) — read alongside both, not in place of either. Injury history, equipment, and the athlete's real logged performance still govern which specific exercise fills each slot and at what load.
+- A reduced-recovery week (e.g., a game week that only leaves room for fewer "fresh" sessions) doesn't silently drop a day — combine that week's lower-priority content into practice-adjacent days at reduced intensity instead, per `coaching-philosophy.md` Section 5.
+- Where OLY_OR_EXPLOSIVE has no real substitute available (no equipment access at all, or a training age too early for any explosive-lift technique work), it becomes a second SPEED_ACCEL or PLYOMETRICS exposure rather than an empty slot — the freshness-first, explosive-first sequencing principle still applies even without a barbell in the room.

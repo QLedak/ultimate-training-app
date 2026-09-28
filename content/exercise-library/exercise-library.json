@@ -5194,5 +5194,145 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null
+  },
+  {
+    "exercise_id": "CD-006",
+    "exercise_name": "Reactive Mirror Drill (Partner Shadow)",
+    "priority_tier": "extended",
+    "movement_pattern": "Change of Direction",
+    "primary_purpose": "Read-and-react change of direction \u2014 mirrors a partner's lateral/forward-back movement, closer to defending or getting open off a live cutter than a pre-planned cone pattern",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "Partner",
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Stay on the balls of your feet and react to your partner's hips, not their eyes or the disc \u2014 mirror the movement a half-beat after it starts.",
+    "regression": "CD-005",
+    "progression": "CD-009",
+    "training_age": "advanced",
+    "season_tag": null,
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": null
+  },
+  {
+    "exercise_id": "CD-007",
+    "exercise_name": "Curved Cut (Banana Route)",
+    "priority_tier": "extended",
+    "movement_pattern": "Change of Direction",
+    "primary_purpose": "The rounded, decelerate-and-bend cutting mechanic used on deep/around cuts in ultimate, as opposed to a sharp planted cut",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "Cones",
+    "space_requirements": "Requires Running Room (15-20 yd)",
+    "cue": "Round the turn instead of planting hard \u2014 bend the path like a banana, leaning in and gradually opening back upfield rather than stopping and redirecting.",
+    "regression": "CD-003",
+    "progression": null,
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": null
+  },
+  {
+    "exercise_id": "CD-008",
+    "exercise_name": "Close-Space Juke / Hip Turn Drill",
+    "priority_tier": "extended",
+    "movement_pattern": "Change of Direction",
+    "primary_purpose": "A tight-radius fake-and-go move trained in a small footprint \u2014 built for apartment/minimal-space athletes who can't get outside for full cone work",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "None",
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Sell the fake with a real weight shift, then snap the hips and drive hard the other way \u2014 small space, but full-intent redirection.",
+    "regression": "CD-005",
+    "progression": "CD-007",
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": null
+  },
+  {
+    "exercise_id": "CD-009",
+    "exercise_name": "Backpedal-to-Sprint Transition",
+    "priority_tier": "extended",
+    "movement_pattern": "Change of Direction",
+    "primary_purpose": "Defensive backpedal opening into a sprint \u2014 the mark/defender's transition from a defensive shuffle into a recovery sprint",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "None",
+    "space_requirements": "Requires Running Room (10 yd)",
+    "cue": "Stay low in the backpedal, then snap the hips and drive forward the instant you flip \u2014 the transition should be one motion, not two.",
+    "regression": "CD-005",
+    "progression": "CD-006",
+    "training_age": "both",
+    "season_tag": null,
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": null
+  },
+  {
+    "exercise_id": "CD-010",
+    "exercise_name": "T-Drill (4-Direction Cone Drill)",
+    "priority_tier": "extended",
+    "movement_pattern": "Change of Direction",
+    "primary_purpose": "A structured forward-shuffle-backpedal combination drill that layers all four directional change patterns in one rep",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "Cones",
+    "space_requirements": "Requires Running Room (10-15 yd)",
+    "cue": "Sprint the top, shuffle the crossbar, backpedal the stem \u2014 keep the hips low and the steps choppy through every direction change.",
+    "regression": "CD-004",
+    "progression": "CD-002",
+    "training_age": "novice",
+    "season_tag": null,
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": null
+  },
+  {
+    "exercise_id": "CD-011",
+    "exercise_name": "Single-Cone Reactive Cut (Visual Cue)",
+    "priority_tier": "extended",
+    "movement_pattern": "Change of Direction",
+    "primary_purpose": "A coach- or partner-cued reactive cut off a visual signal \u2014 the closest cone-drill approximation of reading a defender and cutting on a break",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "Cones or Partner",
+    "space_requirements": "Requires Running Room (Short)",
+    "cue": "Wait for the cue before you commit \u2014 a late, sharp cut beats an early, telegraphed one every time.",
+    "regression": "CD-003",
+    "progression": "CD-006",
+    "training_age": "advanced",
+    "season_tag": null,
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": null
+  },
+  {
+    "exercise_id": "CD-012",
+    "exercise_name": "Shuffle-to-Close-Out",
+    "priority_tier": "extended",
+    "movement_pattern": "Change of Direction",
+    "primary_purpose": "The mark's close-out mechanic \u2014 a shuffle or sprint approach that decelerates under control into a balanced defensive stance",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "None",
+    "space_requirements": "Requires Running Room (5-10 yd)",
+    "cue": "Close the distance under control and chop your steps down as you arrive \u2014 you want to land balanced and ready to move, not lunging in off-balance.",
+    "regression": "CD-005",
+    "progression": "CD-009",
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": null
   }
 ]

@@ -141,13 +141,19 @@ export async function runPhaseBuilder(
     "# COACHING PHILOSOPHY",
     coachingPhilosophy,
     "",
-    "# DAY STRUCTURE TEMPLATES (by split & phase)",
+    "# DAY STRUCTURE TEMPLATES (six fixed day types, by phase)",
     daysPerWeek
-      ? `This athlete trains ${daysPerWeek} days/week — use the ${daysPerWeek}-Day Split section below for the ` +
-        `fixed slot order per day type, and this phase's row in that split's phase table for dosing/pairing. ` +
-        `Fill each generic slot with a real exercise from the filtered library below that matches the slot's intent.`
-      : "Use the section matching this athlete's days/week for the fixed slot order per day type, and this " +
-        "phase's row in that split's phase table for dosing/pairing.",
+      ? `This athlete trains ${daysPerWeek} days/week — per the priority-order table below, include exactly the ` +
+        `first ${daysPerWeek} day types from the list (Lower Body Strength, Upper Body Strength, Athlete Day, ` +
+        `Impulse Day, Hypertrophy Day, Energy System Day, in that order), in that same weekly sequence. Use each ` +
+        `included day's fixed slot order and this phase's row in that day's dosing table. If the athlete has a ` +
+        `league/game day on their schedule, it satisfies the Energy System day's role — do not also fold in or ` +
+        `dedicate a Conditioning slot elsewhere; if there is no league day, apply this document's fold-in rule for ` +
+        `whichever day types are included. Fill each generic slot with a real exercise from the filtered library ` +
+        `below that matches the slot's intent, and apply the injury-resilience home-day table from the coaching ` +
+        `philosophy above as mandatory, not optional.`
+      : "Include day types from the priority-order table below up to this athlete's days/week, in that same " +
+        "weekly sequence, using each included day's fixed slot order and this phase's dosing table.",
     dayStructureTemplates,
     "",
     "# MACROCYCLE SKELETON — THIS PHASE",
