@@ -142,11 +142,9 @@ export async function runMacrocyclePlanner(
   const response = await client.messages.create({
     model: CLAUDE_MODEL,
     max_tokens: 4096,
-    // Low, not zero: this is structured, rules-driven output where
-    // consistency matters more than creative variety, but a small amount of
-    // room still lets it weigh close judgment calls (e.g. phase boundary
-    // placement) sensibly rather than being brittle about it.
-    temperature: 0.3,
+    // `temperature` used to be set low (0.3) here for consistency on this
+    // structured, rules-driven output — removed because the API now rejects
+    // it for this model ("temperature is deprecated for this model").
     system: systemPrompt,
     tools: [SKELETON_TOOL],
     tool_choice: { type: "tool", name: "submit_macrocycle_skeleton" },

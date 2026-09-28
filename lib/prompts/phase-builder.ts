@@ -275,10 +275,9 @@ export async function runPhaseBuilder(
     // throws if a response still comes back without it, rather than
     // silently saving a broken draft.
     max_tokens: 20000,
-    // Same reasoning as the Macrocycle Planner call: structured, rules-driven
-    // output where consistency matters more than creative variety, with a
-    // little room left for weighing close exercise-selection judgment calls.
-    temperature: 0.3,
+    // `temperature` used to be set low (0.3) here, same reasoning as the
+    // Macrocycle Planner call — removed because the API now rejects it for
+    // this model ("temperature is deprecated for this model").
     system: systemPrompt,
     tools: [PHASE_PROGRAM_TOOL],
     tool_choice: { type: "tool", name: "submit_phase_program" },
