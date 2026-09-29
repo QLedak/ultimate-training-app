@@ -119,7 +119,7 @@ Every injury-history area gets a fixed "home day" where its resilience slot is a
 | Ankle | Lower Body day | Impulse and Athlete Days' plyometric/cutting volume |
 | Hamstring | Lower Body day (distinct slot from the day's HINGE_PATTERN main lift) | Athlete Day's sprint volume |
 | Shoulder | Upper Body day | Hypertrophy Day (second upper-dominant exposure, when present) |
-| Low back | Lower Body day (CORE_ROTATIONAL/INJURY_RESILIENCE slot) | Impulse Day's CORE_ROTATIONAL slot, when present |
+| Low back | Lower Body day (INJURY_RESILIENCE slot — anti-extension/anti-rotation and rotational-power work, per the progression below; `day-structure-templates.md` has no separate CORE_ROTATIONAL slot on Lower Body day, so this runs in the same INJURY_RESILIENCE slot as every other Lower Body day injury area) | Impulse Day's CORE_ROTATIONAL slot, when present |
 
 Progress each one like any other trained quality (per the existing rule below) — here's the phase-by-phase progression for every area, extending the Achilles/groin progressions already established:
 
