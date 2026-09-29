@@ -13,7 +13,17 @@ const NAV_LINKS = [
 
 type Tournament = { start_date: string; end_date: string; label: string; is_priority?: boolean };
 
+type DaysChangeRequest = {
+  id: string;
+  current_days_per_week: number;
+  requested_days_per_week: number;
+  note: string | null;
+  status: "pending" | "approved" | "declined";
+  requested_at: string;
+};
+
 const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none";
+const DAYS_OPTIONS = [2, 3, 4, 5, 6];
 
 /**
  * The edit path intake never had a follow-up for: add a tournament or
@@ -31,6 +41,14 @@ export default function EditSchedulePage() {
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
+  const [currentDays, setCurrentDays] = useState<number | null>(null);
+  const [pendingDaysRequest, setPendingDaysRequest] = useState<DaysChangeRequest | null>(null);
+  const [requestedDays, setRequestedDays] = useState<number | "">("");
+  const [daysNote, setDaysNote] = useState("");
+  const [daysError, setDaysError] = useState<string | null>(null);
+  const [daysMessage, setDaysMessage] = useState<string | null>(null);
+  const [daysSaving, setDaysSaving] = useState(false);
+
   useEffect(() => {
     if (!athlete) return;
     fetch(`/api/athletes/${athlete.id}/schedule`)
@@ -44,6 +62,66 @@ export default function EditSchedulePage() {
       })
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }, [athlete]);
+
+  function loadDaysChangeRequest(athleteId: string) {
+    fetch(`/api/athletes/${athleteId}/days-change-request`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.error) throw new Error(data.error);
+        setCurrentDays(data.current_days_per_week ?? null);
+        setPendingDaysRequest(data.pending_request ?? null);
+      })
+      .catch((e) => setDaysError(e instanceof Error ? e.message : String(e)));
+  }
+
+  useEffect(() => {
+    if (!athlete) return;
+    loadDaysChangeRequest(athlete.id);
+  }, [athlete]);
+
+  async function handleRequestDaysChange() {
+    if (!athlete || requestedDays === "") return;
+    setDaysSaving(true);
+    setDaysError(null);
+    setDaysMessage(null);
+    try {
+      const res = await fetch(`/api/athletes/${athlete.id}/days-change-request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requested_days_per_week: requestedDays, note: daysNote || undefined }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setDaysMessage(data.message ?? "Sent to your coach.");
+      setDaysNote("");
+      setRequestedDays("");
+      loadDaysChangeRequest(athlete.id);
+    } catch (e) {
+      setDaysError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setDaysSaving(false);
+    }
+  }
+
+  async function handleCancelDaysRequest() {
+    if (!athlete || !pendingDaysRequest) return;
+    setDaysSaving(true);
+    setDaysError(null);
+    setDaysMessage(null);
+    try {
+      const res = await fetch(`/api/athletes/${athlete.id}/days-change-request/${pendingDaysRequest.id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setDaysMessage("Request cancelled.");
+      loadDaysChangeRequest(athlete.id);
+    } catch (e) {
+      setDaysError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setDaysSaving(false);
+    }
+  }
 
   function updateTournament(i: number, patch: Partial<Tournament>) {
     setTournaments((ts) => ts.map((t, idx) => (idx === i ? { ...t, ...patch } : t)));
@@ -117,6 +195,70 @@ export default function EditSchedulePage() {
 
         {error && <p className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-600">{error}</p>}
         {saveMessage && <p className="mt-4 rounded-md bg-green-50 p-3 text-sm text-green-700">{saveMessage}</p>}
+
+        <div className="mt-8 rounded-lg border border-slate-200 p-4">
+          <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-slate-400">
+            Training days per week
+          </h2>
+          <p className="mb-3 text-sm text-slate-600">
+            You&apos;re currently training <span className="font-medium">{currentDays ?? "…"}</span> days/week.
+            Requesting a change sends it to your coach — once approved, your plan updates automatically, even
+            mid-phase.
+          </p>
+
+          {daysError && <p className="mb-3 rounded-md bg-red-50 p-3 text-sm text-red-600">{daysError}</p>}
+          {daysMessage && <p className="mb-3 rounded-md bg-green-50 p-3 text-sm text-green-700">{daysMessage}</p>}
+
+          {pendingDaysRequest ? (
+            <div className="rounded-md border border-amber-300 bg-amber-50 p-3">
+              <p className="text-sm text-amber-900">
+                Pending: {pendingDaysRequest.current_days_per_week} → {pendingDaysRequest.requested_days_per_week}{" "}
+                days/week
+                {pendingDaysRequest.note && <span className="text-amber-700"> — &ldquo;{pendingDaysRequest.note}&rdquo;</span>}
+              </p>
+              <button
+                type="button"
+                onClick={handleCancelDaysRequest}
+                disabled={daysSaving}
+                className="mt-2 text-sm text-amber-800 underline disabled:opacity-50"
+              >
+                Cancel request
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                {DAYS_OPTIONS.map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => setRequestedDays(d)}
+                    disabled={d === currentDays}
+                    className={`h-10 w-10 rounded-md border text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40 ${
+                      requestedDays === d ? "border-brand bg-blue-50 text-brand-dark" : "border-slate-300 text-slate-700"
+                    }`}
+                  >
+                    {d}
+                  </button>
+                ))}
+              </div>
+              <input
+                placeholder="Optional note for your coach"
+                className={inputClass}
+                value={daysNote}
+                onChange={(e) => setDaysNote(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={handleRequestDaysChange}
+                disabled={requestedDays === "" || daysSaving}
+                className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                {daysSaving ? "Sending…" : "Request change"}
+              </button>
+            </div>
+          )}
+        </div>
 
         <div className="mt-6 flex gap-3">
           <label className="block flex-1">
