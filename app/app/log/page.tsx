@@ -8,7 +8,8 @@ import { useAthleteSession } from "../_components/useAthleteSession";
 const NAV_LINKS = [
   { href: "/app", label: "Home" },
   { href: "/app/log", label: "Schedule" },
-  { href: "/app/log/program", label: "Season" },
+  { href: "/app/log/program", label: "Overview" },
+  { href: "/app/injuries", label: "Injuries" },
 ];
 
 type SessionSummary = {

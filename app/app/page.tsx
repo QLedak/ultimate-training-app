@@ -9,7 +9,8 @@ import { BodyweightWidget, RebuildRequestWidget } from "./_components/widgets";
 const NAV_LINKS = [
   { href: "/app", label: "Home" },
   { href: "/app/log", label: "Schedule" },
-  { href: "/app/log/program", label: "Season" },
+  { href: "/app/log/program", label: "Overview" },
+  { href: "/app/injuries", label: "Injuries" },
 ];
 
 type SessionSummary = {
@@ -139,6 +140,13 @@ export default function AthleteHomePage() {
             Season overview
           </Link>
         </div>
+
+        <Link
+          href="/app/injuries"
+          className="mt-3 block rounded-md border border-slate-200 px-4 py-3 text-center text-sm font-medium text-brand-dark hover:border-brand"
+        >
+          Update injury status
+        </Link>
       </main>
     </>
   );

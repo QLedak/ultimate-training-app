@@ -8,7 +8,8 @@ import { useAthleteSession } from "../../_components/useAthleteSession";
 const NAV_LINKS = [
   { href: "/app", label: "Home" },
   { href: "/app/log", label: "Schedule" },
-  { href: "/app/log/program", label: "Season" },
+  { href: "/app/log/program", label: "Overview" },
+  { href: "/app/injuries", label: "Injuries" },
 ];
 
 type Phase = {
@@ -168,12 +169,20 @@ export default function ProgramOverviewPage() {
         </div>
       )}
 
-      <Link
-        href="/app/schedule"
-        className="mt-8 block rounded-md border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700 hover:border-brand hover:text-brand"
-      >
-        Edit schedule / add a tournament
-      </Link>
+      <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <Link
+          href="/app/schedule"
+          className="block rounded-md border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700 hover:border-brand hover:text-brand"
+        >
+          Edit schedule / add a tournament
+        </Link>
+        <Link
+          href="/app/injuries"
+          className="block rounded-md border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700 hover:border-brand hover:text-brand"
+        >
+          Update injury status
+        </Link>
+      </div>
       </main>
     </>
   );
