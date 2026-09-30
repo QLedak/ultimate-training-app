@@ -1,5 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { runMacrocyclePlanner, MacrocyclePlannerOutput } from "../prompts/macrocycle-planner";
+import { addDays, computeMacrocyclePhaseSequence, ComputedPhase } from "./phase-sequencing";
 
 /**
  * Tomorrow's date (server UTC), as YYYY-MM-DD — training always starts the
@@ -14,6 +15,59 @@ function tomorrowDateString(): string {
   const d = new Date();
   d.setUTCDate(d.getUTCDate() + 1);
   return d.toISOString().slice(0, 10);
+}
+
+type TournamentWeekend = { start_date?: string; end_date?: string; is_priority?: boolean };
+
+/**
+ * Builds the deterministic 4-week-block phase skeleton (lib/generation/
+ * phase-sequencing.ts) for whatever portion of the season still needs
+ * planning, and assigns phase_number continuing on from any preserved
+ * prior phases. Returns undefined when season_start isn't available/
+ * confirmed yet — the prompt falls back to its old provisional-skeleton
+ * guidance in that case, same as before this feature existed.
+ */
+function buildComputedPhaseSkeleton(params: {
+  intake: Record<string, unknown>;
+  isRebuild?: boolean;
+  priorSkeletonPhases: Record<string, unknown>[];
+  trainingStartDate: string;
+}): { computedPhases: Array<{ phase_number: number } & ComputedPhase>; computedPhaseFlags: string[] } | undefined {
+  const { intake, isRebuild, priorSkeletonPhases, trainingStartDate } = params;
+
+  const seasonStart = intake.season_start as string | null | undefined;
+  const seasonEnd = intake.season_end as string | null | undefined;
+  if (!seasonStart || !seasonEnd) return undefined;
+
+  const priorityTournament = ((intake.tournament_weekends as TournamentWeekend[] | null) ?? []).find(
+    (t) => t.is_priority && t.start_date
+  );
+
+  let resumeDate = trainingStartDate;
+  let includeGpp = !isRebuild;
+  let lastPhaseNumber = 0;
+
+  if (isRebuild && priorSkeletonPhases.length > 0) {
+    const latest = [...priorSkeletonPhases].sort(
+      (a, b) => (b.phase_number as number) - (a.phase_number as number)
+    )[0];
+    resumeDate = addDays(latest.end_date as string, 1);
+    lastPhaseNumber = latest.phase_number as number;
+    includeGpp = false;
+  }
+
+  const { phases, flags } = computeMacrocyclePhaseSequence({
+    resumeDate,
+    seasonStart,
+    seasonEnd,
+    priorityTournamentDate: priorityTournament?.start_date ?? null,
+    includeGpp,
+  });
+
+  return {
+    computedPhases: phases.map((p, i) => ({ phase_number: lastPhaseNumber + i + 1, ...p })),
+    computedPhaseFlags: flags,
+  };
 }
 
 /**
@@ -32,6 +86,35 @@ function assertPhase1StartsOnTrainingStartDate(output: MacrocyclePlannerOutput, 
         "(the day after signup — training start, not the athlete's competitive season start). Nothing was " +
         "saved — try generating this skeleton again."
     );
+  }
+}
+
+/**
+ * Only enforced for a fresh (non-rebuild) skeleton, same carve-out as
+ * assertPhase1StartsOnTrainingStartDate — a rebuild is explicitly allowed
+ * to deviate from the computed default (e.g. an injury_return/testing_block
+ * phase the rebuild reason calls for), so it's guidance there, not a gate.
+ */
+function assertPhasesMatchComputedSkeleton(
+  output: MacrocyclePlannerOutput,
+  computedPhases: Array<{ phase_number: number } & ComputedPhase>
+) {
+  const byNumber = new Map(output.phases.map((p) => [p.phase_number, p]));
+  for (const expected of computedPhases) {
+    const actual = byNumber.get(expected.phase_number);
+    if (
+      !actual ||
+      actual.goal !== expected.goal ||
+      actual.start_date !== expected.start_date ||
+      actual.end_date !== expected.end_date ||
+      actual.week_count !== expected.week_count
+    ) {
+      throw new Error(
+        `Macrocycle Planner did not use the app's computed phase boundaries for phase ${expected.phase_number} ` +
+          `(expected goal=${expected.goal}, ${expected.start_date} -> ${expected.end_date}, ` +
+          `${expected.week_count}wk). Nothing was saved — try generating this skeleton again.`
+      );
+    }
   }
 }
 
@@ -90,14 +173,20 @@ export async function generateMacrocycleDraft(
   const { intake, priorSkeletonPhases } = await buildMacrocycleContext(supabase, { athleteId, isRebuild });
 
   const trainingStartDate = tomorrowDateString();
+  const skeleton = buildComputedPhaseSkeleton({ intake, isRebuild, priorSkeletonPhases, trainingStartDate });
   const output = await runMacrocyclePlanner({
     intake,
     isRebuild,
     rebuildReason,
     priorSkeletonPhases,
     trainingStartDate,
+    computedPhases: skeleton?.computedPhases,
+    computedPhaseFlags: skeleton?.computedPhaseFlags,
   });
-  if (!isRebuild) assertPhase1StartsOnTrainingStartDate(output, trainingStartDate);
+  if (!isRebuild) {
+    assertPhase1StartsOnTrainingStartDate(output, trainingStartDate);
+    if (skeleton) assertPhasesMatchComputedSkeleton(output, skeleton.computedPhases);
+  }
 
   const { data: draft, error: draftError } = await supabase
     .from("program_drafts")
@@ -132,15 +221,27 @@ export async function reviseMacrocyclePlannerDraft(
     isRebuild: inputSnapshot.is_rebuild,
   });
 
+  const trainingStartDate = tomorrowDateString();
+  const skeleton = buildComputedPhaseSkeleton({
+    intake,
+    isRebuild: inputSnapshot.is_rebuild,
+    priorSkeletonPhases,
+    trainingStartDate,
+  });
   const output = await runMacrocyclePlanner({
     intake,
     isRebuild: inputSnapshot.is_rebuild,
     rebuildReason: inputSnapshot.rebuild_reason ?? undefined,
     priorSkeletonPhases,
-    trainingStartDate: tomorrowDateString(),
+    trainingStartDate,
+    computedPhases: skeleton?.computedPhases,
+    computedPhaseFlags: skeleton?.computedPhaseFlags,
     currentDraftOutput: draft.output as MacrocyclePlannerOutput,
     editRequest,
   });
+  // A chat edit to a fresh (non-rebuild) draft still must not touch phase
+  // boundaries — same guardrail as the initial v1 generation.
+  if (!inputSnapshot.is_rebuild && skeleton) assertPhasesMatchComputedSkeleton(output, skeleton.computedPhases);
 
   const { data: newDraft, error: draftError } = await supabase
     .from("program_drafts")

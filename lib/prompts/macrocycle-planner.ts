@@ -91,6 +91,22 @@ export type MacrocyclePlannerInput = {
   // stated season_start — see the prompt section this drives for why those
   // are different dates).
   trainingStartDate?: string;
+  // The deterministic 4-week-block phase skeleton computed by
+  // lib/generation/phase-sequencing.ts — phase_number/goal/start_date/
+  // end_date/week_count for every phase this call needs to plan. When
+  // present, the model's only job per phase is phase_name,
+  // weekly_template_label, and deload_test_note (plus the overall
+  // rationale/flags); phase boundaries themselves are fixed by the app.
+  // Absent when season_start isn't available/confirmed yet, in which case
+  // the old prose-only fallback guidance applies instead.
+  computedPhases?: Array<{
+    phase_number: number;
+    goal: string;
+    start_date: string;
+    end_date: string;
+    week_count: number;
+  }>;
+  computedPhaseFlags?: string[];
   // Set both to regenerate an edited version of an existing draft (the
   // "chat edit" path in review-approval-flow-spec.md) instead of a fresh v1.
   currentDraftOutput?: MacrocyclePlannerOutput;
@@ -154,7 +170,7 @@ export async function runMacrocyclePlanner(
     "",
     "# ATHLETE INTAKE",
     JSON.stringify(input.intake, null, 2),
-    ...(input.trainingStartDate
+    ...(input.trainingStartDate && !input.computedPhases
       ? [
           "",
           "# TRAINING START DATE vs. COMPETITIVE SEASON — READ CAREFULLY",
@@ -176,21 +192,45 @@ export async function runMacrocyclePlanner(
             "conditioning note — but do not treat any tournament date as a peak target in its own right; " +
             "season_start alone is the peak target this skeleton builds toward.",
           "",
-          "If the gap between Phase 1's start and season_start is short (e.g. the athlete is signing up " +
-            "mid-season, or their season starts very soon), compress the buildup — fewer/shorter GPP and " +
-            "hypertrophy weeks, not a full off-season progression forced into too little time — and add a " +
-            "flag explaining the compression, rather than pushing the peak target itself later than the " +
-            "athlete's actual season start. If season_start/season_calendar_confirmed indicate the calendar " +
-            "isn't set yet, or no clear season_start is available, build the standard full periodization " +
-            "toward a reasonable default peak instead, and flag that the skeleton is provisional pending the " +
-            "real calendar.",
-          ...(input.isRebuild
-            ? [
-                "",
-                "For this rebuild, phases already marked completed/active in the prior skeleton above are " +
-                  "preserved exactly as given — this section only governs newly (re)planned phase boundaries " +
-                  "going forward, not Phase 1's start_date (which isn't being replanned in a rebuild).",
-              ]
+          "This skeleton is PROVISIONAL — no computed phase skeleton could be built because season_start " +
+            "isn't available/confirmed yet. Build the standard full periodization toward a reasonable " +
+            "default peak, using 4-week blocks per the standard cycle (Hypertrophy -> Max Strength -> " +
+            "Power Conversion -> Peak Taper, GPP only as an opening block right after a season ends), and " +
+            "flag that the skeleton is provisional pending the real calendar. If the gap between Phase 1's " +
+            "start and a knowable season_start is short, compress the buildup rather than forcing a full " +
+            "progression into too little time, and flag the compression.",
+        ]
+      : []),
+    ...(input.computedPhases
+      ? [
+          "",
+          "# PHASE BOUNDARIES — FIXED BY THE APP (do not change dates, goal, phase_number, or week_count)",
+          "These boundaries were computed deterministically from the athlete's training start date, " +
+            "season_start (their single peak target), season_end, and any priority tournament, per the " +
+            "app's standard 4-week-block periodization model: every phase defaults to 4 weeks; working " +
+            "backward from a peak, the cycle is Hypertrophy -> Max Strength -> Power Conversion -> Peak " +
+            "Taper, repeating the middle two as many times as the available time allows; GPP/Reacclimation " +
+            "only ever opens a fresh off-season build, directly after a season ends, never mid-cycle. A " +
+            "flagged priority tournament gets its own backward-planned sequence ending in its own Peak " +
+            "Taper, as a second, in-season peak — with every in-season phase (before AND after that " +
+            "tournament) dosed per the Coaching Philosophy's in-season rules (maintenance strength, managed " +
+            "fatigue around games, day-before/day-of-game volume rules), never at off-season volume.",
+          "",
+          "For each phase below, use EXACTLY this phase_number, goal, start_date, end_date, and week_count " +
+            "in your submit_macrocycle_skeleton call. Your only job for each one is to write its phase_name, " +
+            "weekly_template_label, and (if relevant) deload_test_note, and to write the overall " +
+            "rationale/flags reflecting this structure — do not add, remove, reorder, resize, or re-date any " +
+            "phase." +
+            (input.isRebuild
+              ? " This is a rebuild: the boundaries below are the app's computed default for the " +
+                "still-to-be-planned remainder of the season — deviate from them only if the rebuild reason " +
+                "genuinely requires something else (e.g. inserting an injury_return or testing_block phase " +
+                "in place of one of these), and say so explicitly in flags if you do."
+              : ""),
+          JSON.stringify(input.computedPhases, null, 2),
+          ...(input.computedPhaseFlags && input.computedPhaseFlags.length
+            ? ["", "Automatic flags from this computation (include these, worded naturally, in your own flags array):",
+                ...input.computedPhaseFlags.map((f) => `- ${f}`)]
             : []),
         ]
       : []),

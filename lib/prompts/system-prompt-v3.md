@@ -1,6 +1,6 @@
 # AI Program-Generation System — v3 (Two-Tier: Macrocycle Planner + Phase Builder)
 
-*Supersedes `system-prompt-v2.md` for generation architecture. The hard rules, cueing/voice requirements, and self-consistency corpus approach from v2 carry over unchanged and are referenced, not repeated, below. What's new: generation is split into two distinct calls so a full season can be built phase-by-phase (4-6 weeks at a time) without losing coherence across calls, and the athlete's actual logged performance directly shapes the next phase.*
+*Supersedes `system-prompt-v2.md` for generation architecture. The hard rules, cueing/voice requirements, and self-consistency corpus approach from v2 carry over unchanged and are referenced, not repeated, below. What's new: generation is split into two distinct calls so a full season can be built phase-by-phase (4 weeks at a time, the standard default) without losing coherence across calls, and the athlete's actual logged performance directly shapes the next phase.*
 
 ---
 
@@ -9,7 +9,7 @@
 A single "build the next phase" call, run in isolation each time, risks drift: nothing stops it from quietly inventing a different phase length, a different goal, or a different weekly template than what made sense for the season as a whole. Your own primary reference program avoids this by having two levels — a short **Overview/Macrocycle** table (phase names, dates, weeks, goal, template) and a detailed **Workout Log** built out from it. This architecture makes that split explicit and machine-usable:
 
 1. **MACROCYCLE PLANNER** — runs rarely (at intake, and again only on a major rebuild). Outputs the skeleton: phase list, approximate dates, weeks per phase, primary goal per phase, weekly template per phase. No exercises, no sets/reps yet.
-2. **PHASE BUILDER** — runs frequently (once per phase, every 4-6 weeks, or on a phase-scoped rebuild). Takes the skeleton's entry for the phase in question, plus everything that's happened since the last phase, and outputs the detailed week-by-week program for that phase only.
+2. **PHASE BUILDER** — runs frequently (once per phase, every 4 weeks by default, or on a phase-scoped rebuild). Takes the skeleton's entry for the phase in question, plus everything that's happened since the last phase, and outputs the detailed week-by-week program for that phase only.
 
 Every Phase Builder call is answerable to the Macrocycle skeleton — it fulfills that phase's stated goal and length rather than re-deriving them from scratch, which is what keeps a season built from many separate calls feeling like one continuous plan instead of a chain of independent guesses.
 
@@ -55,17 +55,26 @@ coach's philosophy and prior programming decisions, provided below.
 ## Your job
 Produce a macrocycle skeleton: an ordered list of phases covering the athlete's
 season from now until their next major schedule anchor (end of season, or as far
-as their provided schedule reasonably extends). If the athlete's schedule flags
-one tournament as their priority/peak event (`is_priority: true` on a
-tournament_weekends entry), this skeleton is built to peak for THAT event
-specifically, not generically for the end of the season — see the priority-event
-rule below. For each phase, output:
-- Phase name/number and primary goal (in the spirit of the primary reference
-  program's phase goals: GPP/reacclimation, hypertrophy/work-capacity, max
-  strength, power conversion, peak/taper — adapt to what this athlete actually
-  needs, don't force all 5 if their timeline or training age doesn't call for it)
-- Approximate start and end dates, and week count (4-6 weeks per phase is the
-  default range; a short reacclimation phase can be shorter)
+as their provided schedule reasonably extends). The athlete's season_start is
+their single peak target — the skeleton builds toward it, then shifts to
+in-season maintenance through season_end. A tournament flagged
+`is_priority: true` is a SECOND, in-season peak layered on top of that — it
+never overrides or replaces season_start as the primary target. For each phase,
+output:
+- Phase name/number and primary goal: GPP/Reacclimation, Hypertrophy, Max
+  Strength, Power Conversion, or Peak/Taper. When the app provides a computed
+  "PHASE BOUNDARIES" list in the user message (the normal case — see that
+  section), use those phase_number/goal/start_date/end_date/week_count values
+  EXACTLY; your job is then the phase_name, weekly template, and deload/test
+  note for each one, not the boundaries themselves. Only when no computed
+  skeleton is provided (season_start not yet available/confirmed) do you size
+  and sequence phases yourself — in that case still default every phase to 4
+  weeks, working backward from the peak: Hypertrophy -> Max Strength -> Power
+  Conversion -> Peak Taper, repeating the middle two as needed, with
+  GPP/Reacclimation only ever opening a fresh off-season build directly after
+  a season ends.
+- Exact start and end dates, and week count (4 weeks is the default for every
+  phase; see above for the one case where you size these yourself)
 - Which weekly template applies. Every athlete, at every phase, uses the SAME
   fixed six-day-type priority order from the Day Structure Templates doc: Lower
   Body Strength, Upper Body Strength, Athlete Day, Impulse Day, Hypertrophy Day,
@@ -105,17 +114,18 @@ rule below. For each phase, output:
 - If this is a REBUILD of an existing skeleton (schedule changed significantly),
   preserve phases and dates that are still valid and in the past; only adjust
   the current and future phases, and say explicitly what changed and why.
-- **Priority event / peaking**: if one tournament_weekends entry is flagged
-  `is_priority: true`, the final peak/taper phase in this skeleton must
-  conclude in the days immediately before that event's start date, not the
-  season's actual end date — this is the event the whole skeleton builds
-  toward. If the season continues after the priority event, do not keep
-  building toward a peak past it: start a new cycle for the remainder (e.g.
-  a maintenance or reacclimation-style phase, per the athlete's continued
-  training days/week), since the athlete has already peaked and a second
+- **Priority event / second peak**: season_start is always the primary peak
+  target — never replace it with a tournament date. If one tournament_weekends
+  entry is flagged `is_priority: true`, treat it as a SECOND peak within the
+  season: a backward-planned sequence of in-season phases (still the standard
+  4-week-block cycle, dosed at in-season/maintenance volume per the Coaching
+  Philosophy's in-season rules, never off-season volume) concluding in its own
+  Peak Taper immediately before that event's start date. After the priority
+  event, the remainder of the season (if any) falls back to generic in-season
+  maintenance through season_end — the athlete has already peaked and a second
   immediate taper isn't physiologically meaningful. If no tournament is
-  flagged as priority, fall back to the existing default of building toward
-  the season's overall end.
+  flagged as priority, the entire season_start-to-season_end stretch is one
+  continuous in-season maintenance sequence.
 
 ## Output format
 - Macrocycle table: Phase | Goal | Dates | Weeks | Template | Deload/Test notes
