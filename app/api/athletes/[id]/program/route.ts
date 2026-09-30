@@ -1,35 +1,50 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/db/supabase-admin";
-import { getSessionAthleteId, unauthorized, forbidden } from "@/lib/auth/session";
+import { getSessionAthleteId, getSessionCoachId, unauthorized, forbidden } from "@/lib/auth/session";
 import { dbError } from "@/lib/api/error-response";
 
 /**
  * GET /api/athletes/[id]/program
  *
- * The athlete's season-at-a-glance: their active MacrocycleSkeleton's
- * phases (data-architecture-spec.md — the skeleton IS the latest approved
+ * The season-at-a-glance: the active MacrocycleSkeleton's phases
+ * (data-architecture-spec.md — the skeleton IS the latest approved
  * macrocycle_planner draft, materialized), plus the season calendar
- * (season dates, tournament weekends) from their intake record, so an
- * athlete can see where they are in the season without asking their coach.
+ * (season dates, tournament weekends) from the intake record, so an athlete
+ * can see where they are in the season without asking their coach — and,
+ * since this is a single-coach app with no per-athlete assignment, any
+ * signed-in coach can read the same thing for any athlete (the "current
+ * program" view on the coach dashboard). Also returns the draft ids behind
+ * the active skeleton and active phase (both already-APPROVED drafts, per
+ * how is_active/status get set at approval), so a coach viewing this can
+ * jump straight to the full read-only draft detail on /review/[id] instead
+ * of hunting through the review queue's status filter for it.
  */
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   const sessionAthleteId = await getSessionAthleteId();
-  if (!sessionAthleteId) return unauthorized();
-  if (sessionAthleteId !== params.id) return forbidden();
+  const sessionCoachId = sessionAthleteId ? null : await getSessionCoachId();
+  if (!sessionAthleteId && !sessionCoachId) return unauthorized();
+  if (sessionAthleteId && sessionAthleteId !== params.id) return forbidden();
 
   const athleteId = params.id;
   const supabase = getSupabaseAdmin();
 
   const { data: skeleton, error: skeletonError } = await supabase
     .from("macrocycle_skeletons")
-    .select("id, created_at")
+    .select("id, created_at, source_draft_id")
     .eq("athlete_id", athleteId)
     .eq("is_active", true)
     .maybeSingle();
   if (skeletonError) return dbError("athletes/[id]/program", skeletonError);
 
   if (!skeleton) {
-    return NextResponse.json({ skeleton: null, phases: [], tournament_weekends: [], season: null });
+    return NextResponse.json({
+      skeleton: null,
+      phases: [],
+      tournament_weekends: [],
+      season: null,
+      skeleton_draft_id: null,
+      active_phase_draft_id: null,
+    });
   }
 
   const [{ data: phases, error: phasesError }, { data: intake, error: intakeError }] = await Promise.all([
@@ -49,6 +64,22 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   if (phasesError) return dbError("athletes/[id]/program", phasesError);
   if (intakeError) return dbError("athletes/[id]/program", intakeError);
 
+  const activePhase = (phases ?? []).find((p) => p.status === "active") ?? null;
+
+  let activePhaseDraftId: string | null = null;
+  if (activePhase) {
+    const { data: latestApprovedPhaseDraft } = await supabase
+      .from("program_drafts")
+      .select("id")
+      .eq("phase_id", activePhase.id)
+      .eq("call_type", "phase_builder")
+      .eq("status", "approved")
+      .order("version", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    activePhaseDraftId = latestApprovedPhaseDraft?.id ?? null;
+  }
+
   return NextResponse.json({
     skeleton,
     phases: phases ?? [],
@@ -60,5 +91,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
           confirmed: intake.season_calendar_confirmed,
         }
       : null,
+    skeleton_draft_id: skeleton.source_draft_id ?? null,
+    active_phase_draft_id: activePhaseDraftId,
   });
 }

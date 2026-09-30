@@ -32,7 +32,7 @@ export async function GET() {
 
   const roster = await Promise.all(
     (athletes ?? []).map(async (athlete) => {
-      const [{ data: skeleton }, { data: pendingDrafts }, { data: intake }, { data: state }] =
+      const [{ data: skeleton }, { data: draftRows }, { data: intake }, { data: state }] =
         await Promise.all([
           supabase
             .from("macrocycle_skeletons")
@@ -40,11 +40,19 @@ export async function GET() {
             .eq("athlete_id", athlete.id)
             .eq("is_active", true)
             .maybeSingle(),
+          // All draft rows (every version, every status) for this athlete —
+          // NOT pre-filtered to status=pending_review. A chat edit never
+          // changes the status of the version it superseded (only inserts a
+          // new row), so an old v1 can sit at "pending_review" forever even
+          // after v2 was approved. Counting rows by status directly would
+          // double-count that stale v1 as a second pending draft; the fix
+          // (matching /api/drafts's own fix for the same bug) is to reduce
+          // to the latest version PER LINEAGE first, then count only those
+          // whose true latest version is still pending_review.
           supabase
             .from("program_drafts")
-            .select("id")
-            .eq("athlete_id", athlete.id)
-            .eq("status", "pending_review"),
+            .select("id, lineage_id, version, status")
+            .eq("athlete_id", athlete.id),
           supabase
             .from("athlete_intake")
             .select("id")
@@ -57,6 +65,17 @@ export async function GET() {
             .eq("athlete_id", athlete.id)
             .maybeSingle(),
         ]);
+
+      const latestByLineage = new Map<string, { version: number; status: string }>();
+      for (const row of draftRows ?? []) {
+        const existing = latestByLineage.get(row.lineage_id);
+        if (!existing || row.version > existing.version) {
+          latestByLineage.set(row.lineage_id, { version: row.version, status: row.status });
+        }
+      }
+      const pendingDraftsCount = [...latestByLineage.values()].filter(
+        (v) => v.status === "pending_review"
+      ).length;
 
       let activePhase: {
         id: string;
@@ -91,7 +110,7 @@ export async function GET() {
         email: athlete.email,
         name: athlete.name,
         active_phase: activePhase,
-        pending_drafts_count: pendingDrafts?.length ?? 0,
+        pending_drafts_count: pendingDraftsCount,
         last_logged_at: lastLoggedAt,
         has_intake: Boolean(intake),
         has_skeleton: Boolean(skeleton),

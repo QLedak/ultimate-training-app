@@ -253,7 +253,7 @@ export default function CoachHomePage() {
       <div className="rounded-lg border border-slate-200 bg-white p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <Link href={`/review?athleteId=${a.id}`} className="font-medium text-brand-dark hover:underline">
+            <Link href={`/coach/athletes/${a.id}/program`} className="font-medium text-brand-dark hover:underline">
               {a.name ?? a.email}
             </Link>
             <p className="mt-0.5 text-xs text-slate-500">
