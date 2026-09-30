@@ -83,6 +83,14 @@ export type MacrocyclePlannerInput = {
   isRebuild?: boolean;
   rebuildReason?: string;
   priorSkeletonPhases?: Record<string, unknown>[]; // for a rebuild: past/completed phases to preserve
+  // The exact calendar date (YYYY-MM-DD) Phase 1 must start on — training
+  // begins the day after the athlete signs up, full stop, regardless of
+  // when their competitive season falls. See lib/generation/macrocycle.ts:
+  // always computed as tomorrow relative to when this call actually runs,
+  // never left for the model to infer (and never taken from the athlete's
+  // stated season_start — see the prompt section this drives for why those
+  // are different dates).
+  trainingStartDate?: string;
   // Set both to regenerate an edited version of an existing draft (the
   // "chat edit" path in review-approval-flow-spec.md) instead of a fresh v1.
   currentDraftOutput?: MacrocyclePlannerOutput;
@@ -146,6 +154,46 @@ export async function runMacrocyclePlanner(
     "",
     "# ATHLETE INTAKE",
     JSON.stringify(input.intake, null, 2),
+    ...(input.trainingStartDate
+      ? [
+          "",
+          "# TRAINING START DATE vs. COMPETITIVE SEASON — READ CAREFULLY",
+          `Phase 1's start_date MUST be exactly ${input.trainingStartDate} — training begins the day ` +
+            "after the athlete signed up, always, regardless of anything on their intake calendar. This is " +
+            "not a floor or a suggestion; it is the literal start_date value for phase_number 1.",
+          "",
+          "The athlete's `season_start` / `season_end` fields on intake describe their COMPETITIVE ultimate " +
+            "season — when they're playing games/tournaments — NOT a training start date. Never use " +
+            "season_start as Phase 1's start_date. Instead, treat season_start itself as the PEAK TARGET the " +
+            "periodization builds toward: size and sequence the phases between Phase 1's start (" +
+            `${input.trainingStartDate}) and season_start so the athlete reaches in-season-ready condition ` +
+            "(appropriate power-conversion/peaking emphasis, per the Coaching Philosophy's GPP-to-SPP " +
+            "progression) right around season_start, then shift phase goals/emphasis to in-season maintenance " +
+            "(per the Coaching Philosophy's in-season rules) from season_start through season_end. Any " +
+            "`tournament_weekends` (including one marked `is_priority`) are schedule anchors for THIS purpose " +
+            "only — feed them into the day-before/day-of-game rule and into how much in-season volume/" +
+            "conditioning a given week can carry, per the Coaching Philosophy's tournament-weekend " +
+            "conditioning note — but do not treat any tournament date as a peak target in its own right; " +
+            "season_start alone is the peak target this skeleton builds toward.",
+          "",
+          "If the gap between Phase 1's start and season_start is short (e.g. the athlete is signing up " +
+            "mid-season, or their season starts very soon), compress the buildup — fewer/shorter GPP and " +
+            "hypertrophy weeks, not a full off-season progression forced into too little time — and add a " +
+            "flag explaining the compression, rather than pushing the peak target itself later than the " +
+            "athlete's actual season start. If season_start/season_calendar_confirmed indicate the calendar " +
+            "isn't set yet, or no clear season_start is available, build the standard full periodization " +
+            "toward a reasonable default peak instead, and flag that the skeleton is provisional pending the " +
+            "real calendar.",
+          ...(input.isRebuild
+            ? [
+                "",
+                "For this rebuild, phases already marked completed/active in the prior skeleton above are " +
+                  "preserved exactly as given — this section only governs newly (re)planned phase boundaries " +
+                  "going forward, not Phase 1's start_date (which isn't being replanned in a rebuild).",
+              ]
+            : []),
+        ]
+      : []),
     ...(input.isRebuild
       ? [
           "",
