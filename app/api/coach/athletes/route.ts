@@ -7,9 +7,11 @@ import { dbError } from "@/lib/api/error-response";
  * GET /api/coach/athletes
  *
  * The coach homepage's roster: every athlete, each annotated with their
- * active phase (if any), how many drafts are waiting on review, and when
- * they last logged a session — enough for a coach to see at a glance who
- * needs attention without opening each athlete individually.
+ * active phase (if any, including its date range so the dashboard can flag
+ * upcoming phase transitions), how many drafts are waiting on review, how
+ * many injuries they've self-reported as currently active, and when they
+ * last logged a session — enough for a coach to see at a glance who needs
+ * attention without opening each athlete individually.
  *
  * Done as one query per athlete rather than a single joined query — the
  * roster is expected to be small (one coach's athletes), and this keeps
@@ -30,31 +32,43 @@ export async function GET() {
 
   const roster = await Promise.all(
     (athletes ?? []).map(async (athlete) => {
-      const [{ data: skeleton }, { data: pendingDrafts }, { data: intake }] = await Promise.all([
-        supabase
-          .from("macrocycle_skeletons")
-          .select("id")
-          .eq("athlete_id", athlete.id)
-          .eq("is_active", true)
-          .maybeSingle(),
-        supabase
-          .from("program_drafts")
-          .select("id")
-          .eq("athlete_id", athlete.id)
-          .eq("status", "pending_review"),
-        supabase
-          .from("athlete_intake")
-          .select("id")
-          .eq("athlete_id", athlete.id)
-          .limit(1)
-          .maybeSingle(),
-      ]);
+      const [{ data: skeleton }, { data: pendingDrafts }, { data: intake }, { data: state }] =
+        await Promise.all([
+          supabase
+            .from("macrocycle_skeletons")
+            .select("id")
+            .eq("athlete_id", athlete.id)
+            .eq("is_active", true)
+            .maybeSingle(),
+          supabase
+            .from("program_drafts")
+            .select("id")
+            .eq("athlete_id", athlete.id)
+            .eq("status", "pending_review"),
+          supabase
+            .from("athlete_intake")
+            .select("id")
+            .eq("athlete_id", athlete.id)
+            .limit(1)
+            .maybeSingle(),
+          supabase
+            .from("current_athlete_state")
+            .select("current_active_injuries")
+            .eq("athlete_id", athlete.id)
+            .maybeSingle(),
+        ]);
 
-      let activePhase: { id: string; phase_number: number; phase_name: string } | null = null;
+      let activePhase: {
+        id: string;
+        phase_number: number;
+        phase_name: string;
+        start_date: string;
+        end_date: string;
+      } | null = null;
       if (skeleton) {
         const { data: phase } = await supabase
           .from("macrocycle_phases")
-          .select("id, phase_number, phase_name")
+          .select("id, phase_number, phase_name, start_date, end_date")
           .eq("skeleton_id", skeleton.id)
           .eq("status", "active")
           .maybeSingle();
@@ -70,6 +84,7 @@ export async function GET() {
         .maybeSingle();
 
       const lastLoggedAt = lastLog?.logged_at ?? null;
+      const activeInjuries = (state?.current_active_injuries as unknown[] | null) ?? [];
 
       return {
         id: athlete.id,
@@ -80,6 +95,7 @@ export async function GET() {
         last_logged_at: lastLoggedAt,
         has_intake: Boolean(intake),
         has_skeleton: Boolean(skeleton),
+        active_injuries_count: activeInjuries.length,
       };
     })
   );
