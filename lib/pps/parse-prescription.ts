@@ -61,6 +61,45 @@ export function parseRestSeconds(rest: string | null | undefined): number | null
   return null;
 }
 
+/**
+ * Detects a time-held prescription (planks, isometric holds, dead hangs,
+ * etc.) rather than a rep-based one, so the guided logging screen can swap
+ * in a work timer instead of a reps field. Looks for an explicit seconds/
+ * minutes marker next to a number — "3x30s", "3 x 45 sec", "Hold 30s x3",
+ * "45 second hold" — in either sets-first or duration-first order. A bare
+ * duration with no set count ("30s hold") still counts, with sets: null.
+ * Anything without a time unit (plain "3x8") is left alone — this never
+ * fires for a normal rep-based prescription.
+ */
+export type ParsedTimedTarget = { sets: number | null; seconds: number };
+
+export function parseTimedTarget(target: string | null | undefined): ParsedTimedTarget | null {
+  if (!target) return null;
+
+  const setsFirst = target.match(/(\d+)\s*x\s*:?(\d+)\s*(sec|second|s\b|min|minute|m\b)/i);
+  if (setsFirst) {
+    const value = parseInt(setsFirst[2], 10);
+    const unit = setsFirst[3].toLowerCase();
+    return { sets: parseInt(setsFirst[1], 10), seconds: unit.startsWith("m") ? value * 60 : value };
+  }
+
+  const durationFirst = target.match(/(\d+)\s*(sec|second|s\b|min|minute|m\b)[^\d]{0,15}x\s*(\d+)/i);
+  if (durationFirst) {
+    const value = parseInt(durationFirst[1], 10);
+    const unit = durationFirst[2].toLowerCase();
+    return { sets: parseInt(durationFirst[3], 10), seconds: unit.startsWith("m") ? value * 60 : value };
+  }
+
+  const bareDuration = target.match(/(\d+)\s*(sec|second|s\b|min|minute|m\b)/i);
+  if (bareDuration) {
+    const value = parseInt(bareDuration[1], 10);
+    const unit = bareDuration[2].toLowerCase();
+    return { sets: null, seconds: unit.startsWith("m") ? value * 60 : value };
+  }
+
+  return null;
+}
+
 export type PerformanceClass = "hit" | "exceeded" | "missed" | "unknown";
 
 export function classifyPerformance(params: {

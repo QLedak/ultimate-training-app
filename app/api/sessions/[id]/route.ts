@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/db/supabase-admin";
 import { deriveLoggingTier } from "@/lib/training/logging-tier";
 import { parsePrescribedWeightHint } from "@/lib/pps/parse-prescription";
+import { humanizeExerciseId, isSupersetLabel } from "@/lib/training/display-labels";
 import { getSessionAthleteId, unauthorized, forbidden } from "@/lib/auth/session";
 import { dbError } from "@/lib/api/error-response";
 
@@ -101,10 +102,12 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 
     return {
       exercise_id: exerciseId,
-      exercise_name: libraryRow?.exercise_name ?? exerciseId,
+      exercise_name: libraryRow?.exercise_name ?? humanizeExerciseId(exerciseId),
       cue: libraryRow?.cue ?? null,
       tier,
-      circuit_label: prescribed.circuit_label ?? null,
+      // Only a real A1/A2-style superset code is shown/grouped on — see
+      // lib/training/display-labels.ts for why this guard exists.
+      circuit_label: isSupersetLabel(prescribed.circuit_label) ? (prescribed.circuit_label as string).trim() : null,
       prescribed_target: prescribed.sets_reps ?? null,
       prescribed_weight_hint:
         tier !== 3 && typeof prescribed.sets_reps === "string"

@@ -123,9 +123,14 @@ export default function CoachAthleteProgramPage({ params }: { params: { id: stri
           ← Coach dashboard
         </Link>
 
-        <h1 className="mt-2 text-2xl font-bold text-brand-dark">
-          {athlete?.name ?? athlete?.email ?? "Athlete"}&apos;s current program
-        </h1>
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+          <h1 className="text-2xl font-bold text-brand-dark">
+            {athlete?.name ?? athlete?.email ?? "Athlete"}&apos;s current program
+          </h1>
+          <Link href={`/coach/athletes/${params.id}/profile`} className="text-sm text-brand underline">
+            View profile →
+          </Link>
+        </div>
         {season && (
           <p className="mt-1 text-sm text-slate-500">
             Season: {season.start} → {season.end}

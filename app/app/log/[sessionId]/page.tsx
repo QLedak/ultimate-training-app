@@ -3,9 +3,12 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { parsePrescribedTarget, parseRestSeconds } from "@/lib/pps/parse-prescription";
+import { parsePrescribedTarget, parseRestSeconds, parseTimedTarget } from "@/lib/pps/parse-prescription";
 import { suggestNextWeight } from "@/lib/training/autoregulate";
 import { EFFORT_SCALE, EffortLevel, effortToRir, rirToEffort } from "@/lib/training/perceived-effort";
+import { isSupersetLabel, supersetGroupKey } from "@/lib/training/display-labels";
+import { startRestTimer, clearRestTimer } from "@/lib/training/rest-timer-store";
+import { useRestTimer } from "@/components/training/useRestTimer";
 
 type SetResult = { set_number: number; weight_used: number | null; reps_completed: number | null; rir: number | null };
 
@@ -138,6 +141,11 @@ export default function SessionLogPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
+  const [rescheduling, setRescheduling] = useState(false);
+  const [rescheduleDate, setRescheduleDate] = useState("");
+  const [rescheduleError, setRescheduleError] = useState<string | null>(null);
+  const [rescheduleSaving, setRescheduleSaving] = useState(false);
+
   useEffect(() => {
     fetch(`/api/sessions/${sessionId}`)
       .then((r) => r.json())
@@ -184,6 +192,7 @@ export default function SessionLogPage() {
         }
         setForms(initialForms);
         setLoggedExerciseIds(loggedIds);
+        setRescheduleDate(d.session.date);
       })
       .catch((e) => setLoadError(e instanceof Error ? e.message : String(e)));
   }, [sessionId]);
@@ -211,6 +220,27 @@ export default function SessionLogPage() {
     }
   }
 
+  async function handleReschedule() {
+    if (!data || !rescheduleDate) return;
+    setRescheduleError(null);
+    setRescheduleSaving(true);
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}/reschedule`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date: rescheduleDate }),
+      });
+      const resData = await res.json();
+      if (resData.error) throw new Error(resData.error);
+      setData({ ...data, session: { ...data.session, date: resData.session.date } });
+      setRescheduling(false);
+    } catch (e) {
+      setRescheduleError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setRescheduleSaving(false);
+    }
+  }
+
   // Shared by both the manual form and the guided workout — whichever built
   // the payload, submission itself works the same way from here.
   async function submitLog(payload: SubmitPayload) {
@@ -229,6 +259,7 @@ export default function SessionLogPage() {
       } catch {
         // best-effort cleanup only
       }
+      clearRestTimer();
       setSaved(true);
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : String(e));
@@ -503,9 +534,50 @@ export default function SessionLogPage() {
           </span>
         )}
       </div>
-      <p className="mt-1 text-sm text-slate-500">
-        {session.date} · Week {session.week_number}
-      </p>
+      <div className="mt-1 flex items-center gap-2">
+        <p className="text-sm text-slate-500">
+          {session.date} · Week {session.week_number}
+        </p>
+        {!alreadyLogged && !rescheduling && (
+          <button type="button" onClick={() => setRescheduling(true)} className="text-xs text-brand underline">
+            Move to a different day
+          </button>
+        )}
+      </div>
+
+      {rescheduling && (
+        <div className="mt-3 rounded-md border border-slate-200 bg-slate-50 p-3">
+          <label className="mb-1 block text-xs font-medium text-slate-600">New date</label>
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              className={inputClass}
+              value={rescheduleDate}
+              onChange={(e) => setRescheduleDate(e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={handleReschedule}
+              disabled={rescheduleSaving}
+              className="shrink-0 rounded-md bg-brand px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              {rescheduleSaving ? "Saving…" : "Save"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setRescheduling(false);
+                setRescheduleError(null);
+                setRescheduleDate(session.date);
+              }}
+              className="shrink-0 text-sm text-slate-500 underline"
+            >
+              Cancel
+            </button>
+          </div>
+          {rescheduleError && <p className="mt-2 text-xs text-red-600">{rescheduleError}</p>}
+        </div>
+      )}
 
       {alreadyLogged && (
         <p className="mt-4 rounded-md bg-green-50 p-3 text-sm text-green-800">
@@ -613,6 +685,8 @@ function loadProgress(sessionId: string): GuidedProgress | null {
 function defaultSetCount(exercise: SessionDetail["exercises"][number]): number {
   const parsed = parsePrescribedTarget(exercise.prescribed_target ?? "");
   if (parsed.sets) return parsed.sets;
+  const timed = parseTimedTarget(exercise.prescribed_target ?? "");
+  if (timed?.sets) return timed.sets;
   return exercise.tier === 3 ? 1 : 3;
 }
 
@@ -665,6 +739,48 @@ function initExerciseState(exercise: SessionDetail["exercises"][number]): Guided
   };
 }
 
+// ---------------------------------------------------------------------------
+// Superset grouping: consecutive exercises sharing an A1/A2-style
+// circuit_label letter (see lib/training/display-labels.ts) are grouped into
+// one combined "step" so the guided flow can show/alternate between them
+// instead of marching through each exercise in isolation (testing feedback —
+// supersets used to stay stuck on the first exercise's screen the whole
+// time). Everything else is still a single-exercise step, unchanged.
+// ---------------------------------------------------------------------------
+
+type Step =
+  | { kind: "single"; exerciseIndexes: [number] }
+  | { kind: "superset"; exerciseIndexes: number[] };
+
+function buildSteps(exercises: SessionDetail["exercises"]): Step[] {
+  const steps: Step[] = [];
+  let i = 0;
+  while (i < exercises.length) {
+    const label = exercises[i].circuit_label;
+    if (isSupersetLabel(label)) {
+      const key = supersetGroupKey(label);
+      const group = [i];
+      let j = i + 1;
+      while (
+        j < exercises.length &&
+        isSupersetLabel(exercises[j].circuit_label) &&
+        supersetGroupKey(exercises[j].circuit_label as string) === key
+      ) {
+        group.push(j);
+        j++;
+      }
+      if (group.length > 1) {
+        steps.push({ kind: "superset", exerciseIndexes: group });
+        i = j;
+        continue;
+      }
+    }
+    steps.push({ kind: "single", exerciseIndexes: [i] });
+    i++;
+  }
+  return steps;
+}
+
 function GuidedWorkout({
   sessionId,
   session,
@@ -682,11 +798,14 @@ function GuidedWorkout({
   submitting: boolean;
   submitError: string | null;
 }) {
-  const [exerciseIndex, setExerciseIndex] = useState(0);
+  const [stepIndex, setStepIndex] = useState(0);
   const [states, setStates] = useState<Record<string, GuidedExerciseState>>({});
-  const [restSecondsLeft, setRestSecondsLeft] = useState<number | null>(null);
   const [initialized, setInitialized] = useState(false);
   const [finishing, setFinishing] = useState(false);
+
+  const { secondsLeft: restSecondsLeft } = useRestTimer();
+
+  const steps = buildSteps(exercises);
 
   useEffect(() => {
     const saved = loadProgress(sessionId);
@@ -695,7 +814,7 @@ function GuidedWorkout({
       initialStates[ex.exercise_id] = saved?.states[ex.exercise_id] ?? initExerciseState(ex);
     }
     setStates(initialStates);
-    setExerciseIndex(saved?.exerciseIndex ?? 0);
+    setStepIndex(saved?.exerciseIndex ?? 0);
     setInitialized(true);
     // Only ever run once on mount — this is a one-time hydration from
     // localStorage/server data, not something that should re-run on prop churn.
@@ -704,16 +823,8 @@ function GuidedWorkout({
 
   useEffect(() => {
     if (!initialized) return;
-    saveProgress(sessionId, { exerciseIndex, states });
-  }, [sessionId, exerciseIndex, states, initialized]);
-
-  // Rest timer countdown
-  useEffect(() => {
-    if (restSecondsLeft == null) return;
-    if (restSecondsLeft <= 0) return;
-    const t = setTimeout(() => setRestSecondsLeft((s) => (s == null ? null : s - 1)), 1000);
-    return () => clearTimeout(t);
-  }, [restSecondsLeft]);
+    saveProgress(sessionId, { exerciseIndex: stepIndex, states });
+  }, [sessionId, stepIndex, states, initialized]);
 
   if (!initialized) {
     return (
@@ -723,17 +834,16 @@ function GuidedWorkout({
     );
   }
 
-  const exercise = exercises[exerciseIndex];
-  const state = states[exercise.exercise_id];
-  const isLastExercise = exerciseIndex === exercises.length - 1;
+  const step = steps[stepIndex];
+  const isLastStep = stepIndex === steps.length - 1;
 
-  function updateExerciseState(patch: Partial<GuidedExerciseState>) {
-    setStates((prev) => ({ ...prev, [exercise.exercise_id]: { ...prev[exercise.exercise_id], ...patch } }));
+  function updateExerciseState(exerciseId: string, patch: Partial<GuidedExerciseState>) {
+    setStates((prev) => ({ ...prev, [exerciseId]: { ...prev[exerciseId], ...patch } }));
   }
 
-  function updateSet(setIndex: number, patch: Partial<GuidedSetState>) {
+  function updateSet(exerciseId: string, setIndex: number, patch: Partial<GuidedSetState>) {
     setStates((prev) => {
-      const current = prev[exercise.exercise_id];
+      const current = prev[exerciseId];
       const nextSets = current.sets.map((s, i) => {
         if (i !== setIndex) return s;
         const merged = { ...s, ...patch };
@@ -742,59 +852,109 @@ function GuidedWorkout({
         if ("weight" in patch && !("autoSuggested" in patch)) merged.autoSuggested = false;
         return merged;
       });
-      return { ...prev, [exercise.exercise_id]: { ...current, sets: nextSets } };
+      return { ...prev, [exerciseId]: { ...current, sets: nextSets } };
     });
   }
 
-  function addSet() {
-    updateExerciseState({ sets: [...state.sets, blankSet()] });
+  function addSet(exerciseId: string) {
+    const current = states[exerciseId];
+    updateExerciseState(exerciseId, { sets: [...current.sets, blankSet()] });
   }
 
-  function removeSet(setIndex: number) {
-    updateExerciseState({ sets: state.sets.filter((_, i) => i !== setIndex) });
+  function removeSet(exerciseId: string, setIndex: number) {
+    const current = states[exerciseId];
+    updateExerciseState(exerciseId, { sets: current.sets.filter((_, i) => i !== setIndex) });
   }
 
-  function logSet(setIndex: number) {
-    const loggedSet = state.sets[setIndex];
-    updateSet(setIndex, { logged: true });
-    updateExerciseState({ doneIndex: Math.max(state.doneIndex, setIndex + 1) });
+  /** Copies the first not-yet-logged set's weight/reps onto every other
+   * not-yet-logged set — the "I don't want to keep looking at my phone"
+   * shortcut from testing feedback. Already-logged sets are left alone. */
+  function applyToAllSets(exerciseId: string) {
+    const current = states[exerciseId];
+    const template = current.sets.find((s) => !s.logged);
+    if (!template) return;
+    updateExerciseState(exerciseId, {
+      sets: current.sets.map((s) => (s.logged ? s : { ...s, weight: template.weight, reps: template.reps })),
+    });
+  }
 
-    const isLastSetOfExercise = setIndex === state.sets.length - 1;
-    if (!isLastSetOfExercise) {
-      const restSeconds = parseRestSeconds(exercise.rest) ?? 60;
-      setRestSecondsLeft(restSeconds);
+  function logSet(exercise: SessionDetail["exercises"][number], setIndex: number, opts?: { skipRest?: boolean }) {
+    const exState = states[exercise.exercise_id];
+    const loggedSet = exState.sets[setIndex];
+    updateSet(exercise.exercise_id, setIndex, { logged: true });
+    updateExerciseState(exercise.exercise_id, { doneIndex: Math.max(exState.doneIndex, setIndex + 1) });
 
-      // Autoregulate: nudge the next set's weight based on how this one felt.
-      // Tier 3 has no RIR at all, and test-week / true-max attempts are
-      // chasing a ceiling rather than a target RIR, so both are left alone —
-      // the athlete drives the weight directly in those cases.
-      const eligible = exercise.tier !== 3 && session.week_type !== "test" && !state.isTrueMax;
-      if (eligible) {
-        const priorWeight = parseFloat(loggedSet.weight);
-        const actualRir = effortToRir(loggedSet.rir);
-        if (!Number.isNaN(priorWeight) && priorWeight > 0 && actualRir != null) {
-          const suggestion = suggestNextWeight(priorWeight, actualRir);
-          const nextSet = state.sets[setIndex + 1];
-          if (suggestion && nextSet && !nextSet.logged) {
-            updateSet(setIndex + 1, { weight: String(suggestion.weight), autoSuggested: true });
-          }
-        }
+    const isLastSetOfExercise = setIndex === exState.sets.length - 1;
+
+    // Autoregulate: nudge the next set's weight based on how this one felt.
+    // Tier 3 has no RIR at all, and test-week / true-max attempts are
+    // chasing a ceiling rather than a target RIR, so both are left alone —
+    // the athlete drives the weight directly in those cases.
+    const eligible = exercise.tier !== 3 && session.week_type !== "test" && !exState.isTrueMax;
+    if (eligible && !isLastSetOfExercise) {
+      const priorWeight = parseFloat(loggedSet.weight);
+      const suggestion = !Number.isNaN(priorWeight) && priorWeight > 0 ? suggestNextWeight(priorWeight, loggedSet.rir) : null;
+      const nextSet = exState.sets[setIndex + 1];
+      if (suggestion && nextSet && !nextSet.logged) {
+        updateSet(exercise.exercise_id, setIndex + 1, { weight: String(suggestion.weight), autoSuggested: true });
       }
     }
-  }
 
-  function goToNextExercise() {
-    setRestSecondsLeft(null);
-    if (isLastExercise) {
-      setFinishing(true);
-    } else {
-      setExerciseIndex((i) => i + 1);
+    if (!opts?.skipRest && !isLastSetOfExercise) {
+      const restSeconds = parseRestSeconds(exercise.rest) ?? 60;
+      startRestTimer({
+        sessionId,
+        exerciseId: exercise.exercise_id,
+        exerciseName: exercise.exercise_name,
+        endsAt: Date.now() + restSeconds * 1000,
+      });
     }
   }
 
-  function goToPreviousExercise() {
-    setRestSecondsLeft(null);
-    setExerciseIndex((i) => Math.max(0, i - 1));
+  /** Superset-aware version of logSet: only starts the rest timer once every
+   * exercise in the group has completed the same number of sets (a full
+   * round of the circuit), not after each individual exercise's set — a
+   * superset rests as a unit, not per exercise. Assumes a matched set count
+   * across the group's exercises, which is how the coach writes these. */
+  function logSupersetSet(groupExerciseIds: string[], exercise: SessionDetail["exercises"][number], setIndex: number) {
+    logSet(exercise, setIndex, { skipRest: true });
+
+    // Read the post-update doneIndex synchronously isn't possible with
+    // setState's async batching, so recompute the same value here directly.
+    const updatedDoneIndex = Math.max(states[exercise.exercise_id].doneIndex, setIndex + 1);
+    const roundComplete = groupExerciseIds.every((id) => {
+      if (id === exercise.exercise_id) return updatedDoneIndex === setIndex + 1;
+      return states[id].doneIndex >= setIndex + 1;
+    });
+    const groupFullyDone = groupExerciseIds.every((id) => {
+      const s = states[id];
+      const done = id === exercise.exercise_id ? updatedDoneIndex : s.doneIndex;
+      return done >= s.sets.length;
+    });
+
+    if (roundComplete && !groupFullyDone) {
+      const restSeconds = parseRestSeconds(exercise.rest) ?? 60;
+      startRestTimer({
+        sessionId,
+        exerciseId: exercise.exercise_id,
+        exerciseName: "Superset",
+        endsAt: Date.now() + restSeconds * 1000,
+      });
+    }
+  }
+
+  function goToNextStep() {
+    clearRestTimer();
+    if (isLastStep) {
+      setFinishing(true);
+    } else {
+      setStepIndex((i) => i + 1);
+    }
+  }
+
+  function goToPreviousStep() {
+    clearRestTimer();
+    setStepIndex((i) => Math.max(0, i - 1));
   }
 
   function buildFinalPayload(): { exercises: ExercisePayload[]; anySkipped: boolean } {
@@ -861,6 +1021,8 @@ function GuidedWorkout({
     );
   }
 
+  const stepExercises = step.exerciseIndexes.map((i) => exercises[i]);
+
   return (
     <main className="mx-auto max-w-xl px-6 py-10">
       <div className="mb-2 flex items-center justify-between">
@@ -868,167 +1030,103 @@ function GuidedWorkout({
           Exit workout
         </button>
         <span className="text-xs font-medium text-slate-400">
-          Exercise {exerciseIndex + 1} of {exercises.length}
+          Step {stepIndex + 1} of {steps.length}
         </span>
       </div>
 
       <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
         <div
           className="h-full rounded-full bg-brand transition-all"
-          style={{ width: `${((exerciseIndex + (restSecondsLeft != null ? 0.5 : 0)) / exercises.length) * 100}%` }}
+          style={{ width: `${(stepIndex / steps.length) * 100}%` }}
         />
       </div>
 
-      <h1 className="text-2xl font-bold text-brand-dark">
-        {exercise.circuit_label ? `${exercise.circuit_label}. ` : ""}
-        {exercise.exercise_name}
-      </h1>
-      <p className="mt-1 text-sm text-slate-500">
-        Target: {exercise.prescribed_target || "—"}
-        {exercise.tempo && ` · Tempo: ${exercise.tempo}`}
-      </p>
-      {exercise.cue && <p className="mt-2 text-sm text-slate-600">{exercise.cue}</p>}
-      {exercise.coach_notes && <p className="mt-1 text-xs italic text-slate-500">{exercise.coach_notes}</p>}
-      {exercise.last_time && (
-        <p className="mt-2 text-xs text-slate-400">
-          Last time ({exercise.last_time.date}): {exercise.last_time.load_descriptor || exercise.last_time.weight_used}
-          {exercise.last_time.reps_completed ? ` x ${exercise.last_time.reps_completed}` : ""}
-        </p>
+      {restSecondsLeft != null && restSecondsLeft > 0 && (
+        <RestBanner secondsLeft={restSecondsLeft} onSkip={() => clearRestTimer()} />
       )}
 
-      {restSecondsLeft != null ? (
-        <RestTimer
-          secondsLeft={restSecondsLeft}
-          onTick={setRestSecondsLeft}
-          onSkip={() => setRestSecondsLeft(null)}
+      {step.kind === "single" ? (
+        <SingleExerciseStep
+          exercise={stepExercises[0]}
+          weekType={session.week_type}
+          state={states[stepExercises[0].exercise_id]}
+          onUpdateExercise={(patch) => updateExerciseState(stepExercises[0].exercise_id, patch)}
+          onUpdateSet={(i, patch) => updateSet(stepExercises[0].exercise_id, i, patch)}
+          onAddSet={() => addSet(stepExercises[0].exercise_id)}
+          onRemoveSet={(i) => removeSet(stepExercises[0].exercise_id, i)}
+          onApplyToAll={() => applyToAllSets(stepExercises[0].exercise_id)}
+          onLogSet={(i) => logSet(stepExercises[0], i)}
         />
       ) : (
-        <div className="mt-6 space-y-3">
-          {state.sets.map((set, i) => (
-            <GuidedSetRow
-              key={i}
-              setNumber={i + 1}
-              tier={exercise.tier}
-              set={set}
-              weekType={session.week_type}
-              onChange={(patch) => updateSet(i, patch)}
-              onLog={() => logSet(i)}
-              onRemove={state.sets.length > 1 ? () => removeSet(i) : undefined}
-            />
-          ))}
-
-          <button type="button" onClick={addSet} className="text-sm text-brand underline">
-            + Add another set
-          </button>
-
-          <div className="rounded-md border border-slate-200 p-3">
-            <label className="flex items-center gap-2 text-xs text-slate-600">
-              <input
-                type="checkbox"
-                checked={state.substituted}
-                onChange={(e) => updateExerciseState({ substituted: e.target.checked })}
-              />
-              I did something different than prescribed
-            </label>
-            {state.substituted && (
-              <div className="mt-2 flex gap-2">
-                <input
-                  placeholder="What did you do instead?"
-                  className={inputClass}
-                  value={state.substitutedExerciseId}
-                  onChange={(e) => updateExerciseState({ substitutedExerciseId: e.target.value })}
-                />
-                <input
-                  placeholder="Why?"
-                  className={inputClass}
-                  value={state.substitutionReason}
-                  onChange={(e) => updateExerciseState({ substitutionReason: e.target.value })}
-                />
-              </div>
-            )}
-            {session.week_type === "test" && exercise.tier === 1 && (
-              <label className="mt-2 flex items-center gap-2 text-xs text-slate-600">
-                <input
-                  type="checkbox"
-                  checked={state.isTrueMax}
-                  onChange={(e) => updateExerciseState({ isTrueMax: e.target.checked })}
-                />
-                This was a true 1RM/PR attempt (not an estimate)
-              </label>
-            )}
-          </div>
-
-          <div className="flex gap-2">
-            {exerciseIndex > 0 && (
-              <button
-                type="button"
-                onClick={goToPreviousExercise}
-                className="rounded-md border border-slate-300 px-4 py-3 text-sm font-medium text-slate-600 hover:border-brand hover:text-brand"
-              >
-                ← Back
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => {
-                updateExerciseState({ skipped: true });
-                goToNextExercise();
-              }}
-              className="rounded-md border border-slate-300 px-4 py-3 text-sm font-medium text-slate-500 hover:border-slate-400"
-            >
-              Skip exercise
-            </button>
-            <button
-              type="button"
-              onClick={goToNextExercise}
-              className="flex-1 rounded-md bg-brand px-5 py-3 text-sm font-medium text-white hover:bg-blue-700"
-            >
-              {isLastExercise ? "Finish workout" : "Next exercise →"}
-            </button>
-          </div>
-        </div>
+        <SupersetStep
+          exercises={stepExercises}
+          states={states}
+          weekType={session.week_type}
+          onUpdateExercise={updateExerciseState}
+          onUpdateSet={updateSet}
+          onAddSet={addSet}
+          onRemoveSet={removeSet}
+          onApplyToAll={applyToAllSets}
+          onLogSet={(exercise, i) =>
+            logSupersetSet(
+              stepExercises.map((e) => e.exercise_id),
+              exercise,
+              i
+            )
+          }
+        />
       )}
+
+      <div className="mt-4 flex gap-2">
+        {stepIndex > 0 && (
+          <button
+            type="button"
+            onClick={goToPreviousStep}
+            className="rounded-md border border-slate-300 px-4 py-3 text-sm font-medium text-slate-600 hover:border-brand hover:text-brand"
+          >
+            ← Back
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={() => {
+            for (const ex of stepExercises) updateExerciseState(ex.exercise_id, { skipped: true });
+            goToNextStep();
+          }}
+          className="rounded-md border border-slate-300 px-4 py-3 text-sm font-medium text-slate-500 hover:border-slate-400"
+        >
+          Skip
+        </button>
+        <button
+          type="button"
+          onClick={goToNextStep}
+          className="flex-1 rounded-md bg-brand px-5 py-3 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          {isLastStep ? "Finish workout" : "Next →"}
+        </button>
+      </div>
     </main>
   );
 }
 
-function RestTimer({
-  secondsLeft,
-  onTick,
-  onSkip,
-}: {
-  secondsLeft: number;
-  onTick: (v: number | null) => void;
-  onSkip: () => void;
-}) {
+function RestBanner({ secondsLeft, onSkip }: { secondsLeft: number; onSkip: () => void }) {
   const minutes = Math.floor(secondsLeft / 60);
   const seconds = secondsLeft % 60;
-  const isDone = secondsLeft <= 0;
-
   return (
-    <div className="mt-6 flex flex-col items-center rounded-lg border border-slate-200 bg-slate-50 px-6 py-10 text-center">
-      <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-        {isDone ? "Rest complete" : "Resting"}
-      </span>
-      <span className="mt-2 text-5xl font-bold tabular-nums text-brand-dark">
-        {minutes}:{String(seconds).padStart(2, "0")}
-      </span>
-      <div className="mt-6 flex w-full gap-2">
-        <button
-          type="button"
-          onClick={() => onTick(secondsLeft + 15)}
-          className="flex-1 rounded-md border border-slate-300 px-4 py-3.5 text-base font-medium text-slate-600 hover:border-brand hover:text-brand"
-        >
-          +15s
-        </button>
-        <button
-          type="button"
-          onClick={onSkip}
-          className="flex-1 rounded-md bg-brand px-5 py-3.5 text-base font-medium text-white hover:bg-blue-700"
-        >
-          {isDone ? "Continue" : "Skip rest"}
-        </button>
+    <div className="mb-4 flex items-center justify-between rounded-lg border border-brand bg-blue-50 px-4 py-3">
+      <div>
+        <span className="text-xs font-semibold uppercase tracking-wide text-brand">Resting</span>
+        <p className="text-2xl font-bold tabular-nums text-brand-dark">
+          {minutes}:{String(seconds).padStart(2, "0")}
+        </p>
       </div>
+      <button
+        type="button"
+        onClick={onSkip}
+        className="rounded-md bg-brand px-3 py-2 text-xs font-medium text-white hover:bg-blue-700"
+      >
+        Skip rest
+      </button>
     </div>
   );
 }
@@ -1084,11 +1182,80 @@ function EffortSlider({
   );
 }
 
+/** Counts up from zero while held, for a timed/isometric exercise (plank,
+ * dead hang, wall sit). Stopping writes the elapsed whole seconds into
+ * `onDone` — the caller stores it in the same `reps` field a rep-based
+ * exercise would use (the schema has no separate duration column; a
+ * timed-hold's "reps" is its seconds held). Purely local/in-page state —
+ * unlike the rest timer, there's no need for this to survive navigation,
+ * since the athlete is actively performing the hold while watching it. */
+function WorkTimer({
+  targetSeconds,
+  initialSeconds,
+  disabled,
+  onDone,
+}: {
+  targetSeconds: number;
+  initialSeconds: number;
+  disabled?: boolean;
+  onDone: (seconds: number) => void;
+}) {
+  const [running, setRunning] = useState(false);
+  const [elapsed, setElapsed] = useState(initialSeconds);
+
+  useEffect(() => {
+    if (!running) return;
+    const start = Date.now() - elapsed * 1000;
+    const interval = setInterval(() => setElapsed(Math.round((Date.now() - start) / 1000)), 250);
+    return () => clearInterval(interval);
+    // Only re-anchor when (re)started — elapsed updates come from the
+    // interval itself while running.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [running]);
+
+  const minutes = Math.floor(elapsed / 60);
+  const seconds = elapsed % 60;
+  const atTarget = targetSeconds > 0 && elapsed >= targetSeconds;
+
+  return (
+    <div className={`rounded-md border p-3 text-center ${atTarget ? "border-green-300 bg-green-50" : "border-slate-200"}`}>
+      <p className="text-xs text-slate-500">Target: {targetSeconds}s</p>
+      <p className="mt-1 text-3xl font-bold tabular-nums text-brand-dark">
+        {minutes}:{String(seconds).padStart(2, "0")}
+      </p>
+      <div className="mt-2 flex gap-2">
+        {!running ? (
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => setRunning(true)}
+            className="flex-1 rounded-md bg-brand px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-40"
+          >
+            {elapsed > 0 ? "Resume" : "Start hold"}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setRunning(false);
+              onDone(elapsed);
+            }}
+            className="flex-1 rounded-md bg-brand-dark px-3 py-2 text-sm font-medium text-white hover:opacity-90"
+          >
+            Stop
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function GuidedSetRow({
   setNumber,
   tier,
   set,
   weekType,
+  timedSeconds,
   onChange,
   onLog,
   onRemove,
@@ -1097,12 +1264,12 @@ function GuidedSetRow({
   tier: 1 | 2 | 3;
   set: GuidedSetState;
   weekType: "build" | "deload" | "test";
+  timedSeconds: number | null;
   onChange: (patch: Partial<GuidedSetState>) => void;
   onLog: () => void;
   onRemove?: () => void;
 }) {
-  const canLog =
-    tier === 1 ? !!(set.weight && set.reps && set.rir) : tier === 2 ? !!set.rir : true; // tier 3: weight/reps optional
+  const canLog = timedSeconds != null ? !!set.reps : tier === 1 ? !!(set.weight && set.reps && set.rir) : tier === 2 ? !!set.rir : true;
 
   return (
     <div className={`rounded-md border p-3 ${set.logged ? "border-green-300 bg-green-50" : "border-slate-200"}`}>
@@ -1118,39 +1285,9 @@ function GuidedSetRow({
         </div>
       </div>
 
-      {tier === 1 && (
+      {timedSeconds != null ? (
         <div className="space-y-2">
-          <div className="flex gap-2">
-            <input
-              type="number"
-              placeholder="Weight (lb)"
-              className={inputClass}
-              value={set.weight}
-              disabled={set.logged}
-              onChange={(e) => onChange({ weight: e.target.value })}
-            />
-            <input
-              type="number"
-              placeholder="Reps"
-              className={inputClass}
-              value={set.reps}
-              disabled={set.logged}
-              onChange={(e) => onChange({ reps: e.target.value })}
-            />
-          </div>
-          <EffortSlider value={set.rir} disabled={set.logged} onChange={(v) => onChange({ rir: v })} />
-          {!set.logged && set.autoSuggested && (
-            <p className="text-xs text-brand">
-              Weight adjusted from your last set&apos;s effort — edit it if this isn&apos;t right.
-            </p>
-          )}
-        </div>
-      )}
-
-      {tier === 2 && (
-        <div className="space-y-2">
-          <EffortSlider value={set.rir} disabled={set.logged} onChange={(v) => onChange({ rir: v })} />
-          <div className="flex gap-2">
+          {tier !== 3 && (
             <input
               type="number"
               placeholder="Weight/load (optional)"
@@ -1159,42 +1296,98 @@ function GuidedSetRow({
               disabled={set.logged}
               onChange={(e) => onChange({ weight: e.target.value })}
             />
-            <input
-              type="number"
-              placeholder="Reps (optional)"
-              className={inputClass}
-              value={set.reps}
-              disabled={set.logged}
-              onChange={(e) => onChange({ reps: e.target.value })}
+          )}
+          {!set.logged ? (
+            <WorkTimer
+              targetSeconds={timedSeconds}
+              initialSeconds={set.reps ? Number(set.reps) : 0}
+              onDone={(seconds) => onChange({ reps: String(seconds) })}
             />
-          </div>
-          {!set.logged && set.autoSuggested && (
-            <p className="text-xs text-brand">
-              Weight adjusted from your last set&apos;s effort — edit it if this isn&apos;t right.
-            </p>
+          ) : (
+            <p className="text-sm text-slate-600">Held for {set.reps}s</p>
           )}
         </div>
-      )}
+      ) : (
+        <>
+          {tier === 1 && (
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  placeholder="Weight (lb)"
+                  className={inputClass}
+                  value={set.weight}
+                  disabled={set.logged}
+                  onChange={(e) => onChange({ weight: e.target.value })}
+                />
+                <input
+                  type="number"
+                  placeholder="Reps"
+                  className={inputClass}
+                  value={set.reps}
+                  disabled={set.logged}
+                  onChange={(e) => onChange({ reps: e.target.value })}
+                />
+              </div>
+              <EffortSlider value={set.rir} disabled={set.logged} onChange={(v) => onChange({ rir: v })} />
+              {!set.logged && set.autoSuggested && (
+                <p className="text-xs text-brand">
+                  Weight adjusted from your last set&apos;s effort — edit it if this isn&apos;t right.
+                </p>
+              )}
+            </div>
+          )}
 
-      {tier === 3 && (
-        <div className="flex gap-2">
-          <input
-            type="number"
-            placeholder="Weight (optional)"
-            className={inputClass}
-            value={set.weight}
-            disabled={set.logged}
-            onChange={(e) => onChange({ weight: e.target.value })}
-          />
-          <input
-            type="number"
-            placeholder="Reps (optional)"
-            className={inputClass}
-            value={set.reps}
-            disabled={set.logged}
-            onChange={(e) => onChange({ reps: e.target.value })}
-          />
-        </div>
+          {tier === 2 && (
+            <div className="space-y-2">
+              <EffortSlider value={set.rir} disabled={set.logged} onChange={(v) => onChange({ rir: v })} />
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  placeholder="Weight/load (optional)"
+                  className={inputClass}
+                  value={set.weight}
+                  disabled={set.logged}
+                  onChange={(e) => onChange({ weight: e.target.value })}
+                />
+                <input
+                  type="number"
+                  placeholder="Reps (optional)"
+                  className={inputClass}
+                  value={set.reps}
+                  disabled={set.logged}
+                  onChange={(e) => onChange({ reps: e.target.value })}
+                />
+              </div>
+              {!set.logged && set.autoSuggested && (
+                <p className="text-xs text-brand">
+                  Weight adjusted from your last set&apos;s effort — edit it if this isn&apos;t right.
+                </p>
+              )}
+            </div>
+          )}
+
+          {tier === 3 && (
+            <div className="flex gap-2">
+              <input
+                type="number"
+                placeholder="Weight (optional)"
+                className={inputClass}
+                value={set.weight}
+                disabled={set.logged}
+                onChange={(e) => onChange({ weight: e.target.value })}
+              />
+              <input
+                type="number"
+                placeholder="Reps (optional)"
+                className={inputClass}
+                value={set.reps}
+                disabled={set.logged}
+                onChange={(e) => onChange({ reps: e.target.value })}
+              />
+            </div>
+          )}
+        </>
       )}
 
       {weekType === "test" && tier === 1 && null /* true-max checkbox lives at the exercise level, not per set */}
@@ -1209,6 +1402,266 @@ function GuidedSetRow({
           Log set
         </button>
       )}
+    </div>
+  );
+}
+
+/** The shared "header + sets list + apply-to-all + substitution" body used by
+ * both a single-exercise step and each exercise inside a superset step. */
+function ExerciseGuidedBody({
+  exercise,
+  state,
+  weekType,
+  onUpdateExercise,
+  onUpdateSet,
+  onAddSet,
+  onRemoveSet,
+  onApplyToAll,
+  onLogSet,
+}: {
+  exercise: SessionDetail["exercises"][number];
+  state: GuidedExerciseState;
+  weekType: "build" | "deload" | "test";
+  onUpdateExercise: (patch: Partial<GuidedExerciseState>) => void;
+  onUpdateSet: (setIndex: number, patch: Partial<GuidedSetState>) => void;
+  onAddSet: () => void;
+  onRemoveSet: (setIndex: number) => void;
+  onApplyToAll: () => void;
+  onLogSet: (setIndex: number) => void;
+}) {
+  const timed = parseTimedTarget(exercise.prescribed_target ?? "");
+  const hasUnloggedSets = state.sets.some((s) => !s.logged);
+  const multipleUnlogged = state.sets.filter((s) => !s.logged).length > 1;
+
+  return (
+    <div className="space-y-3">
+      {multipleUnlogged && (
+        <button
+          type="button"
+          onClick={onApplyToAll}
+          className="w-full rounded-md border border-dashed border-brand px-3 py-2 text-xs font-medium text-brand hover:bg-blue-50"
+        >
+          Use the same weight/reps for every remaining set
+        </button>
+      )}
+
+      {state.sets.map((set, i) => (
+        <GuidedSetRow
+          key={i}
+          setNumber={i + 1}
+          tier={exercise.tier}
+          set={set}
+          weekType={weekType}
+          timedSeconds={timed?.seconds ?? null}
+          onChange={(patch) => onUpdateSet(i, patch)}
+          onLog={() => onLogSet(i)}
+          onRemove={state.sets.length > 1 ? () => onRemoveSet(i) : undefined}
+        />
+      ))}
+
+      {hasUnloggedSets && (
+        <button type="button" onClick={onAddSet} className="text-sm text-brand underline">
+          + Add another set
+        </button>
+      )}
+
+      <div className="rounded-md border border-slate-200 p-3">
+        <label className="flex items-center gap-2 text-xs text-slate-600">
+          <input
+            type="checkbox"
+            checked={state.substituted}
+            onChange={(e) => onUpdateExercise({ substituted: e.target.checked })}
+          />
+          I did something different than prescribed
+        </label>
+        {state.substituted && (
+          <div className="mt-2 flex gap-2">
+            <input
+              placeholder="What did you do instead?"
+              className={inputClass}
+              value={state.substitutedExerciseId}
+              onChange={(e) => onUpdateExercise({ substitutedExerciseId: e.target.value })}
+            />
+            <input
+              placeholder="Why?"
+              className={inputClass}
+              value={state.substitutionReason}
+              onChange={(e) => onUpdateExercise({ substitutionReason: e.target.value })}
+            />
+          </div>
+        )}
+        {weekType === "test" && exercise.tier === 1 && (
+          <label className="mt-2 flex items-center gap-2 text-xs text-slate-600">
+            <input
+              type="checkbox"
+              checked={state.isTrueMax}
+              onChange={(e) => onUpdateExercise({ isTrueMax: e.target.checked })}
+            />
+            This was a true 1RM/PR attempt (not an estimate)
+          </label>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ExerciseHeader({ exercise }: { exercise: SessionDetail["exercises"][number] }) {
+  return (
+    <>
+      <h1 className="text-2xl font-bold text-brand-dark">
+        {exercise.circuit_label ? `${exercise.circuit_label}. ` : ""}
+        {exercise.exercise_name}
+      </h1>
+      <p className="mt-1 text-sm text-slate-500">
+        Target: {exercise.prescribed_target || "—"}
+        {exercise.tempo && ` · Tempo: ${exercise.tempo}`}
+      </p>
+      {exercise.cue && <p className="mt-2 text-sm text-slate-600">{exercise.cue}</p>}
+      {exercise.coach_notes && <p className="mt-1 text-xs italic text-slate-500">{exercise.coach_notes}</p>}
+      {exercise.last_time && (
+        <p className="mt-2 text-xs text-slate-400">
+          Last time ({exercise.last_time.date}): {exercise.last_time.load_descriptor || exercise.last_time.weight_used}
+          {exercise.last_time.reps_completed ? ` x ${exercise.last_time.reps_completed}` : ""}
+        </p>
+      )}
+    </>
+  );
+}
+
+function SingleExerciseStep({
+  exercise,
+  weekType,
+  state,
+  onUpdateExercise,
+  onUpdateSet,
+  onAddSet,
+  onRemoveSet,
+  onApplyToAll,
+  onLogSet,
+}: {
+  exercise: SessionDetail["exercises"][number];
+  weekType: "build" | "deload" | "test";
+  state: GuidedExerciseState;
+  onUpdateExercise: (patch: Partial<GuidedExerciseState>) => void;
+  onUpdateSet: (setIndex: number, patch: Partial<GuidedSetState>) => void;
+  onAddSet: () => void;
+  onRemoveSet: (setIndex: number) => void;
+  onApplyToAll: () => void;
+  onLogSet: (setIndex: number) => void;
+}) {
+  return (
+    <div>
+      <ExerciseHeader exercise={exercise} />
+      <div className="mt-6">
+        <ExerciseGuidedBody
+          exercise={exercise}
+          state={state}
+          weekType={weekType}
+          onUpdateExercise={onUpdateExercise}
+          onUpdateSet={onUpdateSet}
+          onAddSet={onAddSet}
+          onRemoveSet={onRemoveSet}
+          onApplyToAll={onApplyToAll}
+          onLogSet={onLogSet}
+        />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Shows every exercise in the superset at once (per testing feedback's
+ * "simultaneous" option) with whichever one is next due — the exercise with
+ * the fewest sets logged so far, ties going to the earlier one in the group —
+ * expanded for logging, and the rest shown collapsed. Logging a set
+ * re-evaluates "next due" immediately, so the expanded card naturally
+ * alternates back and forth between the group's exercises each time.
+ */
+function SupersetStep({
+  exercises,
+  states,
+  weekType,
+  onUpdateExercise,
+  onUpdateSet,
+  onAddSet,
+  onRemoveSet,
+  onApplyToAll,
+  onLogSet,
+}: {
+  exercises: SessionDetail["exercises"];
+  states: Record<string, GuidedExerciseState>;
+  weekType: "build" | "deload" | "test";
+  onUpdateExercise: (exerciseId: string, patch: Partial<GuidedExerciseState>) => void;
+  onUpdateSet: (exerciseId: string, setIndex: number, patch: Partial<GuidedSetState>) => void;
+  onAddSet: (exerciseId: string) => void;
+  onRemoveSet: (exerciseId: string, setIndex: number) => void;
+  onApplyToAll: (exerciseId: string) => void;
+  onLogSet: (exercise: SessionDetail["exercises"][number], setIndex: number) => void;
+}) {
+  let activeExercise = exercises[0];
+  let lowestDoneIndex = Infinity;
+  for (const ex of exercises) {
+    const done = states[ex.exercise_id].doneIndex;
+    if (done < lowestDoneIndex) {
+      lowestDoneIndex = done;
+      activeExercise = ex;
+    }
+  }
+
+  return (
+    <div>
+      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-purple-600">
+        Superset {exercises[0].circuit_label ? supersetGroupKey(exercises[0].circuit_label) : ""}
+      </p>
+      <div className="space-y-4">
+        {exercises.map((ex) => {
+          const state = states[ex.exercise_id];
+          const isActive = ex.exercise_id === activeExercise.exercise_id;
+          const allLogged = state.doneIndex >= state.sets.length;
+          return (
+            <div
+              key={ex.exercise_id}
+              className={`rounded-lg border p-4 ${
+                isActive ? "border-brand bg-blue-50/40" : allLogged ? "border-green-200 bg-green-50" : "border-slate-200"
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <ExerciseHeader exercise={ex} />
+                {isActive && !allLogged && (
+                  <span className="ml-2 shrink-0 rounded-full bg-brand px-2 py-0.5 text-xs font-medium text-white">
+                    Up next
+                  </span>
+                )}
+                {allLogged && (
+                  <span className="ml-2 shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+                    Done
+                  </span>
+                )}
+              </div>
+
+              {isActive && !allLogged ? (
+                <div className="mt-4">
+                  <ExerciseGuidedBody
+                    exercise={ex}
+                    state={state}
+                    weekType={weekType}
+                    onUpdateExercise={(patch) => onUpdateExercise(ex.exercise_id, patch)}
+                    onUpdateSet={(i, patch) => onUpdateSet(ex.exercise_id, i, patch)}
+                    onAddSet={() => onAddSet(ex.exercise_id)}
+                    onRemoveSet={(i) => onRemoveSet(ex.exercise_id, i)}
+                    onApplyToAll={() => onApplyToAll(ex.exercise_id)}
+                    onLogSet={(i) => onLogSet(ex, i)}
+                  />
+                </div>
+              ) : (
+                <p className="mt-2 text-xs text-slate-500">
+                  {state.doneIndex} of {state.sets.length} sets logged
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -1232,6 +1685,8 @@ function ExerciseRow({
   onChange: (patch: Partial<ExerciseFormState>) => void;
   onUnlog: () => void;
 }) {
+  const timed = parseTimedTarget(exercise.prescribed_target ?? "");
+
   return (
     <div className="rounded-md border border-slate-200 p-3">
       <div className="mb-1 flex items-baseline justify-between">
@@ -1274,7 +1729,7 @@ function ExerciseRow({
             />
             <input
               type="number"
-              placeholder="Reps"
+              placeholder={timed ? "Seconds held" : "Reps"}
               className={inputClass}
               value={form.reps}
               onChange={(e) => onChange({ reps: e.target.value })}
@@ -1327,7 +1782,7 @@ function ExerciseRow({
             />
             <input
               type="number"
-              placeholder="Reps (optional)"
+              placeholder={timed ? "Seconds held (optional)" : "Reps (optional)"}
               className={inputClass}
               value={form.reps}
               onChange={(e) => onChange({ reps: e.target.value })}
@@ -1360,7 +1815,7 @@ function ExerciseRow({
               />
               <input
                 type="number"
-                placeholder="Reps (optional)"
+                placeholder={timed ? "Seconds held (optional)" : "Reps (optional)"}
                 className={inputClass}
                 value={form.reps}
                 onChange={(e) => onChange({ reps: e.target.value })}

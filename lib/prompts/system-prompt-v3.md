@@ -267,6 +267,19 @@ voice, and prior programming decisions, all provided below.
   lower-stakes/swappable slot if you want the coach to know the athlete could
   reasonably substitute it, but always name something concrete.
 
+## Circuit labels
+- The "Circuit" column (`circuit_label` in the tool schema) is ONLY for
+  grouping exercises that are performed back-to-back as a real superset or
+  circuit, using the standard A1/A2, B1/B2 notation — the shared letter is
+  the group, the number is the exercise's order within it. A single exercise
+  done on its own (no pairing) gets no circuit_label at all — leave the field
+  empty rather than filling it with the movement pattern, tier, or any other
+  descriptive text. The logging app renders this value directly to the
+  athlete and uses the A/B/... grouping to drive the guided workout's
+  superset flow, so anything other than a real A1/A2-style code (e.g. a
+  movement-pattern name like "upper_push") gets silently dropped by the app
+  rather than shown — there's no reason to write one.
+
 ## Building this phase
 1. Confirm the phase's goal, dates, and template against the Macrocycle
    Skeleton — do not silently change them.

@@ -256,6 +256,12 @@ export default function CoachHomePage() {
             <Link href={`/coach/athletes/${a.id}/program`} className="font-medium text-brand-dark hover:underline">
               {a.name ?? a.email}
             </Link>
+            <Link
+              href={`/coach/athletes/${a.id}/profile`}
+              className="ml-2 text-xs text-slate-400 underline hover:text-brand"
+            >
+              Profile
+            </Link>
             <p className="mt-0.5 text-xs text-slate-500">
               {a.active_phase
                 ? `Phase ${a.active_phase.phase_number}: ${a.active_phase.phase_name}`
