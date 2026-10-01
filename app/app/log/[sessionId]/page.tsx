@@ -102,7 +102,7 @@ function blankExerciseForm(): ExerciseFormState {
     weight: "",
     reps: "",
     sets: "",
-    rir: "",
+    rir: "moderate",
     loadDescriptor: "",
     notes: "",
     substituted: false,
@@ -276,7 +276,7 @@ export default function SessionLogPage() {
       setSubmitError("Let us know how the session went.");
       return;
     }
-    if ((status === "skipped" || status === "partially_completed") && !skipReason) {
+    if (status === "skipped" && !skipReason) {
       setSubmitError("Please choose a reason.");
       return;
     }
@@ -691,7 +691,10 @@ function defaultSetCount(exercise: SessionDetail["exercises"][number]): number {
 }
 
 function blankSet(): GuidedSetState {
-  return { weight: "", reps: "", rir: "", logged: false, autoSuggested: false };
+  // Difficulty defaults to "moderate" so a set can be logged without ever
+  // touching the slider — most sets land there anyway, and the athlete can
+  // still drag it before logging if a set felt different.
+  return { weight: "", reps: "", rir: "moderate", logged: false, autoSuggested: false };
 }
 
 function initExerciseState(exercise: SessionDetail["exercises"][number]): GuidedExerciseState {
@@ -1134,11 +1137,9 @@ function RestBanner({ secondsLeft, onSkip }: { secondsLeft: number; onSkip: () =
 /**
  * The guided flow's difficulty input: a slider from "very easy" to "did not
  * complete" (see lib/training/perceived-effort.ts) instead of a numeric RIR
- * pick. The thumb always shows a position — HTML range inputs can't render
- * "unset" — but it defaults to the middle ("Moderate") purely for display;
- * `value` (and therefore validation/canLog) stays "" until the athlete
- * actually drags it, so an untouched slider can't silently log as
- * "Moderate."
+ * pick. Every set starts pre-set to "Moderate" (see blankSet/blankExerciseForm)
+ * so a set can be logged without ever touching the slider — the athlete only
+ * needs to drag it when a set actually felt different from that.
  */
 function EffortSlider({
   value,
@@ -1269,14 +1270,32 @@ function GuidedSetRow({
   onLog: () => void;
   onRemove?: () => void;
 }) {
+  // Logged sets are normally shown read-only/disabled, but testing feedback
+  // asked for a way to go back and fix a set logged with the wrong weight —
+  // this lets the athlete temporarily re-open an already-logged set's fields.
+  // Nothing about `set.logged` itself changes while editing (so the set stays
+  // counted toward the workout), and the final submit payload always reads
+  // these fields' current values, not a snapshot taken at log time — so an
+  // edit here takes effect without any extra plumbing.
+  const [editing, setEditing] = useState(false);
+  const locked = set.logged && !editing;
   const canLog = timedSeconds != null ? !!set.reps : tier === 1 ? !!(set.weight && set.reps && set.rir) : tier === 2 ? !!set.rir : true;
 
   return (
-    <div className={`rounded-md border p-3 ${set.logged ? "border-green-300 bg-green-50" : "border-slate-200"}`}>
+    <div className={`rounded-md border p-3 ${locked ? "border-green-300 bg-green-50" : "border-slate-200"}`}>
       <div className="mb-2 flex items-center justify-between">
         <span className="text-sm font-semibold text-slate-700">Set {setNumber}</span>
         <div className="flex items-center gap-2">
-          {set.logged && <span className="text-xs font-medium text-green-700">Logged</span>}
+          {locked && <span className="text-xs font-medium text-green-700">Logged</span>}
+          {set.logged && (
+            <button
+              type="button"
+              onClick={() => setEditing((e) => !e)}
+              className="text-xs text-brand underline"
+            >
+              {editing ? "Cancel" : "Edit"}
+            </button>
+          )}
           {onRemove && !set.logged && (
             <button type="button" onClick={onRemove} className="text-xs text-slate-400 underline">
               Remove
@@ -1293,7 +1312,7 @@ function GuidedSetRow({
               placeholder="Weight/load (optional)"
               className={inputClass}
               value={set.weight}
-              disabled={set.logged}
+              disabled={locked}
               onChange={(e) => onChange({ weight: e.target.value })}
             />
           )}
@@ -1302,6 +1321,14 @@ function GuidedSetRow({
               targetSeconds={timedSeconds}
               initialSeconds={set.reps ? Number(set.reps) : 0}
               onDone={(seconds) => onChange({ reps: String(seconds) })}
+            />
+          ) : editing ? (
+            <input
+              type="number"
+              placeholder="Seconds held"
+              className={inputClass}
+              value={set.reps}
+              onChange={(e) => onChange({ reps: e.target.value })}
             />
           ) : (
             <p className="text-sm text-slate-600">Held for {set.reps}s</p>
@@ -1317,7 +1344,7 @@ function GuidedSetRow({
                   placeholder="Weight (lb)"
                   className={inputClass}
                   value={set.weight}
-                  disabled={set.logged}
+                  disabled={locked}
                   onChange={(e) => onChange({ weight: e.target.value })}
                 />
                 <input
@@ -1325,11 +1352,11 @@ function GuidedSetRow({
                   placeholder="Reps"
                   className={inputClass}
                   value={set.reps}
-                  disabled={set.logged}
+                  disabled={locked}
                   onChange={(e) => onChange({ reps: e.target.value })}
                 />
               </div>
-              <EffortSlider value={set.rir} disabled={set.logged} onChange={(v) => onChange({ rir: v })} />
+              <EffortSlider value={set.rir} disabled={locked} onChange={(v) => onChange({ rir: v })} />
               {!set.logged && set.autoSuggested && (
                 <p className="text-xs text-brand">
                   Weight adjusted from your last set&apos;s effort — edit it if this isn&apos;t right.
@@ -1340,14 +1367,14 @@ function GuidedSetRow({
 
           {tier === 2 && (
             <div className="space-y-2">
-              <EffortSlider value={set.rir} disabled={set.logged} onChange={(v) => onChange({ rir: v })} />
+              <EffortSlider value={set.rir} disabled={locked} onChange={(v) => onChange({ rir: v })} />
               <div className="flex gap-2">
                 <input
                   type="number"
                   placeholder="Weight/load (optional)"
                   className={inputClass}
                   value={set.weight}
-                  disabled={set.logged}
+                  disabled={locked}
                   onChange={(e) => onChange({ weight: e.target.value })}
                 />
                 <input
@@ -1355,7 +1382,7 @@ function GuidedSetRow({
                   placeholder="Reps (optional)"
                   className={inputClass}
                   value={set.reps}
-                  disabled={set.logged}
+                  disabled={locked}
                   onChange={(e) => onChange({ reps: e.target.value })}
                 />
               </div>
@@ -1374,7 +1401,7 @@ function GuidedSetRow({
                 placeholder="Weight (optional)"
                 className={inputClass}
                 value={set.weight}
-                disabled={set.logged}
+                disabled={locked}
                 onChange={(e) => onChange({ weight: e.target.value })}
               />
               <input
@@ -1382,7 +1409,7 @@ function GuidedSetRow({
                 placeholder="Reps (optional)"
                 className={inputClass}
                 value={set.reps}
-                disabled={set.logged}
+                disabled={locked}
                 onChange={(e) => onChange({ reps: e.target.value })}
               />
             </div>
@@ -1392,14 +1419,20 @@ function GuidedSetRow({
 
       {weekType === "test" && tier === 1 && null /* true-max checkbox lives at the exercise level, not per set */}
 
-      {!set.logged && (
+      {(!set.logged || editing) && (
         <button
           type="button"
-          onClick={onLog}
+          onClick={() => {
+            if (editing) {
+              setEditing(false);
+            } else {
+              onLog();
+            }
+          }}
           disabled={!canLog}
           className="mt-3 w-full rounded-md bg-brand px-4 py-3.5 text-base font-medium text-white hover:bg-blue-700 disabled:opacity-40"
         >
-          Log set
+          {editing ? "Save changes" : "Log set"}
         </button>
       )}
     </div>

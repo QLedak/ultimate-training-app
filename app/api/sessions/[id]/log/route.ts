@@ -86,9 +86,14 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   if (!VALID_STATUSES.includes(status)) {
     return NextResponse.json({ error: `status must be one of ${VALID_STATUSES.join(", ")}` }, { status: 400 });
   }
-  if ((status === "skipped" || status === "partially_completed") && !skip_reason) {
+  // skip_reason is only required for a fully-skipped day (the manual form's
+  // explicit "Skipped" choice). "partially_completed" also covers the guided
+  // workout's own per-exercise skip ("skip this one exercise, finish the
+  // rest") where there's no single day-level reason to give — skip_reason
+  // stays optional there, in both flows, rather than blocking the save.
+  if (status === "skipped" && !skip_reason) {
     return NextResponse.json(
-      { error: "skip_reason is required when the session was skipped or only partially completed." },
+      { error: "skip_reason is required when the whole session was skipped." },
       { status: 400 }
     );
   }
