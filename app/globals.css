@@ -7,5 +7,16 @@ html {
 }
 
 body {
-  @apply bg-white text-slate-900 antialiased;
+  @apply bg-slate-50 text-slate-900 antialiased;
+}
+
+/* Brand headings: Barlow Condensed. Page titles are uppercase, as in the brand guide. */
+@layer base {
+  h1,
+  h2 {
+    @apply font-display;
+  }
+  h1 {
+    @apply uppercase tracking-normal;
+  }
 }
