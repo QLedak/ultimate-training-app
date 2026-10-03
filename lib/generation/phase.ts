@@ -20,11 +20,27 @@ const SPLIT_THRESHOLD_WEEKS = 5;
 function weekRanges(startWeek: number, endWeek: number): Array<{ start: number; end: number }> {
   const remainingWeeks = endWeek - startWeek + 1;
   if (remainingWeeks <= SPLIT_THRESHOLD_WEEKS) return [{ start: startWeek, end: endWeek }];
-  const firstHalfEnd = startWeek + Math.ceil(remainingWeeks / 2) - 1;
-  return [
-    { start: startWeek, end: firstHalfEnd },
-    { start: firstHalfEnd + 1, end: endWeek },
-  ];
+
+  // Split into as many EVEN, bounded chunks as needed to keep every one at
+  // or under SPLIT_THRESHOLD_WEEKS -- this used to bisect exactly once
+  // regardless of how long the range was, so a 12-week range (a full rebuild
+  // of a long phase, which isn't capped by DELIVERY_CHUNK_WEEKS the way
+  // normal chunk generation is) produced two 6-week halves, each already
+  // over the threshold that prompted splitting in the first place. A
+  // chat-edit on that same draft re-requests that same oversized range and
+  // is what actually tipped a call over its token budget. This divides the
+  // range into enough equal pieces that every piece is safely within
+  // SPLIT_THRESHOLD_WEEKS, regardless of total length.
+  const numChunks = Math.ceil(remainingWeeks / SPLIT_THRESHOLD_WEEKS);
+  const chunkSize = Math.ceil(remainingWeeks / numChunks);
+  const ranges: Array<{ start: number; end: number }> = [];
+  let cursor = startWeek;
+  while (cursor <= endWeek) {
+    const end = Math.min(cursor + chunkSize - 1, endWeek);
+    ranges.push({ start: cursor, end });
+    cursor = end + 1;
+  }
+  return ranges;
 }
 
 /**

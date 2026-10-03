@@ -10,6 +10,23 @@ body {
   @apply bg-white text-slate-900 antialiased font-sans;
 }
 
+/* Tailwind's base styles set `color: inherit` on every form control, and
+   .dark body below sets body text to near-white (Chalk) for the app's
+   permanent dark theme. No input/textarea/select in the app sets its own
+   text color, and `color-scheme: light` above keeps their background native
+   white regardless of the dark theme — so every text field was inheriting
+   near-white text on a white background: readable only by highlighting it.
+   Pinning real text fields to a dark, legible color (independent of
+   light/dark mode, since their background is always native white either
+   way) fixes every page that takes typed input (login, reset-password, the
+   review screen's chat-edit box and direct-override fields, intake, etc.)
+   from one place rather than adding a text-color class to each field. */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  color: #0f172a; /* slate-900 */
+}
+
 /* True Ultimate Training brand guide v1: Barlow Condensed for every
    headline, kept to font-family only — each heading's own size/weight
    classes (text-2xl font-bold, etc.) are untouched, so this is a look-and-feel

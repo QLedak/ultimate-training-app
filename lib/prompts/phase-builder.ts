@@ -163,11 +163,21 @@ export async function runPhaseBuilder(
           "",
           "# WEEK RANGE FOR THIS CALL",
           `This ${input.weekRange.totalWeeks}-week phase is being generated across multiple calls ` +
-            `to stay within response limits. Generate ONLY weeks ${input.weekRange.start} through ` +
-            `${input.weekRange.end} in this call, using the phase's ACTUAL week numbers (do not ` +
-            `restart numbering at 1). Apply the phase's deload/test placement exactly where it falls ` +
-            `within the full ${input.weekRange.totalWeeks}-week phase, even if that week isn't in ` +
-            `this call's range.` +
+            `to stay within response limits. Generate EVERY week from ${input.weekRange.start} through ` +
+            `${input.weekRange.end} in this call, inclusive — that is exactly ` +
+            `${input.weekRange.end - input.weekRange.start + 1} week${input.weekRange.end - input.weekRange.start + 1 === 1 ? "" : "s"} ` +
+            `(week numbers ${Array.from(
+              { length: input.weekRange.end - input.weekRange.start + 1 },
+              (_, i) => input.weekRange!.start + i
+            ).join(", ")}), using the phase's ACTUAL week numbers (do not restart numbering at 1). ` +
+            `Do not skip, omit, or defer ANY week inside this range to a later call for any reason — not ` +
+            `because it's a deload/test week, not because it feeds into the next phase, not for any other ` +
+            `reasoning. A week outside this range (before ${input.weekRange.start} or after ` +
+            `${input.weekRange.end}) belongs to a different call and must NOT be included here. If you ` +
+            `believe a week in this range needs special handling, generate it anyway with that handling ` +
+            `reflected in its content and a coach_review_flag explaining it — never by leaving the week out. ` +
+            `Apply the phase's deload/test placement exactly where it falls within the full ` +
+            `${input.weekRange.totalWeeks}-week phase, even if that week isn't in this call's range.` +
             // The first call of a split/rebuild sequence has no
             // priorWeeksContext yet (lib/generation/phase.ts only sets it
             // once a prior call's weeks exist) — that's the reliable signal
@@ -268,13 +278,20 @@ export async function runPhaseBuilder(
   const response = await client.messages.create({
     model: CLAUDE_MODEL,
     // A long phase is split across multiple calls by weekRange (see
-    // lib/generation/phase.ts), so a single call only ever needs to cover a
-    // handful of weeks — but even a small range with detailed exercises can
-    // add up, so this still leaves real headroom. "weeks" is listed first in
-    // the schema above as a second line of defense, and the check below
-    // throws if a response still comes back without it, rather than
-    // silently saving a broken draft.
-    max_tokens: 20000,
+    // lib/generation/phase.ts's weekRanges, which now bounds every chunk to
+    // SPLIT_THRESHOLD_WEEKS regardless of the total range's length), so a
+    // single call only ever needs to cover a handful of weeks. Raised from
+    // 20,000 -- a chat-edit call re-emits a chunk's COMPLETE revised weeks
+    // (not a diff), which costs roughly as much output as generating that
+    // same chunk from scratch, and 20,000 wasn't reliably enough margin for
+    // that plus explanatory rationale/coach_review_flags text. The model
+    // (claude-sonnet-5) supports up to 128K output tokens via the Messages
+    // API, so this still leaves very large headroom above what even a full
+    // SPLIT_THRESHOLD_WEEKS-week chunk needs. "weeks" is listed first in the
+    // schema above as a second line of defense, and the check below throws
+    // if a response still comes back without it, rather than silently
+    // saving a broken draft.
+    max_tokens: 32000,
     // `temperature` used to be set low (0.3) here, same reasoning as the
     // Macrocycle Planner call — removed because the API now rejects it for
     // this model ("temperature is deprecated for this model").
