@@ -125,10 +125,38 @@ async function buildFullPhaseOutput(
   const genEnd = endWeek ?? totalWeeks;
   const ranges = weekRanges(startWeek, genEnd);
 
-  if (ranges.length === 1 && startWeek === 1 && genEnd === totalWeeks && !seedContext) {
+  if (ranges.length === 1 && !seedContext) {
+    // Always hand the model an explicit "# WEEK RANGE FOR THIS CALL" block
+    // (built from weekRange below) even when this single call happens to
+    // cover the whole phase from week 1 — leaving weekRange unset here used
+    // to skip that instruction entirely and rely on the model noticing
+    // phase.week_count buried in the raw phase JSON, which is exactly what
+    // let a rebuild's phase-performance-summary framing ("interrupted
+    // mid-way") talk the model into writing only one week instead of the
+    // full requested range. Being explicit costs nothing on a from-scratch
+    // full-phase call and closes that gap on every other call shape.
+    const weekRange = { start: startWeek, end: genEnd, totalWeeks };
+    // Slice the current draft down to this call's range before handing it
+    // back for editing — same reasoning as the multi-range loop below: this
+    // path now also covers a single mid-phase chunk's edit (e.g. revising
+    // only weeks 5-8 of an 8-week phase), not just a from-scratch full-phase
+    // call, so it can no longer assume the whole currentDraftOutput belongs
+    // to this call's range.
+    const editForThisCall = edit
+      ? {
+          currentDraftOutput: {
+            ...edit.currentDraftOutput,
+            weeks: edit.currentDraftOutput.weeks.filter(
+              (w) => w.week_number >= startWeek && w.week_number <= genEnd
+            ),
+          },
+          editRequest: edit.editRequest,
+        }
+      : undefined;
     const result = await runPhaseBuilder(supabase, {
       ...baseInput,
-      ...(edit ? { currentDraftOutput: edit.currentDraftOutput, editRequest: edit.editRequest } : {}),
+      weekRange,
+      ...(editForThisCall ?? {}),
     });
     assertCompleteWeeks(result.weeks, startWeek, genEnd);
     return result;
