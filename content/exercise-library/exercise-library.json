@@ -4375,7 +4375,7 @@
     "exercise_name": "Dead Bug with Plate Pass (Dying Bug Plate Pass)",
     "priority_tier": "core_50",
     "movement_pattern": "Core - Anti-Extension",
-    "primary_purpose": "Anti-extension core control with an added overhead plate-pass challenge; progression from the basic Dead Bug",
+    "primary_purpose": "Advanced anti-extension core control with an added overhead plate-pass challenge; the advanced-tier crunch-variation option alongside Weighted Sit-Up (CR-034)",
     "equipment_needed": [
       "barbell_rack"
     ],
@@ -4384,7 +4384,7 @@
     "cue": "Flatten your low back into the floor and keep it there the whole rep — pass the plate overhead slow and controlled, brace like someone's about to press on your stomach.",
     "regression": "CR-004",
     "progression": null,
-    "training_age": "novice",
+    "training_age": "advanced",
     "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
@@ -5454,5 +5454,398 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null
+  },
+  {
+    "exercise_id": "PJ-028",
+    "exercise_name": "DB Jump",
+    "priority_tier": "core_50",
+    "movement_pattern": "Plyometric / Jump",
+    "primary_purpose": "Loaded triple-extension power with a low technical demand — the entry point into jump/Olympic-lift-pattern loading for athletes who aren't ready for a barbell variation yet",
+    "equipment_needed": [
+      "dumbbells"
+    ],
+    "equipment_needed_raw": "Dumbbells",
+    "space_requirements": "Confined Space Friendly, Low-Ceiling Friendly",
+    "cue": "Hold the dumbbells at your sides, load the hips, and jump straight up as high as you can — land soft and reset each rep, don't rush into the next one.",
+    "regression": "PJ-009 (Squat Jump, In Place)",
+    "progression": "PJ-029 (Trap Bar Jump)",
+    "training_age": "novice",
+    "season_tag": "Off-season, Pre-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Technical-coordination slot on Lower Body Strength Day and Impulse Day for athletes new to training (see day-structure-templates-spec: Olympic-lift gating) — a loaded jump pattern without the Olympic lift's catch/receiving position."
+  },
+  {
+    "exercise_id": "PJ-029",
+    "exercise_name": "Trap Bar Jump",
+    "priority_tier": "core_50",
+    "movement_pattern": "Plyometric / Jump",
+    "primary_purpose": "Loaded triple-extension power at a higher load than a dumbbell allows, still without a catch/receiving position to coach",
+    "equipment_needed": [
+      "barbell_rack"
+    ],
+    "equipment_needed_raw": "Trap Bar",
+    "space_requirements": "Low-Ceiling Friendly",
+    "cue": "Set up like a trap bar deadlift, then explode up through the floor and jump — land soft back in the same stance and reset before the next rep.",
+    "regression": "PJ-028 (DB Jump)",
+    "progression": "OL-003 (Dumbbell Hang Clean)",
+    "training_age": "novice",
+    "season_tag": "Off-season, Pre-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Technical-coordination slot on Lower Body Strength Day and Impulse Day for athletes new to training (see day-structure-templates-spec: Olympic-lift gating) — bridges DB Jump up to the loads an Olympic-lift variation would use."
+  },
+  {
+    "exercise_id": "PJ-030",
+    "exercise_name": "SL Hops — Lateral/Lateral/Medial/Medial (Continuous)",
+    "priority_tier": "extended",
+    "movement_pattern": "Plyometric - Single-Leg / Ankle",
+    "primary_purpose": "Continuous single-leg frontal-plane reactive strength — repeated direction changes on one leg without resetting between reps",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "None",
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Hop laterally, laterally, then medially, medially, all on the same leg, continuously — quick ground contacts, stay stacked over the landing foot each time.",
+    "regression": "PJ-015 (Single-Leg Lateral Hop, Side-to-Side)",
+    "progression": null,
+    "training_age": "advanced",
+    "season_tag": "Year-round",
+    "injury_considerations": [
+      "ankle"
+    ],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "COD slot on Athlete Day, middle phases — continuous multidirectional single-leg hopping for speed, once the hurdle-hop/stick-landing regressions are solid."
+  },
+  {
+    "exercise_id": "PJ-031",
+    "exercise_name": "SL Hops — Fwd/Fwd/Bkwd/Bkwd (Continuous)",
+    "priority_tier": "extended",
+    "movement_pattern": "Plyometric - Single-Leg / Ankle",
+    "primary_purpose": "Continuous single-leg sagittal-plane reactive strength — repeated direction changes on one leg without resetting between reps",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "None",
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Hop forward, forward, then backward, backward, all on the same leg, continuously — quick ground contacts, stay stacked over the landing foot each time.",
+    "regression": "PJ-017 (Single-Leg Hop and Stick, Deceleration)",
+    "progression": null,
+    "training_age": "advanced",
+    "season_tag": "Year-round",
+    "injury_considerations": [
+      "ankle"
+    ],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "COD slot on Athlete Day, middle phases — continuous multidirectional single-leg hopping for speed, once the hurdle-hop/stick-landing regressions are solid."
+  },
+  {
+    "exercise_id": "PJ-032",
+    "exercise_name": "SL Lateral/Medial Hurdle Hops — Stick Landing",
+    "priority_tier": "extended",
+    "movement_pattern": "Plyometric - Single-Leg / Ankle",
+    "primary_purpose": "Single-leg frontal-plane hop over a hurdle with a controlled, balanced landing — the entry point into multidirectional single-leg hopping",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "Mini Hurdles or Cones",
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Hop laterally then medially over the hurdle on one leg — land and freeze each time before the next hop. If you wobble, that's the rep telling you to slow down.",
+    "regression": "PJ-015 (Single-Leg Lateral Hop, Side-to-Side)",
+    "progression": "PJ-030 (SL Hops — Lateral/Lateral/Medial/Medial, Continuous)",
+    "training_age": "both",
+    "season_tag": "Year-round",
+    "injury_considerations": [
+      "ankle",
+      "acl_knee"
+    ],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "COD slot on Athlete Day, early phases — controlled-landing single-leg multidirectional hopping is the early-phase version of the COD progression that continues into resisted lateral bounds and true COD sprinting/agility."
+  },
+  {
+    "exercise_id": "PJ-033",
+    "exercise_name": "SL Fwd/Bkwd Hurdle Hops — Stick Landing",
+    "priority_tier": "extended",
+    "movement_pattern": "Plyometric - Single-Leg / Ankle",
+    "primary_purpose": "Single-leg sagittal-plane hop over a hurdle with a controlled, balanced landing — the entry point into multidirectional single-leg hopping",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "Mini Hurdles or Cones",
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Hop forward then backward over the hurdle on one leg — land and freeze each time before the next hop. If you wobble, that's the rep telling you to slow down.",
+    "regression": "PJ-017 (Single-Leg Hop and Stick, Deceleration)",
+    "progression": "PJ-031 (SL Hops — Fwd/Fwd/Bkwd/Bkwd, Continuous)",
+    "training_age": "both",
+    "season_tag": "Year-round",
+    "injury_considerations": [
+      "ankle",
+      "acl_knee"
+    ],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "COD slot on Athlete Day, early phases — controlled-landing single-leg multidirectional hopping is the early-phase version of the COD progression that continues into resisted lateral bounds and true COD sprinting/agility."
+  },
+  {
+    "exercise_id": "PJ-034",
+    "exercise_name": "Resisted Lateral Bound",
+    "priority_tier": "extended",
+    "movement_pattern": "Plyometric / Jump",
+    "primary_purpose": "Frontal-plane power for cutting and marking, loaded with band resistance for extra force demand",
+    "equipment_needed": [
+      "bands"
+    ],
+    "equipment_needed_raw": "Band, Anchor Point",
+    "space_requirements": "Confined Space Friendly, Low-Ceiling Friendly",
+    "cue": "Same bound as the unloaded version, but fight the band's pull on the way across — push off hard and stick the landing before you bound back.",
+    "regression": "PJ-003 (Lateral Bound)",
+    "progression": null,
+    "training_age": "advanced",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "COD slot on Athlete Day, middle phases."
+  },
+  {
+    "exercise_id": "CD-013",
+    "exercise_name": "Resisted 3-Step Lateral Deceleration",
+    "priority_tier": "extended",
+    "movement_pattern": "Change of Direction",
+    "primary_purpose": "Lateral deceleration mechanics against band resistance over a short, controlled approach",
+    "equipment_needed": [
+      "bands"
+    ],
+    "equipment_needed_raw": "Band, Anchor Point",
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Take three lateral steps against the band, chopping them down as you decelerate — finish balanced and in control, not falling into the last step.",
+    "regression": "CD-005 (Lateral Shuffle, Confined Space)",
+    "progression": "CD-014 (Resisted 3-Step Lateral Deceleration to Shuffle)",
+    "training_age": "both",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "COD slot on Athlete Day, early-to-middle phases."
+  },
+  {
+    "exercise_id": "CD-014",
+    "exercise_name": "Resisted 3-Step Lateral Deceleration to Shuffle",
+    "priority_tier": "extended",
+    "movement_pattern": "Change of Direction",
+    "primary_purpose": "Lateral deceleration against band resistance that transitions directly into a defensive shuffle — closer to the mark's actual in-game movement",
+    "equipment_needed": [
+      "bands"
+    ],
+    "equipment_needed_raw": "Band, Anchor Point",
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Decelerate over three steps against the band, then flow straight into a shuffle — no pause at the bottom, the deceleration and the shuffle are one continuous motion.",
+    "regression": "CD-013 (Resisted 3-Step Lateral Deceleration)",
+    "progression": "CD-015 (Resisted Lateral Shuffle)",
+    "training_age": "advanced",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "COD slot on Athlete Day, middle phases."
+  },
+  {
+    "exercise_id": "CD-015",
+    "exercise_name": "Resisted Lateral Shuffle",
+    "priority_tier": "extended",
+    "movement_pattern": "Change of Direction",
+    "primary_purpose": "Defensive lateral movement mechanics loaded with band resistance for extra force demand",
+    "equipment_needed": [
+      "bands"
+    ],
+    "equipment_needed_raw": "Band, Anchor Point",
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Same shuffle as the unloaded version — stay low, feet don't cross — but drive harder off the trail leg to fight through the band's pull.",
+    "regression": "CD-005 (Lateral Shuffle, Confined Space)",
+    "progression": null,
+    "training_age": "advanced",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "COD slot on Athlete Day, middle phases."
+  },
+  {
+    "exercise_id": "PJ-035",
+    "exercise_name": "SL Continuous Hurdle Hops",
+    "priority_tier": "extended",
+    "movement_pattern": "Plyometric - Single-Leg / Ankle",
+    "primary_purpose": "Continuous single-leg reactive strength over hurdles — rhythm and ground-contact time on one leg, without resetting between reps",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "Mini Hurdles or Cones",
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Quick ground contacts over each hurdle on one leg — 'hot coals,' minimal time on the floor. Stay tall and don't let the landing leg collapse.",
+    "regression": "PJ-032 (SL Lateral/Medial Hurdle Hops, Stick Landing)",
+    "progression": null,
+    "training_age": "advanced",
+    "season_tag": "Year-round",
+    "injury_considerations": [
+      "ankle"
+    ],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "COD slot on Athlete Day, middle-to-late phases — the continuous-rhythm version of the stick-landing hurdle hop regressions."
+  },
+  {
+    "exercise_id": "SM-013",
+    "exercise_name": "Band Resisted High Knees (In Place)",
+    "priority_tier": "extended",
+    "movement_pattern": "Sprint Mechanics",
+    "primary_purpose": "Sprint knee-drive patterning loaded with band resistance, without needing distance to run",
+    "equipment_needed": [
+      "bands"
+    ],
+    "equipment_needed_raw": "Band, Anchor Point",
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Drive the knees up fast against the band resistance — quick, light contacts, stay tall through the torso.",
+    "regression": "SM-009 (High Knees in Place)",
+    "progression": "SM-006 (Resisted Sprint, Sled Push/Pull)",
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Acceleration slot on Athlete Day for athletes with limited training space, or as early-phase acceleration work."
+  },
+  {
+    "exercise_id": "SM-014",
+    "exercise_name": "Band Resisted A-Skips (In Place)",
+    "priority_tier": "extended",
+    "movement_pattern": "Sprint Mechanics",
+    "primary_purpose": "Knee drive and ground-contact patterning loaded with band resistance, without needing distance to run",
+    "equipment_needed": [
+      "bands"
+    ],
+    "equipment_needed_raw": "Band, Anchor Point",
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Same A-skip pattern — drive the knee up, punch it down — but fight the band's pull on every rep. Quick and rhythmic, not slow and grinding.",
+    "regression": "SM-003 (A-Skip)",
+    "progression": "SM-006 (Resisted Sprint, Sled Push/Pull)",
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Acceleration slot on Athlete Day for athletes with limited training space, or as early-phase acceleration work."
+  },
+  {
+    "exercise_id": "SM-015",
+    "exercise_name": "Skips for Height",
+    "priority_tier": "extended",
+    "movement_pattern": "Sprint Mechanics",
+    "primary_purpose": "Vertical power expression of the skip pattern — bridges sprint-mechanics drilling into true plyometric output",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "None",
+    "space_requirements": "Requires Running Room (10 yd)",
+    "cue": "Skip forward but drive the lead knee up as high as you can each rep — maximum height, not speed down the line.",
+    "regression": "SM-003 (A-Skip)",
+    "progression": null,
+    "training_age": "advanced",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Speed/acceleration slot on Athlete Day, middle-to-late phases."
+  },
+  {
+    "exercise_id": "SM-016",
+    "exercise_name": "Skips for Distance",
+    "priority_tier": "extended",
+    "movement_pattern": "Sprint Mechanics",
+    "primary_purpose": "Horizontal power expression of the skip pattern — bridges sprint-mechanics drilling into true plyometric output",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "None",
+    "space_requirements": "Requires Running Room (10 yd)",
+    "cue": "Skip forward driving for maximum distance each rep — full extension and a strong arm swing, not a quick choppy skip.",
+    "regression": "SM-003 (A-Skip)",
+    "progression": null,
+    "training_age": "advanced",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Speed/acceleration slot on Athlete Day, middle-to-late phases."
+  },
+  {
+    "exercise_id": "PJ-036",
+    "exercise_name": "Kneeling Plyometric Push-Up",
+    "priority_tier": "extended",
+    "movement_pattern": "Plyometric - Upper Body",
+    "primary_purpose": "Beginner entry into upper-body plyometric pressing — the kneeling position shortens the lever arm so the explosive push-off pattern can be learned before loading the full plank",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "None (Bodyweight)",
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Set up in a kneeling push-up position, brace, and push yourself explosively up off the ground — land soft with a slight bend in the elbows, same as the full version just from the knees.",
+    "regression": null,
+    "progression": "PJ-037 (Band-Assisted Plyometric Push-Up)",
+    "training_age": "novice",
+    "season_tag": "Off-season, Pre-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Upper-body technical-coordination slot on Upper Body Strength Day and Hypertrophy Day for athletes new to training — the beginner on-ramp into the plyo push-up progression."
+  },
+  {
+    "exercise_id": "PJ-037",
+    "exercise_name": "Band-Assisted Plyometric Push-Up",
+    "priority_tier": "extended",
+    "movement_pattern": "Plyometric - Upper Body",
+    "primary_purpose": "Beginner entry into upper-body plyometric pressing from a full plank — an overhead band offloads bodyweight so the explosive push-off pattern can be trained at full body length",
+    "equipment_needed": [
+      "bands"
+    ],
+    "equipment_needed_raw": "Band, Anchor Point (Overhead)",
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Set up in a push-up with the band supporting you from overhead, brace, and push yourself explosively off the ground — land soft with a slight bend in the elbows. Let the band take the weight you're not ready for yet.",
+    "regression": "PJ-036 (Kneeling Plyometric Push-Up)",
+    "progression": "PJ-021 (Plyometric Push-Up, Clap Push-Up)",
+    "training_age": "novice",
+    "season_tag": "Off-season, Pre-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Upper-body technical-coordination slot on Upper Body Strength Day and Hypertrophy Day for athletes new to training — bridges the kneeling regression up to the full plyo push-up."
+  },
+  {
+    "exercise_id": "PJ-038",
+    "exercise_name": "Kneeling Dumbbell Push Press",
+    "priority_tier": "extended",
+    "movement_pattern": "Plyometric - Upper Body",
+    "primary_purpose": "Beginner entry into explosive overhead pressing — the kneeling (tall-kneeling) position removes the leg drive so the athlete learns to transfer trunk/arm explosiveness without needing push-press timing yet",
+    "equipment_needed": [
+      "dumbbells"
+    ],
+    "equipment_needed_raw": "Dumbbells",
+    "space_requirements": null,
+    "cue": "Kneel tall, dumbbells at shoulder height, brace the core so you can't rock back — drive them overhead explosively and catch the lockout under control.",
+    "regression": null,
+    "progression": "UP-001 (Push Press)",
+    "training_age": "novice",
+    "season_tag": "Off-season, Pre-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Upper-body technical-coordination slot on Upper Body Strength Day for athletes new to training — the beginner-friendly stand-in for a jerk/push-press variation until the athlete is ready for the standing, leg-driven version."
+  },
+  {
+    "exercise_id": "CR-034",
+    "exercise_name": "Weighted Sit-Up",
+    "priority_tier": "extended",
+    "movement_pattern": "Core - Anti-Extension",
+    "primary_purpose": "Advanced loaded crunch-pattern core work — higher-intensity option in the sagittal-plane core slot once bodyweight control is established",
+    "equipment_needed": [
+      "dumbbells",
+      "barbell_rack"
+    ],
+    "equipment_needed_raw": "Dumbbell or Weight Plate",
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Hold the weight at your chest, sit all the way up under control, and lower back down without letting it yank you — own the weight the whole rep, don't let it own you.",
+    "regression": null,
+    "progression": null,
+    "training_age": "advanced",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Crunch-variation slot in Lower Body Strength Day's secondary-pattern core superset (and Upper Body Strength Day's rotational/sagittal core pairing) — the advanced-tier option alongside CR-028 (Dead Bug with Plate Pass)."
   }
 ]

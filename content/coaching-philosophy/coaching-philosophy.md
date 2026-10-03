@@ -126,9 +126,9 @@ Every injury-history area gets a fixed "home day" where its resilience slot is a
 | Groin / adductor | Lower Body day | Athlete Day's cutting/agility volume |
 | ACL / knee history | Lower Body day | Impulse Day's RFESS — load/volume for this athlete follows the ACL progression below, not the standard Impulse-day band, until cleared |
 | Ankle | Lower Body day | Impulse and Athlete Days' plyometric/cutting volume |
-| Hamstring | Lower Body day (distinct slot from the day's HINGE_PATTERN main lift) | Athlete Day's sprint volume |
-| Shoulder | Upper Body day | Hypertrophy Day (second upper-dominant exposure, when present) |
-| Low back | Lower Body day (INJURY_RESILIENCE slot — anti-extension/anti-rotation and rotational-power work, per the progression below; `day-structure-templates.md` has no separate CORE_ROTATIONAL slot on Lower Body day, so this runs in the same INJURY_RESILIENCE slot as every other Lower Body day injury area) | Impulse Day's CORE_ROTATIONAL slot, when present |
+| Hamstring | Lower Body day (distinct slot from the day's SECONDARY_PATTERN main lift) | Athlete Day's sprint volume |
+| Shoulder | Upper Body day (INJURY_RESILIENCE slot, supersetted with CORE_ROTATIONAL) | Hypertrophy Day (second upper-dominant exposure, when present) |
+| Low back | Lower Body day (INJURY_RESILIENCE slot — anti-extension/anti-rotation and rotational-power work, per the progression below; `day-structure-templates.md` has no separate CORE_ROTATIONAL slot on Lower Body day — that slot lives on Upper Body day — so this runs in the same INJURY_RESILIENCE slot as every other Lower Body day injury area) | Upper Body Day's CORE_ROTATIONAL slot, when present |
 
 Progress each one like any other trained quality (per the existing rule below) — here's the phase-by-phase progression for every area, extending the Achilles/groin progressions already established:
 
