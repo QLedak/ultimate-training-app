@@ -101,6 +101,10 @@ export async function materializeScheduledSessions(
     }))
   );
 
+  if (rows.length === 0) {
+    return { sessions: [] };
+  }
+
   // A rebuild/new chunk that re-publishes overlapping future days should
   // replace them, not conflict — already-logged past days are untouched by
   // this call in practice since Phase Builder only regens forward from
@@ -115,71 +119,134 @@ export async function materializeScheduledSessions(
   // or exclusion constraint matching the ON CONFLICT specification." This
   // replaces the single upsert with an explicit, phase-aware
   // update-or-insert so republishing still works now that (athlete_id,
-  // date) alone can no longer be trusted to identify "the one row here":
+  // date) alone can no longer be trusted to identify "the one row here".
+  //
+  // The window this call checks against is [earliest, latest] date in the
+  // NEW output, not just the exact dates the new output happens to use. A
+  // rebuild or new chunk can legitimately drop a date entirely (the old
+  // program had a workout there; the new day structure makes it a rest
+  // day), and the old session sitting on that date is "stale" exactly like
+  // a cross-phase collision is — if this only ever looked at the new
+  // output's own dates, that old row would never even be queried, and it
+  // would sit there untouched on the athlete's calendar forever. That was
+  // the actual bug: a rebuilt program showing an old program's leftover
+  // workout on what's now supposed to be a rest day.
   //
   //   - Same date, DIFFERENT phase_id (a coincidental date reuse, or a
   //     phase transition where a test date landed in the new phase's
   //     window): clear that row's session_logs/logged_exercises, then
-  //     delete the row — the new row takes the date with a fresh id,
-  //     exactly like the old "stale session" handling below.
-  //   - Same date, SAME phase_id (the normal republish case — a rebuild or
-  //     a later chunk overlapping a day this phase already generated):
-  //     UPDATE the existing row's prescription IN PLACE, preserving its id,
-  //     so any session_logs already pointing at it over a now-stale
-  //     prescription stay attached to a stable id — they weren't destroyed
-  //     by migration 0011 and shouldn't be destroyed by this fix either.
+  //     delete the row — the new row (if any) takes the date with a fresh
+  //     id. Unlike the same-phase case below, this is done regardless of
+  //     whether it's logged — a different phase owning that date is wrong
+  //     data for this phase, not a legitimate logged workout for it.
+  //   - Same date, SAME phase_id, present in the new output, NOT logged
+  //     (the normal republish case — a rebuild or a later chunk overlapping
+  //     a day this phase already generated): UPDATE the existing row's
+  //     prescription IN PLACE, preserving its id, so any session_logs
+  //     already pointing at it stay attached to a stable id.
+  //   - Same date, SAME phase_id, NOT present in the new output (the actual
+  //     rest-day bug) — deleted, UNLESS it's already logged (see below).
+  //   - Already logged (a session_logs row exists for it), regardless of
+  //     whether the new output has a row for that date or not: left
+  //     completely untouched — not updated, not deleted, and the new
+  //     output's row for that same date (if any) is simply skipped rather
+  //     than inserted as a duplicate. This is the "without affecting days
+  //     that have already been logged" guarantee the rebuild/chunk buttons
+  //     promise; a week-granularity rebuild can legitimately regenerate a
+  //     week that has a few already-logged days earlier in it.
   //   - No existing row for a (athlete_id, phase_id, date) combination at
   //     all: plain insert.
   //   - The one case this doesn't fully resolve: an athlete manually
   //     double-booked a SECOND session from the SAME phase onto this exact
   //     date (migration 0011's whole reason for existing). There, more than
-  //     one same-phase row matches the date — this updates the earliest
-  //     (lowest id) of them and leaves the others alone rather than
-  //     guessing which one the athlete meant to replace. Rare in practice;
-  //     flag it for review if it comes up rather than silently picking for
-  //     the athlete.
-  const dates = rows.map((r) => r.date);
-  const { data: existingForDates, error: existingError } = await supabase
+  //     one same-phase row matches the date — this updates/deletes the
+  //     earliest (lowest id) of them and leaves the others alone rather
+  //     than guessing which one the athlete meant to replace. Rare in
+  //     practice; flag it for review if it comes up rather than silently
+  //     picking for the athlete.
+  const newDatesSet = new Set(rows.map((r) => r.date));
+  const sortedDates = [...newDatesSet].sort();
+  const minDate = sortedDates[0];
+  const maxDate = sortedDates[sortedDates.length - 1];
+
+  const { data: existingInWindow, error: existingError } = await supabase
     .from("scheduled_sessions")
     .select("id, date, phase_id")
     .eq("athlete_id", draft.athlete_id)
-    .in("date", dates);
+    .gte("date", minDate)
+    .lte("date", maxDate);
   if (existingError) throw new Error(existingError.message);
 
-  const staleSessionIds = (existingForDates ?? [])
+  const existingIds = (existingInWindow ?? []).map((s) => s.id as string);
+  const loggedSessionIds = new Set<string>();
+  if (existingIds.length > 0) {
+    const { data: logRows, error: logsError } = await supabase
+      .from("session_logs")
+      .select("session_id")
+      .in("session_id", existingIds);
+    if (logsError) throw new Error(logsError.message);
+    for (const l of logRows ?? []) loggedSessionIds.add(l.session_id as string);
+  }
+
+  const staleSessionIds = (existingInWindow ?? [])
     .filter((s) => s.phase_id !== draft.phase_id)
-    .map((s) => s.id);
-  if (staleSessionIds.length > 0) {
+    .map((s) => s.id as string);
+
+  const obsoleteSamePhaseIds = (existingInWindow ?? [])
+    .filter(
+      (s) =>
+        s.phase_id === draft.phase_id &&
+        !newDatesSet.has(s.date as string) &&
+        !loggedSessionIds.has(s.id as string)
+    )
+    .map((s) => s.id as string);
+
+  const idsToDelete = [...staleSessionIds, ...obsoleteSamePhaseIds];
+  if (idsToDelete.length > 0) {
     const { error: deleteLogsError } = await supabase
       .from("session_logs")
       .delete()
-      .in("session_id", staleSessionIds);
+      .in("session_id", idsToDelete);
     if (deleteLogsError) throw new Error(deleteLogsError.message);
     const { error: deleteExercisesError } = await supabase
       .from("logged_exercises")
       .delete()
-      .in("session_id", staleSessionIds);
+      .in("session_id", idsToDelete);
     if (deleteExercisesError) throw new Error(deleteExercisesError.message);
     const { error: deleteStaleError } = await supabase
       .from("scheduled_sessions")
       .delete()
-      .in("id", staleSessionIds);
+      .in("id", idsToDelete);
     if (deleteStaleError) throw new Error(deleteStaleError.message);
   }
 
-  // Same-phase rows on these dates, now that cross-phase stale rows are
-  // gone — the ones to UPDATE in place rather than insert fresh.
+  // Same-phase rows that are still present in the new output and not
+  // logged, now that cross-phase and obsolete same-phase rows are gone —
+  // the ones to UPDATE in place rather than insert fresh. Logged rows are
+  // deliberately excluded here even though they share a date with a new
+  // row — see the comment above.
   const samePhaseByDate = new Map<string, { id: string }[]>();
-  for (const s of existingForDates ?? []) {
+  for (const s of existingInWindow ?? []) {
     if (s.phase_id !== draft.phase_id) continue;
+    if (loggedSessionIds.has(s.id as string)) continue;
     const list = samePhaseByDate.get(s.date as string) ?? [];
     list.push({ id: s.id as string });
     samePhaseByDate.set(s.date as string, list);
   }
 
+  // Dates already logged (same phase) are skipped entirely — not updated,
+  // not inserted as a duplicate.
+  const loggedDates = new Set(
+    (existingInWindow ?? [])
+      .filter((s) => s.phase_id === draft.phase_id && loggedSessionIds.has(s.id as string))
+      .map((s) => s.date as string)
+  );
+
   const rowsToInsert: typeof rows = [];
   const sessions: Record<string, unknown>[] = [];
   for (const row of rows) {
+    if (loggedDates.has(row.date)) continue;
+
     const existing = samePhaseByDate.get(row.date);
     if (existing && existing.length > 0) {
       const targetId = existing.sort((a, b) => (a.id < b.id ? -1 : 1))[0].id;
