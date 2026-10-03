@@ -3,6 +3,7 @@ import { runPhaseBuilder, PhaseBuilderInput, PhaseBuilderOutput, PhaseWeek } fro
 import { Situation } from "../corpus/retrieve";
 import { deriveTrainingAge } from "../training/training-age";
 import { bucketEquipment } from "../training/equipment";
+import { compilePhasePerformanceSummary } from "../pps/compile";
 
 // A phase longer than this many weeks is generated across multiple calls
 // instead of one — testing showed even 32,000 output tokens wasn't reliably
@@ -24,6 +25,46 @@ function weekRanges(startWeek: number, endWeek: number): Array<{ start: number; 
     { start: startWeek, end: firstHalfEnd },
     { start: firstHalfEnd + 1, end: endWeek },
   ];
+}
+
+/**
+ * A model call can return valid-looking JSON (non-empty "weeks", passes the
+ * truncation check in runPhaseBuilder) while still silently skipping or
+ * duplicating a week it was asked for — this happened in practice (a phase's
+ * week 1 came back missing, with the model's own rationale explaining it had
+ * decided to "generate it separately"). That's not an edge case to tolerate:
+ * a coach reviewing a draft has no reason to expect a gap, and a missed week
+ * reaching an athlete's actual schedule is exactly what chunked delivery
+ * must never produce. So every call's output is checked against the EXACT
+ * set of week numbers it was asked for, and any mismatch fails loudly here
+ * — before the draft is ever saved — rather than shipping a partial phase
+ * with a footnote buried in the rationale.
+ */
+function assertCompleteWeeks(weeks: PhaseWeek[], expectedStart: number, expectedEnd: number) {
+  const expected = new Set<number>();
+  for (let w = expectedStart; w <= expectedEnd; w++) expected.add(w);
+
+  const seen = new Set<number>();
+  const duplicates: number[] = [];
+  for (const week of weeks) {
+    if (seen.has(week.week_number)) duplicates.push(week.week_number);
+    seen.add(week.week_number);
+  }
+
+  const missing = [...expected].filter((w) => !seen.has(w)).sort((a, b) => a - b);
+  const unexpected = [...seen].filter((w) => !expected.has(w)).sort((a, b) => a - b);
+
+  if (missing.length > 0 || unexpected.length > 0 || duplicates.length > 0) {
+    const parts: string[] = [];
+    if (missing.length > 0) parts.push(`missing week${missing.length === 1 ? "" : "s"} ${missing.join(", ")}`);
+    if (unexpected.length > 0)
+      parts.push(`unexpected week${unexpected.length === 1 ? "" : "s"} ${unexpected.join(", ")} outside the requested range`);
+    if (duplicates.length > 0) parts.push(`duplicate week${duplicates.length === 1 ? "" : "s"} ${duplicates.join(", ")}`);
+    throw new Error(
+      `Phase Builder response for weeks ${expectedStart}-${expectedEnd} was incomplete: ${parts.join("; ")}. ` +
+        "Nothing was saved — try generating this chunk again."
+    );
+  }
 }
 
 /**
@@ -85,10 +126,12 @@ async function buildFullPhaseOutput(
   const ranges = weekRanges(startWeek, genEnd);
 
   if (ranges.length === 1 && startWeek === 1 && genEnd === totalWeeks && !seedContext) {
-    return runPhaseBuilder(supabase, {
+    const result = await runPhaseBuilder(supabase, {
       ...baseInput,
       ...(edit ? { currentDraftOutput: edit.currentDraftOutput, editRequest: edit.editRequest } : {}),
     });
+    assertCompleteWeeks(result.weeks, startWeek, genEnd);
+    return result;
   }
 
   const merged: PhaseBuilderOutput = { weeks: [], coach_review_flags: [] };
@@ -120,6 +163,8 @@ async function buildFullPhaseOutput(
       priorWeeksContext,
       ...(editForThisCall ?? {}),
     });
+
+    assertCompleteWeeks(result.weeks, range.start, range.end);
 
     merged.weeks.push(...result.weeks);
     merged.coach_review_flags = [...(merged.coach_review_flags ?? []), ...(result.coach_review_flags ?? [])];
@@ -472,4 +517,66 @@ export async function revisePhaseBuilderDraft(
 
   if (draftError) throw new Error(draftError.message);
   return newDraft;
+}
+
+/**
+ * Coach-triggered "Generate Next Phase" button — distinct from both the
+ * daily cron's in-phase chunk generation (generatePhaseDraft, called with
+ * the SAME phase that's already active) and a rebuild of the current phase
+ * (generatePhaseRebuildDraft, also the same phase). This one builds the
+ * NEXT phase in the skeleton — still sitting at status "upcoming" — while
+ * the current phase keeps running completely untouched: its status, its
+ * already-scheduled/logged days, none of it is touched by this call.
+ *
+ * Before firing Phase Builder for the next phase, this compiles a fresh
+ * Phase Performance Summary from the CURRENT phase's logged-so-far data
+ * (reason: "rebuild_phase_scoped" — the phase_performance_summaries table's
+ * reason enum has no more precise label for "mid-phase, not actually a
+ * rebuild," but this reason is what matters functionally: per
+ * compilePhasePerformanceSummary's own doc comment, it does NOT flip any
+ * phase's status, only "normal_transition" does). That's what lets the next
+ * phase's prescriptions reflect the athlete's real, current weights/sets/
+ * reps rather than stale data left over from the phase before this one.
+ *
+ * The actual active -> completed / upcoming -> active status flip between
+ * the current and next phase is deliberately left to the existing daily
+ * cron (lib/generation/phase-transitions.ts), which already flips it the
+ * moment the current phase's end_date passes. Calling this early (the
+ * 7-day-lead-time trigger in runDailyPhaseTransitionCheck is meant to call
+ * this, not generatePhaseDraft, once wired up) just means that by the time
+ * the cron does the flip, the next phase's sessions are already generated
+ * and (ideally) already approved — no gap at the boundary, no need for this
+ * function to pre-empt the cron's own status bookkeeping.
+ */
+export async function generateNextPhaseDraft(
+  supabase: SupabaseClient,
+  params: { athleteId: string; activePhaseId: string }
+) {
+  const { athleteId, activePhaseId } = params;
+
+  const { data: activePhase, error: activePhaseError } = await supabase
+    .from("macrocycle_phases")
+    .select("id, phase_number, skeleton_id")
+    .eq("id", activePhaseId)
+    .single();
+  if (activePhaseError || !activePhase) throw new Error("Active phase not found");
+
+  const { data: nextPhase, error: nextPhaseError } = await supabase
+    .from("macrocycle_phases")
+    .select("id")
+    .eq("skeleton_id", activePhase.skeleton_id as string)
+    .eq("phase_number", (activePhase.phase_number as number) + 1)
+    .maybeSingle();
+  if (nextPhaseError) throw new Error(nextPhaseError.message);
+  if (!nextPhase) {
+    throw new Error("No next phase in this athlete's season plan — this is the final phase of their skeleton.");
+  }
+
+  await compilePhasePerformanceSummary(supabase, {
+    phaseId: activePhaseId,
+    reason: "rebuild_phase_scoped",
+    reasonDetail: "Coach-triggered: generating next phase ahead of this phase ending.",
+  });
+
+  return generatePhaseDraft(supabase, { athleteId, phaseId: nextPhase.id as string });
 }

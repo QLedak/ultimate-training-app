@@ -101,20 +101,43 @@ export async function materializeScheduledSessions(
     }))
   );
 
-  // upsert on (athlete_id, date): a rebuild that re-publishes overlapping
-  // future days should replace them, not conflict — already-logged past days
-  // are untouched by this call in practice since Phase Builder only regens
-  // forward from "today" (see the (b)/(c) rebuild branches in
-  // data-architecture-spec.md).
+  // A rebuild/new chunk that re-publishes overlapping future days should
+  // replace them, not conflict — already-logged past days are untouched by
+  // this call in practice since Phase Builder only regens forward from
+  // "today" (see the (b)/(c) rebuild branches in data-architecture-spec.md).
   //
-  // BUT: an upsert-on-date updates the existing scheduled_sessions row IN
-  // PLACE (same id), so if that date previously belonged to a DIFFERENT
-  // phase (a coincidental date reuse, or a phase transition where a test
-  // date happened to land in the new phase's window), any session_logs /
-  // logged_exercises still pointing at that row's id would silently survive
-  // — the day now shows a brand-new prescription but reads as already
-  // logged from the old phase. Clear those out first whenever the phase
-  // actually changes for that date.
+  // This used to be a single `.upsert(rows, { onConflict: "athlete_id,date" })`,
+  // relying on the original `unique(athlete_id, date)` constraint from
+  // 0001_init.sql. Migration 0011_allow_multiple_sessions_per_day.sql
+  // dropped that constraint (so athletes can manually double-book a day),
+  // which left that onConflict target pointing at a constraint that no
+  // longer exists — Postgres/PostgREST errors on every call with "no unique
+  // or exclusion constraint matching the ON CONFLICT specification." This
+  // replaces the single upsert with an explicit, phase-aware
+  // update-or-insert so republishing still works now that (athlete_id,
+  // date) alone can no longer be trusted to identify "the one row here":
+  //
+  //   - Same date, DIFFERENT phase_id (a coincidental date reuse, or a
+  //     phase transition where a test date landed in the new phase's
+  //     window): clear that row's session_logs/logged_exercises, then
+  //     delete the row — the new row takes the date with a fresh id,
+  //     exactly like the old "stale session" handling below.
+  //   - Same date, SAME phase_id (the normal republish case — a rebuild or
+  //     a later chunk overlapping a day this phase already generated):
+  //     UPDATE the existing row's prescription IN PLACE, preserving its id,
+  //     so any session_logs already pointing at it over a now-stale
+  //     prescription stay attached to a stable id — they weren't destroyed
+  //     by migration 0011 and shouldn't be destroyed by this fix either.
+  //   - No existing row for a (athlete_id, phase_id, date) combination at
+  //     all: plain insert.
+  //   - The one case this doesn't fully resolve: an athlete manually
+  //     double-booked a SECOND session from the SAME phase onto this exact
+  //     date (migration 0011's whole reason for existing). There, more than
+  //     one same-phase row matches the date — this updates the earliest
+  //     (lowest id) of them and leaves the others alone rather than
+  //     guessing which one the athlete meant to replace. Rare in practice;
+  //     flag it for review if it comes up rather than silently picking for
+  //     the athlete.
   const dates = rows.map((r) => r.date);
   const { data: existingForDates, error: existingError } = await supabase
     .from("scheduled_sessions")
@@ -137,13 +160,50 @@ export async function materializeScheduledSessions(
       .delete()
       .in("session_id", staleSessionIds);
     if (deleteExercisesError) throw new Error(deleteExercisesError.message);
+    const { error: deleteStaleError } = await supabase
+      .from("scheduled_sessions")
+      .delete()
+      .in("id", staleSessionIds);
+    if (deleteStaleError) throw new Error(deleteStaleError.message);
   }
 
-  const { data: sessions, error } = await supabase
-    .from("scheduled_sessions")
-    .upsert(rows, { onConflict: "athlete_id,date" })
-    .select();
-  if (error) throw new Error(error.message);
+  // Same-phase rows on these dates, now that cross-phase stale rows are
+  // gone — the ones to UPDATE in place rather than insert fresh.
+  const samePhaseByDate = new Map<string, { id: string }[]>();
+  for (const s of existingForDates ?? []) {
+    if (s.phase_id !== draft.phase_id) continue;
+    const list = samePhaseByDate.get(s.date as string) ?? [];
+    list.push({ id: s.id as string });
+    samePhaseByDate.set(s.date as string, list);
+  }
+
+  const rowsToInsert: typeof rows = [];
+  const sessions: Record<string, unknown>[] = [];
+  for (const row of rows) {
+    const existing = samePhaseByDate.get(row.date);
+    if (existing && existing.length > 0) {
+      const targetId = existing.sort((a, b) => (a.id < b.id ? -1 : 1))[0].id;
+      const { data: updated, error: updateError } = await supabase
+        .from("scheduled_sessions")
+        .update(row)
+        .eq("id", targetId)
+        .select()
+        .single();
+      if (updateError) throw new Error(updateError.message);
+      sessions.push(updated);
+    } else {
+      rowsToInsert.push(row);
+    }
+  }
+
+  if (rowsToInsert.length > 0) {
+    const { data: inserted, error: insertError } = await supabase
+      .from("scheduled_sessions")
+      .insert(rowsToInsert)
+      .select();
+    if (insertError) throw new Error(insertError.message);
+    sessions.push(...(inserted ?? []));
+  }
 
   return { sessions };
 }

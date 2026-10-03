@@ -1,6 +1,6 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { compilePhasePerformanceSummary } from "../pps/compile";
-import { generatePhaseDraft, lastGeneratedWeek } from "./phase";
+import { generatePhaseDraft, generateNextPhaseDraft, lastGeneratedWeek } from "./phase";
 import { checkAiGenerationLimit } from "../api/ai-generation-limit";
 
 // How many days of lead time to keep in front of an athlete at all times.
@@ -30,17 +30,28 @@ type ActionLog = { athleteId: string; phaseId: string; action: string; detail?: 
  *
  * Meant to run once a day (see app/api/cron/phase-transitions/route.ts +
  * vercel.json). For every athlete's active phase:
- *   1. If it's actually finished (past its end date) -- compile its
- *      PhasePerformanceSummary and flip phase status (active -> completed,
- *      next phase -> active), same as the manual compile-summary endpoint
- *      already did, just triggered automatically instead of never.
+ *   0. If this phase is still running but ends within LEAD_DAYS, and the
+ *      NEXT phase in the skeleton doesn't have a draft or generated weeks
+ *      yet, proactively fire "Generate Next Phase" (generateNextPhaseDraft)
+ *      for it -- this is the coach-side "Generate next phase" button's own
+ *      trigger, run automatically ahead of the boundary instead of waiting
+ *      for a coach to notice. The current phase itself is untouched.
+ *   1. If the current phase is actually finished (past its end date) --
+ *      compile its PhasePerformanceSummary and flip phase status (active ->
+ *      completed, next phase -> active), same as the manual compile-summary
+ *      endpoint already did, just triggered automatically instead of never.
+ *      By the time this fires, step 0 has usually already generated (and
+ *      hopefully the coach has already approved) the next phase's sessions
+ *      on a prior day's run, so there's no gap at the boundary.
  *   2. Whichever phase ends up active (the one just flipped to, or the one
  *      that already was), if it's running low on generated/scheduled weeks
  *      (within LEAD_DAYS of running out) and isn't already fully generated
  *      or already has a pending review draft, fire Phase Builder for the
  *      next chunk -- so a draft is sitting in the coach's review queue with
  *      lead time, instead of the athlete hitting a dead end and the coach
- *      finding out after the fact.
+ *      finding out after the fact. This is for a phase that's chunked across
+ *      multiple Phase Builder calls within itself (DELIVERY_CHUNK_WEEKS);
+ *      step 0 is for the boundary BETWEEN two phases.
  *
  * Approval is still manual (coach review stays in place for now) -- this
  * only automates the TRIGGER to generate, not the publish step.
@@ -63,6 +74,59 @@ export async function runDailyPhaseTransitionCheck(supabase: SupabaseClient): Pr
     let currentEndDate = phase.end_date as string;
 
     try {
+      // ---- Step 0: proactive "Generate Next Phase", LEAD_DAYS before this
+      // phase actually ends. Distinct from Step 2 below (which continues
+      // the CURRENT phase's own chunked delivery) -- this fires
+      // generateNextPhaseDraft for the NEXT phase in the skeleton while the
+      // current one is still running and untouched, so a coach on their
+      // normal review cadence finds the next phase's draft waiting well
+      // before the boundary. Step 1 below only reacts AFTER end_date has
+      // already passed, which on its own would mean the draft doesn't even
+      // exist until the day the athlete needs it -- this closes that gap.
+      // Approval is still manual, same as every other generation trigger
+      // here: this only creates the draft, never publishes it.
+      if (currentEndDate && currentEndDate >= today && daysBetween(today, currentEndDate) <= LEAD_DAYS) {
+        const { data: nextPhaseRow } = await supabase
+          .from("macrocycle_phases")
+          .select("id")
+          .eq("skeleton_id", phase.skeleton_id as string)
+          .eq("phase_number", (phase.phase_number as number) + 1)
+          .maybeSingle();
+
+        if (nextPhaseRow) {
+          const nextAlreadyGenerated = (await lastGeneratedWeek(supabase, nextPhaseRow.id as string)) > 0;
+          const { data: nextPending } = await supabase
+            .from("program_drafts")
+            .select("id")
+            .eq("phase_id", nextPhaseRow.id)
+            .eq("call_type", "phase_builder")
+            .eq("status", "pending_review")
+            .limit(1);
+
+          if (!nextAlreadyGenerated && !(nextPending && nextPending.length > 0)) {
+            if (await checkAiGenerationLimit(athleteId)) {
+              actions.push({
+                athleteId,
+                phaseId: currentPhaseId,
+                action: "skipped_rate_limited",
+                detail: "next-phase generation skipped: athlete's daily AI generation limit already reached today",
+              });
+            } else {
+              const draft = await generateNextPhaseDraft(supabase, {
+                athleteId,
+                activePhaseId: currentPhaseId,
+              });
+              actions.push({
+                athleteId,
+                phaseId: currentPhaseId,
+                action: "generated_next_phase_proactively",
+                detail: `draft ${draft.id} for phase ${nextPhaseRow.id}, current phase ends ${currentEndDate}`,
+              });
+            }
+          }
+        }
+      }
+
       // ---- Step 1: has this phase actually run its course? ----
       if (currentEndDate && currentEndDate < today) {
         const { nextPhase } = await compilePhasePerformanceSummary(supabase, {

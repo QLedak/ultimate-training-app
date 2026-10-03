@@ -77,6 +77,9 @@ export default function CoachAthleteProgramPage({ params }: { params: { id: stri
   const [activePhaseDraftId, setActivePhaseDraftId] = useState<string | null>(null);
   const [season, setSeason] = useState<{ start: string; end: string; confirmed: boolean } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [actionBusy, setActionBusy] = useState<"rebuild" | "next-phase" | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/me/coach")
@@ -114,6 +117,51 @@ export default function CoachAthleteProgramPage({ params }: { params: { id: stri
   }, [params.id]);
 
   const activePhase = phases?.find((p) => p.status === "active") ?? null;
+  const hasNextPhase = !!(activePhase && phases?.some((p) => p.phase_number === activePhase.phase_number + 1));
+
+  async function rebuildCurrentPhase() {
+    setActionError(null);
+    setActionMessage(null);
+    setActionBusy("rebuild");
+    try {
+      const res = await fetch(`/api/athletes/${params.id}/rebuild-current-phase`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (data.error) {
+        setActionError(data.error);
+      } else {
+        window.location.href = `/review/${data.draft.id}`;
+      }
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setActionBusy(null);
+    }
+  }
+
+  async function generateNextPhase() {
+    setActionError(null);
+    setActionMessage(null);
+    setActionBusy("next-phase");
+    try {
+      const res = await fetch(`/api/athletes/${params.id}/generate-next-phase`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (data.error) {
+        setActionError(data.error);
+      } else {
+        window.location.href = `/review/${data.draft.id}`;
+      }
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setActionBusy(null);
+    }
+  }
 
   return (
     <>
@@ -177,6 +225,43 @@ export default function CoachAthleteProgramPage({ params }: { params: { id: stri
               <p className="mt-3 text-xs text-slate-500">
                 This phase's workouts haven&apos;t been generated/approved yet.
               </p>
+            )}
+
+            <div className="mt-4 flex flex-wrap gap-2 border-t border-blue-100 pt-3">
+              <button
+                type="button"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "This removes this phase's not-yet-logged workouts and replaces them with freshly generated ones (proper day structure/ordering). Days already logged are not touched. A new draft will be sent to review — continue?"
+                    )
+                  ) {
+                    rebuildCurrentPhase();
+                  }
+                }}
+                disabled={actionBusy !== null}
+                className="rounded-md border border-brand px-3 py-1.5 text-sm font-medium text-brand hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {actionBusy === "rebuild" ? "Rebuilding…" : "Rebuild current phase"}
+              </button>
+
+              {hasNextPhase && (
+                <button
+                  type="button"
+                  onClick={generateNextPhase}
+                  disabled={actionBusy !== null}
+                  className="rounded-md border border-brand px-3 py-1.5 text-sm font-medium text-brand hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {actionBusy === "next-phase" ? "Generating…" : "Generate next phase"}
+                </button>
+              )}
+            </div>
+
+            {actionError && (
+              <p className="mt-2 rounded-md bg-red-50 p-2 text-xs text-red-600">{actionError}</p>
+            )}
+            {actionMessage && (
+              <p className="mt-2 rounded-md bg-green-50 p-2 text-xs text-green-700">{actionMessage}</p>
             )}
           </div>
         )}
