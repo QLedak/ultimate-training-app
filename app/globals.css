@@ -7,16 +7,205 @@ html {
 }
 
 body {
-  @apply bg-slate-50 text-slate-900 antialiased;
+  @apply bg-white text-slate-900 antialiased font-sans;
 }
 
-/* Brand headings: Barlow Condensed. Page titles are uppercase, as in the brand guide. */
-@layer base {
-  h1,
-  h2 {
-    @apply font-display;
-  }
-  h1 {
-    @apply uppercase tracking-normal;
-  }
+/* True Ultimate Training brand guide v1: Barlow Condensed for every
+   headline, kept to font-family only — each heading's own size/weight
+   classes (text-2xl font-bold, etc.) are untouched, so this is a look-and-feel
+   preview, not the guide's full display-xl/lg type scale. */
+h1,
+h2,
+h3 {
+  font-family: var(--font-barlow-condensed), ui-sans-serif, system-ui, sans-serif;
 }
+
+/* ------------------------------------------------------------------------
+   Dark mode (default) — True Ultimate Training brand guide, Asphalt/Chalk.
+   app/layout.tsx always puts "dark" on <html> (no toggle exists yet; this
+   just makes dark the app's permanent default), and tailwind.config.ts sets
+   darkMode: "class" so a future toggle can use it. Rather than adding a
+   dark: variant to every className in every page/component, this retrofits
+   the app's existing Tailwind slate/white/status palette from one place —
+   the app already centralizes on that default gray scale everywhere (see
+   tailwind.config.ts's note on the brand/brand-dark tokens), so overriding
+   each of those classes under .dark covers the overwhelming majority of the
+   app with no per-component changes. A few one-off / rarely-used shades may
+   still look slightly off; flag anything that does and it's a quick add
+   here, not a redesign.
+   ------------------------------------------------------------------------ */
+.dark body {
+  background-color: #24282d; /* Asphalt */
+  color: #f5f3ef; /* Chalk */
+}
+
+/* Structural surfaces */
+.dark .bg-white {
+  background-color: #2e333a; /* "raised" surface, a step up from Asphalt */
+}
+.dark .bg-slate-50 {
+  background-color: #262a30; /* "sunken" surface, a step down from Asphalt */
+}
+.dark .bg-slate-100 {
+  background-color: #30353c;
+}
+.dark .bg-slate-200 {
+  background-color: #3a3f46;
+}
+
+.dark .border-slate-100 {
+  border-color: #30353c;
+}
+.dark .border-slate-200 {
+  border-color: #3a3f46;
+}
+.dark .border-slate-300 {
+  border-color: #4a5059;
+}
+.dark .border-slate-400 {
+  border-color: #5b636b; /* Slate */
+}
+
+.dark .text-slate-400 {
+  color: #7d848c;
+}
+.dark .text-slate-500 {
+  color: #a9b0b6; /* Fog */
+}
+.dark .text-slate-600 {
+  color: #c7ccd1;
+}
+.dark .text-slate-700 {
+  color: #dde0e3;
+}
+.dark .text-slate-800 {
+  color: #eceef0;
+}
+.dark .text-slate-900 {
+  color: #f5f3ef; /* Chalk */
+}
+
+/* text-brand-dark is the app's main heading/"ink" color in light mode —
+   that near-black would disappear on a dark Asphalt page, so it flips to
+   Chalk. bg-brand-dark (badges, the global rest-timer bar) swaps to the
+   brand's own mid-grey "Slate" so it still reads as its own surface instead
+   of blending into the page background. */
+.dark .text-brand-dark {
+  color: #f5f3ef; /* Chalk */
+}
+.dark .bg-brand-dark {
+  background-color: #5b636b; /* Slate */
+}
+
+/* Status-tinted cards: light tint + dark text in light mode, so each one
+   gets a dark-appropriate tint + a lightened version of its text color. */
+.dark .bg-red-50 {
+  background-color: #3a2222;
+}
+.dark .bg-red-100 {
+  background-color: #452828;
+}
+.dark .text-red-500,
+.dark .text-red-600 {
+  color: #f87171;
+}
+.dark .text-red-700 {
+  color: #fca5a5;
+}
+.dark .text-red-800 {
+  color: #fecaca;
+}
+.dark .border-red-200 {
+  border-color: #5c3434;
+}
+.dark .border-red-600 {
+  border-color: #f87171;
+}
+
+.dark .bg-green-50 {
+  background-color: #1f332a;
+}
+.dark .bg-green-100 {
+  background-color: #27402f;
+}
+.dark .text-green-700 {
+  color: #86efac;
+}
+.dark .text-green-800 {
+  color: #bbf7d0;
+}
+.dark .border-green-200 {
+  border-color: #2f5a3f;
+}
+.dark .border-green-300 {
+  border-color: #3d7350;
+}
+
+.dark .bg-amber-50 {
+  background-color: #392f1c;
+}
+.dark .bg-amber-100 {
+  background-color: #453823;
+}
+.dark .text-amber-700 {
+  color: #fbbf24;
+}
+.dark .text-amber-800 {
+  color: #fcd34d;
+}
+.dark .text-amber-900 {
+  color: #fde68a;
+}
+.dark .border-amber-200 {
+  border-color: #5c4a24;
+}
+.dark .border-amber-300 {
+  border-color: #7a632f;
+}
+
+.dark .bg-purple-50 {
+  background-color: #2c2640;
+}
+.dark .bg-purple-100 {
+  background-color: #352d4d;
+}
+.dark .bg-purple-200 {
+  background-color: #41375e;
+}
+.dark .text-purple-600 {
+  color: #c4b5fd;
+}
+.dark .text-purple-700 {
+  color: #ddd6fe;
+}
+.dark .text-purple-800 {
+  color: #ede9fe;
+}
+.dark .border-purple-200 {
+  border-color: #453a63;
+}
+
+.dark .bg-blue-50 {
+  background-color: #1f2a3a;
+}
+.dark .bg-blue-100 {
+  background-color: #263347;
+}
+.dark .text-blue-700 {
+  color: #93c5fd;
+}
+.dark .text-blue-800 {
+  color: #bfdbfe;
+}
+.dark .border-blue-200 {
+  border-color: #2d3f57;
+}
+
+/* Deliberately NOT overridden: bg-brand/border-brand/text-brand (the Cone
+   orange reads fine on Asphalt as-is), text-white, and the small solid
+   status dots (bg-green-500, bg-amber-500, bg-red-400, bg-slate-400 on the
+   schedule legend) — those are solid chips, not a light-bg/dark-text pair,
+   and need no adjustment on a dark page. bg-slate-700/800 are already
+   dark buttons with white text in light mode (review page, error page) and
+   are left as-is for the same reason.
+*/

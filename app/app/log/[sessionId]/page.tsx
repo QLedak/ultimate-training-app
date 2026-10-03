@@ -1183,13 +1183,19 @@ function EffortSlider({
   );
 }
 
-/** Counts up from zero while held, for a timed/isometric exercise (plank,
- * dead hang, wall sit). Stopping writes the elapsed whole seconds into
- * `onDone` — the caller stores it in the same `reps` field a rep-based
- * exercise would use (the schema has no separate duration column; a
- * timed-hold's "reps" is its seconds held). Purely local/in-page state —
- * unlike the rest timer, there's no need for this to survive navigation,
- * since the athlete is actively performing the hold while watching it. */
+/** Counts DOWN from the target hold time, for a timed/isometric exercise
+ * (plank, dead hang, wall sit) — testing feedback: it used to count up from
+ * zero, which doesn't tell the athlete how much longer to hold. Elapsed time
+ * is still tracked internally (clamped at the target, since a hold can't run
+ * negative on the display), and stopping still writes the elapsed whole
+ * seconds held into `onDone` — the caller stores it in the same `reps` field
+ * a rep-based exercise would use (the schema has no separate duration
+ * column). If the athlete holds past the target, the display sits at 0:00
+ * rather than going negative; `elapsed` behind the scenes keeps counting so
+ * a hold that runs long is still logged accurately. Purely local/in-page
+ * state — unlike the rest timer, there's no need for this to survive
+ * navigation, since the athlete is actively performing the hold while
+ * watching it. */
 function WorkTimer({
   targetSeconds,
   initialSeconds,
@@ -1214,9 +1220,10 @@ function WorkTimer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running]);
 
-  const minutes = Math.floor(elapsed / 60);
-  const seconds = elapsed % 60;
   const atTarget = targetSeconds > 0 && elapsed >= targetSeconds;
+  const remaining = Math.max(0, targetSeconds - elapsed);
+  const minutes = Math.floor(remaining / 60);
+  const seconds = remaining % 60;
 
   return (
     <div className={`rounded-md border p-3 text-center ${atTarget ? "border-green-300 bg-green-50" : "border-slate-200"}`}>
@@ -1224,6 +1231,7 @@ function WorkTimer({
       <p className="mt-1 text-3xl font-bold tabular-nums text-brand-dark">
         {minutes}:{String(seconds).padStart(2, "0")}
       </p>
+      {atTarget && <p className="text-xs font-medium text-green-700">Time&apos;s up — keep holding or stop</p>}
       <div className="mt-2 flex gap-2">
         {!running ? (
           <button

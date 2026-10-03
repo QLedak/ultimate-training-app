@@ -1,9 +1,14 @@
 import type { Config } from "tailwindcss";
-import defaultTheme from "tailwindcss/defaultTheme";
 
-// True Ultimate Training brand colours and fonts.
-// See the brand guide: cone orange + asphalt/chalk greys; Barlow, Barlow Condensed, IBM Plex Mono.
 const config: Config = {
+  // Class-based so a future light/dark toggle just adds/removes "dark" on
+  // <html> (see app/layout.tsx) — for now the app always renders with it on,
+  // making dark the permanent default per the brand kit. Most of the actual
+  // dark-mode color mapping lives in globals.css as plain ".dark .bg-..."
+  // overrides of the existing slate/white/status classes (the app already
+  // centralizes on Tailwind's default gray scale everywhere), rather than a
+  // dark: variant added to every className in every component.
+  darkMode: "class",
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -11,35 +16,30 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // True Ultimate Training brand guide v1 (Oct 2026) — "Cone" orange
+        // and "Asphalt" dark grey. This is a colors-and-fonts-only pass (see
+        // app/layout.tsx and globals.css): the guide's full phase-color
+        // system, semantic token set (surface/ink/line/focus/etc.), and the
+        // "never white text on orange" contrast rule aren't applied yet —
+        // existing bg-brand + text-white buttons are untouched for now.
         brand: {
-          DEFAULT: "#F47A20", // cone: fills only (buttons, progress, highlights)
-          hover: "#FF8A33", // cone hover
-          on: "#16181B", // text on cone fills (never white on orange)
-          text: "#A84A0C", // orange for text and links on light backgrounds
-          tint: "#FDEBDC", // light orange highlight (selected cards, hovers)
-          tint2: "#FBDCC2", // stronger tint for hover on tinted cards
-          dark: "#24282D", // asphalt: headings, dark bars
-        },
-        // Brand greys replace Tailwind's slate, at matching contrast levels,
-        // so every existing slate-* class picks up the brand palette.
-        slate: {
-          50: "#F5F3EF", // chalk
-          100: "#EDEAE4",
-          200: "#DDD9D2",
-          300: "#C6C8CB",
-          400: "#959CA3",
-          500: "#666E76",
-          600: "#4D545B",
-          700: "#3A4047",
-          800: "#24282D", // asphalt
-          900: "#16181B", // ink
-          950: "#0F1113",
+          DEFAULT: "#F47A20", // Cone
+          dark: "#24282D", // Asphalt
         },
       },
       fontFamily: {
-        sans: ["var(--font-barlow)", ...defaultTheme.fontFamily.sans],
-        display: ["var(--font-barlow-condensed)", "Arial Narrow", ...defaultTheme.fontFamily.sans],
-        mono: ["var(--font-plex-mono)", ...defaultTheme.fontFamily.mono],
+        // Barlow is the brand guide's body/UI face; it replaces Tailwind's
+        // default sans everywhere font-sans (or nothing — body sets it as
+        // the default) is in effect.
+        sans: ["var(--font-barlow)", "ui-sans-serif", "system-ui", "sans-serif"],
+        // Barlow Condensed is the display/headline face — applied to
+        // h1/h2/h3 globally in globals.css rather than per-component.
+        display: ["var(--font-barlow-condensed)", "ui-sans-serif", "system-ui", "sans-serif"],
+        // IBM Plex Mono is the guide's numbers/data face (sets, reps, RPE,
+        // rest times) — wired in as Tailwind's `font-mono` so the handful of
+        // spots already using it (exercise-id tags, timer countdowns with
+        // `tabular-nums`) pick it up for free.
+        mono: ["var(--font-plex-mono)", "ui-monospace", "monospace"],
       },
     },
   },

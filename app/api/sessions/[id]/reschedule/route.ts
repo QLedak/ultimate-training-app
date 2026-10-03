@@ -21,9 +21,12 @@ const MAX_SHIFT_DAYS = 6;
  * ever changes scheduled_sessions.date; the prescribed exercises, week
  * number, and phase assignment travel with it unchanged. Blocked once the
  * session has already been logged (reschedule a day you haven't done yet,
- * not rewrite history) and when the target date collides with another of
- * this athlete's sessions (scheduled_sessions has a unique (athlete_id,
- * date) constraint) or falls outside this phase's own date range.
+ * not rewrite history) or when the target date falls outside this phase's
+ * own date range. Landing on a date that already has another session is no
+ * longer blocked — scheduled_sessions no longer enforces one-per-day (see
+ * migration 0011), since testing feedback asked for exactly this: dragging
+ * a workout onto an already-occupied day, or otherwise double-booking a day
+ * on purpose.
  */
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const sessionAthleteId = await getSessionAthleteId();
@@ -87,19 +90,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json(
       { error: "This workout is already logged — only an upcoming, unlogged workout can be moved." },
       { status: 400 }
-    );
-  }
-
-  const { data: conflict } = await supabase
-    .from("scheduled_sessions")
-    .select("id")
-    .eq("athlete_id", sessionAthleteId)
-    .eq("date", date)
-    .maybeSingle();
-  if (conflict) {
-    return NextResponse.json(
-      { error: "You already have a workout scheduled that day — move or log that one first." },
-      { status: 409 }
     );
   }
 
