@@ -48,6 +48,38 @@ const PHASE_PROGRAM_TOOL = {
                         tempo: { type: "string" },
                         rest: { type: "string" },
                         notes: { type: "string" },
+                        // Attached guidance on the SAME exercise entry, not a
+                        // separate exercises[] row — a warmup set sharing this
+                        // exercise's exercise_id as its own array item would
+                        // collide with it in the logging UI's per-exercise
+                        // state (keyed by exercise_id) and in logged_exercises
+                        // (one row per session+exercise_id), which is exactly
+                        // what the athlete's weight-progression history reads
+                        // from. Keeping it as attached, display-only guidance
+                        // sidesteps that entirely.
+                        warmup: {
+                          type: "array",
+                          description:
+                            "Optional ramping warmup sets to show before this exercise's working sets — " +
+                            "light to heavy, each with a suggested weight. Only for a Tier 1 main lift " +
+                            "(squat/hinge/upper-push/upper-pull/lunge-single-leg/Olympic-lift pattern) where " +
+                            "this entry's own sets_reps prescribes a specific working weight. Omit entirely " +
+                            "for accessory, conditioning, mobility, plyometric, or core work, and for any " +
+                            "Tier 1 entry whose sets_reps is percentage-only/bodyweight/no fixed load.",
+                          items: {
+                            type: "object",
+                            properties: {
+                              sets_reps: { type: "string", description: "e.g. '1x5', '1x3', '1x2'" },
+                              suggested_weight: {
+                                type: "number",
+                                description:
+                                  "Suggested weight in lb for this warmup set, scaled off this entry's own " +
+                                  "working weight (see the WARMUP SETS instructions below for the ramp).",
+                              },
+                            },
+                            required: ["sets_reps", "suggested_weight"],
+                          },
+                        },
                       },
                       required: ["exercise_id", "sets_reps"],
                     },
@@ -107,6 +139,7 @@ export type PhaseWeek = {
       tempo?: string;
       rest?: string;
       notes?: string;
+      warmup?: Array<{ sets_reps: string; suggested_weight: number }>;
     }>;
   }>;
 };
@@ -155,6 +188,18 @@ export async function runPhaseBuilder(
       : "Include day types from the priority-order table below up to this athlete's days/week, in that same " +
         "weekly sequence, using each included day's fixed slot order and this phase's dosing table.",
     dayStructureTemplates,
+    "",
+    "# WARMUP SETS",
+    "For every Tier 1 main-lift entry whose sets_reps prescribes a specific working weight " +
+      "(not a percentage-only, bodyweight, or no-fixed-load scheme), attach 2-3 ramping warmup sets " +
+      "in that entry's own `warmup` array — lighter to heavier, each with its own sets_reps and a " +
+      "suggested_weight in lb. Scale the ramp off THIS entry's own working weight, rounded to a " +
+      "sensible gym increment (nearest 5 lb, or nearest 2.5 lb for lighter/accessory-adjacent lifts): " +
+      "roughly 40-50% of working weight for the first set at a slightly higher rep count (e.g. 1x5), " +
+      "roughly 60-70% for the second set at a mid rep count (e.g. 1x3), and for heavier working " +
+      "weights add a third set at roughly 80-85% for 1x1-2. Skip the warmup array entirely for " +
+      "accessory, conditioning, mobility, plyometric, or core work, and for any Tier 1 entry that " +
+      "has no single fixed working weight to ramp toward.",
     "",
     "# MACROCYCLE SKELETON — THIS PHASE",
     JSON.stringify(input.phase, null, 2),

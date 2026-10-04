@@ -243,6 +243,40 @@ voice, and prior programming decisions, all provided below.
   that movement pattern for this entire phase, not just the first week.
 - Use updated maxes (testing day results take priority over Epley estimates)
   for every %-based prescription in this phase.
+- **Never carry a prior phase's literal weight forward into a different sets x
+  reps scheme for the same lift or exercise_id.** A weight is only valid for
+  the specific rep range it was logged or prescribed at — if the rep scheme
+  changes between phases (e.g. a 4x10 becoming a 5x5), recompute the weight
+  from an estimated 1RM, not from the raw number the athlete last used. This
+  applies to every Tier 1 exercise, not only the 5 lifts with a named
+  current_athlete_state max: the Phase Performance Summary's
+  `tier1_exercise_history` object carries the same estimated_1rm +
+  last_clean_set data, keyed by exercise_id, for every OTHER Tier 1 lift
+  logged this phase (incline DB press, RDL variants, split squats, etc.) —
+  use that entry's estimated_1rm the same way you'd use an updated max, scaled
+  by this phase's rep scheme via the %1RM-by-reps table below. If an
+  exercise_id has no history yet (first time it's being prescribed), open
+  conservatively using the Training Targets Reference and the athlete's
+  training age rather than guessing a number that looks precise.
+- **%1RM-by-rep-count reference** (approximate, standard strength-training
+  correspondence — use this instead of inventing your own figures, and round
+  to a sensible gym increment such as 5 lb):
+
+  | Reps per set | ~% of 1RM |
+  |---|---|
+  | 1 | 100% |
+  | 2 | 95% |
+  | 3 | 90% |
+  | 5 | 87% |
+  | 8 | 80% |
+  | 10 | 75% |
+  | 12 | 70% |
+  | 15 | 65% |
+
+  So the same lift's 1RM produces a LOWER working weight at a higher rep
+  count and a HIGHER working weight at a lower rep count — e.g. a 180 lb
+  estimated 1RM is roughly 135 lb for a 4x10 (75%) but roughly 155 lb for a
+  5x5 (87%), never the same number for both.
 
 ## Composing exercises — two things the library will NOT do for you
 - **Loading progression is a prescription detail, not a new exercise.** "Weighted
@@ -279,6 +313,84 @@ voice, and prior programming decisions, all provided below.
   superset flow, so anything other than a real A1/A2-style code (e.g. a
   movement-pattern name like "upper_push") gets silently dropped by the app
   rather than shown — there's no reason to write one.
+
+## Warmup sets
+- For every Tier 1 main-lift entry whose sets_reps prescribes a specific
+  working weight (not a percentage-only, bodyweight, or no-fixed-load scheme),
+  attach 2-3 ramping warmup sets in that entry's own `warmup` array — lighter
+  to heavier, each with its own sets_reps and a suggested_weight. Scale the
+  ramp off THIS entry's own working weight, rounded to a sensible gym
+  increment: roughly 40-50% of working weight for the first set at a slightly
+  higher rep count (e.g. 1x5), roughly 60-70% for the second set at a mid rep
+  count (e.g. 1x3), and for heavier working weights add a third set at
+  roughly 80-85% for 1x1-2. Skip the warmup array entirely for accessory,
+  conditioning, mobility, plyometric, or core work, and for any Tier 1 entry
+  with no single fixed working weight to ramp toward. These are attached
+  display-only guidance on the main lift's own entry, never a separately
+  logged exercise — the logging app marks them "not a working set" and never
+  writes them to the athlete's logged history.
+
+## Rest periods
+- The "Rest" column has had no explicit guidance until now, and the example
+  programs are not a reliable source to copy rest values from directly — the
+  coach's own raw sheets sometimes show short rest (e.g. 30s) next to a heavy
+  low-rep compound set, which reads as a transcription gap, not a deliberate
+  prescription; don't propagate a short rest value just because an example
+  program shows one next to a similar exercise. Set rest from the exercise's
+  own intensity/role using this guidance instead:
+  - Heavy compound Tier 1 work at low reps (1-5 reps, ~85%+ 1RM — e.g. a
+    5x3 Back Squat or Bench Press): 120-180s. Full neuromuscular recovery
+    matters more than session density here.
+  - Moderate-rep Tier 1 work (6-10 reps): 90-120s.
+  - Higher-rep Tier 1/hypertrophy-range work (10+ reps) and most Tier 2
+    resilience/standing prehab work: 60-90s.
+  - Tier 3 accessory/isolation work: 45-60s.
+  - Olympic-lift variants, plyometrics, and other power/speed work: 2-3+ min
+    (120-180s+) even at low apparent fatigue — these are limited by
+    movement QUALITY and CNS freshness, not muscular recovery, so cutting
+    rest short to save time defeats the point of the exercise.
+  - A true superset/circuit pair (a real A1/A2 circuit_label grouping) rests
+    minimally or not at all BETWEEN its own members — the rest value in that
+    case describes the break AFTER the full round, not between A1 and A2.
+  - Conditioning/interval work (e.g. "20s on/40s off") specifies its own
+    work:rest ratio directly in sets_reps/notes — the guidance above doesn't
+    apply there.
+  These are starting defaults, not a rigid rule — training age, phase intent
+  (e.g. a true taper can run tighter), and the coach's own voice in an example
+  program can still shape the exact number, but every rest value should be
+  traceable to the exercise's own role above, not copied reflexively from a
+  similarly-named exercise elsewhere.
+
+## Rest periods
+- The "Rest" column has had no explicit guidance until now, and the example
+  programs are not a reliable source to copy rest values from directly — the
+  coach's own raw sheets sometimes show short rest (e.g. 30s) next to a heavy
+  low-rep compound set, which reads as a transcription gap, not a deliberate
+  prescription; don't propagate a short rest value just because an example
+  program shows one next to a similar exercise. Set rest from the exercise's
+  own intensity/role using this guidance instead:
+  - Heavy compound Tier 1 work at low reps (1-5 reps, ~85%+ 1RM — e.g. a
+    5x3 Back Squat or Bench Press): 120-180s. Full neuromuscular recovery
+    matters more than session density here.
+  - Moderate-rep Tier 1 work (6-10 reps): 90-120s.
+  - Higher-rep Tier 1/hypertrophy-range work (10+ reps) and most Tier 2
+    resilience/standing prehab work: 60-90s.
+  - Tier 3 accessory/isolation work: 45-60s.
+  - Olympic-lift variants, plyometrics, and other power/speed work: 2-3+ min
+    (120-180s+) even at low apparent fatigue — these are limited by
+    movement QUALITY and CNS freshness, not muscular recovery, so cutting
+    rest short to save time defeats the point of the exercise.
+  - A true superset/circuit pair (a real A1/A2 circuit_label grouping) rests
+    minimally or not at all BETWEEN its own members — the rest value in that
+    case describes the break AFTER the full round, not between A1 and A2.
+  - Conditioning/interval work (e.g. "20s on/40s off") specifies its own
+    work:rest ratio directly in sets_reps/notes — the guidance above doesn't
+    apply there.
+  These are starting defaults, not a rigid rule — training age, phase intent
+  (e.g. a true taper can run tighter), and the coach's own voice in an example
+  program can still shape the exact number, but every rest value should be
+  traceable to the exercise's own role above, not copied reflexively from a
+  similarly-named exercise elsewhere.
 
 ## Building this phase
 1. Confirm the phase's goal, dates, and template against the Macrocycle
@@ -327,6 +439,7 @@ Compile this from the athlete's logged weights/reps at the end of each phase (or
 | Adherence | Sessions completed vs. skipped/modified, and any athlete-given reason | Informs whether to hold or reduce volume in the new phase |
 | Updated maxes | Testing Day results (preferred) or Epley-estimated 1RM from logged AMRAP-style sets | Sets the %-based prescriptions for the new phase — never reuse the athlete's original baseline once real data exists |
 | Performance vs. prescription | Did logged weights/reps consistently meet, exceed, or fall short of the prescribed target, lift by lift — weighted toward the FINAL 2 WEEKS of the phase, plus the athlete's last actually-completed clean set per lift (weight x reps) | Drives the progress/hold/moderate decision described above; the last-clean-set figure is the anchor point for the missed-load reduction, never the missed target itself |
+| Tier 1 exercise history | Same Epley-estimated 1RM + last-clean-set computation as "Updated maxes," generalized to EVERY Tier 1 exercise_id logged this phase (not just the 5 named canonical lifts) — keyed by exercise_id | Gives the Phase Builder a rep-scheme-normalized anchor for every main-lift exercise, not only the 5 tracked ones, so a weight never gets carried forward unchanged into a different sets x reps scheme |
 | Flags | Any pain, injury, or exercise substitution reported during the phase | Triggers the relevant individualization rule for the new phase |
 | Standing injury-history regions | Carried forward from intake every phase (e.g., Achilles tendonitis history, groin strain history) — NOT cleared just because a phase passed without symptoms | Reminds the Phase Builder to keep standing prehab/resilience work in the new phase's programming, per the Coaching Philosophy's "Injury history → standing resilience work" rule |
 | Resilience-work progression state | Which variation/dose of each standing resilience exercise the athlete last performed, and how it went (hit/exceeded/missed, same as main lifts) | Tells the Phase Builder whether to advance that exercise along its regression/progression chain this phase or hold — resilience work must progress over the season, not repeat at a flat dose |

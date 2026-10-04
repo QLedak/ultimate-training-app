@@ -7,7 +7,7 @@ import { parsePrescribedTarget, parseRestSeconds, parseTimedTarget } from "@/lib
 import { suggestNextWeight } from "@/lib/training/autoregulate";
 import { EFFORT_SCALE, EffortLevel, effortToRir, rirToEffort } from "@/lib/training/perceived-effort";
 import { isSupersetLabel, supersetGroupKey } from "@/lib/training/display-labels";
-import { startRestTimer, clearRestTimer } from "@/lib/training/rest-timer-store";
+import { startRestTimer, clearRestTimer, RestTimerState } from "@/lib/training/rest-timer-store";
 import { useRestTimer } from "@/components/training/useRestTimer";
 
 type SetResult = { set_number: number; weight_used: number | null; reps_completed: number | null; rir: number | null };
@@ -38,6 +38,11 @@ type SessionDetail = {
     tempo: string | null;
     rest: string | null;
     coach_notes: string | null;
+    alternatives: Array<{ exercise_id: string; exercise_name: string }>;
+    // Ramping warmup sets for this lift, lightest to heaviest — attached
+    // display-only guidance, never a separately logged set. Empty/absent for
+    // anything that isn't a Tier-1 main lift with a fixed working weight.
+    warmup: Array<{ sets_reps: string; suggested_weight: number }>;
     logged: {
       weight_used: number | null;
       reps_completed: number | null;
@@ -596,6 +601,11 @@ export default function SessionLogPage() {
               <span className="text-xs text-slate-500">{ex.prescribed_target || "—"}</span>
             </div>
             {ex.cue && <p className="mt-1 text-xs text-slate-500">{ex.cue}</p>}
+            {ex.warmup && ex.warmup.length > 0 && (
+              <p className="mt-1 text-xs text-amber-700">
+                + {ex.warmup.length} warmup set{ex.warmup.length === 1 ? "" : "s"}
+              </p>
+            )}
             {loggedExerciseIds.has(ex.exercise_id) && (
               <span className="mt-1 inline-block rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
                 Logged
@@ -806,7 +816,7 @@ function GuidedWorkout({
   const [initialized, setInitialized] = useState(false);
   const [finishing, setFinishing] = useState(false);
 
-  const { secondsLeft: restSecondsLeft } = useRestTimer();
+  const { state: restState, secondsLeft: restSecondsLeft } = useRestTimer();
 
   const steps = buildSteps(exercises);
 
@@ -1044,15 +1054,13 @@ function GuidedWorkout({
         />
       </div>
 
-      {restSecondsLeft != null && restSecondsLeft > 0 && (
-        <RestBanner secondsLeft={restSecondsLeft} onSkip={() => clearRestTimer()} />
-      )}
-
       {step.kind === "single" ? (
         <SingleExerciseStep
           exercise={stepExercises[0]}
           weekType={session.week_type}
           state={states[stepExercises[0].exercise_id]}
+          restState={restState}
+          restSecondsLeft={restSecondsLeft}
           onUpdateExercise={(patch) => updateExerciseState(stepExercises[0].exercise_id, patch)}
           onUpdateSet={(i, patch) => updateSet(stepExercises[0].exercise_id, i, patch)}
           onAddSet={() => addSet(stepExercises[0].exercise_id)}
@@ -1065,6 +1073,8 @@ function GuidedWorkout({
           exercises={stepExercises}
           states={states}
           weekType={session.week_type}
+          restState={restState}
+          restSecondsLeft={restSecondsLeft}
           onUpdateExercise={updateExerciseState}
           onUpdateSet={updateSet}
           onAddSet={addSet}
@@ -1453,6 +1463,8 @@ function ExerciseGuidedBody({
   exercise,
   state,
   weekType,
+  restState,
+  restSecondsLeft,
   onUpdateExercise,
   onUpdateSet,
   onAddSet,
@@ -1463,6 +1475,8 @@ function ExerciseGuidedBody({
   exercise: SessionDetail["exercises"][number];
   state: GuidedExerciseState;
   weekType: "build" | "deload" | "test";
+  restState: RestTimerState | null;
+  restSecondsLeft: number | null;
   onUpdateExercise: (patch: Partial<GuidedExerciseState>) => void;
   onUpdateSet: (setIndex: number, patch: Partial<GuidedSetState>) => void;
   onAddSet: () => void;
@@ -1473,6 +1487,17 @@ function ExerciseGuidedBody({
   const timed = parseTimedTarget(exercise.prescribed_target ?? "");
   const hasUnloggedSets = state.sets.some((s) => !s.logged);
   const multipleUnlogged = state.sets.filter((s) => !s.logged).length > 1;
+
+  // The rest timer belongs right under whichever set just triggered it — the
+  // most recently logged one (doneIndex - 1) — rather than pinned above the
+  // whole exercise the way it used to be, so it reads as "resting after
+  // THIS set" instead of a disconnected banner at the top of the page.
+  const restActiveHere =
+    restState != null &&
+    restState.exerciseId === exercise.exercise_id &&
+    restSecondsLeft != null &&
+    restSecondsLeft > 0;
+  const restAfterSetIndex = restActiveHere ? state.doneIndex - 1 : -1;
 
   return (
     <div className="space-y-3">
@@ -1487,17 +1512,23 @@ function ExerciseGuidedBody({
       )}
 
       {state.sets.map((set, i) => (
-        <GuidedSetRow
-          key={i}
-          setNumber={i + 1}
-          tier={exercise.tier}
-          set={set}
-          weekType={weekType}
-          timedSeconds={timed?.seconds ?? null}
-          onChange={(patch) => onUpdateSet(i, patch)}
-          onLog={() => onLogSet(i)}
-          onRemove={state.sets.length > 1 ? () => onRemoveSet(i) : undefined}
-        />
+        <div key={i}>
+          <GuidedSetRow
+            setNumber={i + 1}
+            tier={exercise.tier}
+            set={set}
+            weekType={weekType}
+            timedSeconds={timed?.seconds ?? null}
+            onChange={(patch) => onUpdateSet(i, patch)}
+            onLog={() => onLogSet(i)}
+            onRemove={state.sets.length > 1 ? () => onRemoveSet(i) : undefined}
+          />
+          {i === restAfterSetIndex && (
+            <div className="mt-3">
+              <RestBanner secondsLeft={restSecondsLeft!} onSkip={() => clearRestTimer()} />
+            </div>
+          )}
+        </div>
       ))}
 
       {hasUnloggedSets && (
@@ -1516,15 +1547,14 @@ function ExerciseGuidedBody({
           I did something different than prescribed
         </label>
         {state.substituted && (
-          <div className="mt-2 flex gap-2">
-            <input
-              placeholder="What did you do instead?"
-              className={inputClass}
+          <div className="mt-2 space-y-2">
+            <AlternativeExerciseSelect
+              alternatives={exercise.alternatives}
               value={state.substitutedExerciseId}
-              onChange={(e) => onUpdateExercise({ substitutedExerciseId: e.target.value })}
+              onChange={(v) => onUpdateExercise({ substitutedExerciseId: v })}
             />
             <input
-              placeholder="Why?"
+              placeholder="Why? (no equipment, different gym, etc.)"
               className={inputClass}
               value={state.substitutionReason}
               onChange={(e) => onUpdateExercise({ substitutionReason: e.target.value })}
@@ -1542,6 +1572,45 @@ function ExerciseGuidedBody({
           </label>
         )}
       </div>
+    </div>
+  );
+}
+
+// Ramping warmup sets, lightest to heaviest, clearly marked as NOT working
+// sets. Purely informational — local-only "done" checkboxes, never logged to
+// the database (that's the whole point: a warmup never gets its own
+// exercise_id row, so it can't pollute logged_exercises or the per-exercise_id
+// state the weight-progression history and logging UI depend on).
+function WarmupChecklist({ warmup }: { warmup: Array<{ sets_reps: string; suggested_weight: number }> }) {
+  const [done, setDone] = useState<boolean[]>(() => warmup.map(() => false));
+
+  if (!warmup || warmup.length === 0) return null;
+
+  return (
+    <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3">
+      <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
+        Warmup — not a working set
+      </p>
+      <ul className="mt-2 space-y-1">
+        {warmup.map((w, i) => (
+          <li key={i} className="flex items-center gap-2 text-sm text-amber-900">
+            <input
+              type="checkbox"
+              checked={done[i] ?? false}
+              onChange={(e) =>
+                setDone((prev) => {
+                  const next = [...prev];
+                  next[i] = e.target.checked;
+                  return next;
+                })
+              }
+            />
+            <span className={done[i] ? "line-through opacity-60" : ""}>
+              {w.sets_reps} @ {w.suggested_weight} lb
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -1565,6 +1634,7 @@ function ExerciseHeader({ exercise }: { exercise: SessionDetail["exercises"][num
           {exercise.last_time.reps_completed ? ` x ${exercise.last_time.reps_completed}` : ""}
         </p>
       )}
+      <WarmupChecklist warmup={exercise.warmup} />
     </>
   );
 }
@@ -1573,6 +1643,8 @@ function SingleExerciseStep({
   exercise,
   weekType,
   state,
+  restState,
+  restSecondsLeft,
   onUpdateExercise,
   onUpdateSet,
   onAddSet,
@@ -1583,6 +1655,8 @@ function SingleExerciseStep({
   exercise: SessionDetail["exercises"][number];
   weekType: "build" | "deload" | "test";
   state: GuidedExerciseState;
+  restState: RestTimerState | null;
+  restSecondsLeft: number | null;
   onUpdateExercise: (patch: Partial<GuidedExerciseState>) => void;
   onUpdateSet: (setIndex: number, patch: Partial<GuidedSetState>) => void;
   onAddSet: () => void;
@@ -1598,6 +1672,8 @@ function SingleExerciseStep({
           exercise={exercise}
           state={state}
           weekType={weekType}
+          restState={restState}
+          restSecondsLeft={restSecondsLeft}
           onUpdateExercise={onUpdateExercise}
           onUpdateSet={onUpdateSet}
           onAddSet={onAddSet}
@@ -1622,6 +1698,8 @@ function SupersetStep({
   exercises,
   states,
   weekType,
+  restState,
+  restSecondsLeft,
   onUpdateExercise,
   onUpdateSet,
   onAddSet,
@@ -1632,6 +1710,8 @@ function SupersetStep({
   exercises: SessionDetail["exercises"];
   states: Record<string, GuidedExerciseState>;
   weekType: "build" | "deload" | "test";
+  restState: RestTimerState | null;
+  restSecondsLeft: number | null;
   onUpdateExercise: (exerciseId: string, patch: Partial<GuidedExerciseState>) => void;
   onUpdateSet: (exerciseId: string, setIndex: number, patch: Partial<GuidedSetState>) => void;
   onAddSet: (exerciseId: string) => void;
@@ -1686,6 +1766,20 @@ function SupersetStep({
                     exercise={ex}
                     state={state}
                     weekType={weekType}
+                    // Not wired to restState/restSecondsLeft here: a superset's
+                    // rest timer is started once per completed ROUND (every
+                    // exercise in the group reaching the same set count), keyed
+                    // on whichever exercise's set happened to finish the round
+                    // (see logSupersetSet) -- not necessarily the exercise
+                    // that's "active" for the NEXT round, which is recalculated
+                    // right above by lowest doneIndex. Showing it per-card here
+                    // would attach it to the wrong exercise (or not render at
+                    // all once the triggering exercise is no longer the active
+                    // one). The group-level banner below the card stack is the
+                    // correct "underneath the set that was just logged"
+                    // placement for a superset as a unit.
+                    restState={null}
+                    restSecondsLeft={null}
                     onUpdateExercise={(patch) => onUpdateExercise(ex.exercise_id, patch)}
                     onUpdateSet={(i, patch) => onUpdateSet(ex.exercise_id, i, patch)}
                     onAddSet={() => onAddSet(ex.exercise_id)}
@@ -1703,6 +1797,15 @@ function SupersetStep({
           );
         })}
       </div>
+
+      {restState &&
+        restSecondsLeft != null &&
+        restSecondsLeft > 0 &&
+        exercises.some((ex) => ex.exercise_id === restState.exerciseId) && (
+          <div className="mt-4">
+            <RestBanner secondsLeft={restSecondsLeft} onSkip={() => clearRestTimer()} />
+          </div>
+        )}
     </div>
   );
 }
@@ -1757,6 +1860,7 @@ function ExerciseRow({
           {exercise.last_time.reps_completed ? ` x ${exercise.last_time.reps_completed}` : ""}
         </p>
       )}
+      <WarmupChecklist warmup={exercise.warmup} />
 
       {exercise.tier === 1 && (
         <div className="space-y-2">
@@ -1794,7 +1898,7 @@ function ExerciseRow({
               This was a true 1RM/PR attempt (not an estimate)
             </label>
           )}
-          <SubstitutionFields form={form} onChange={onChange} />
+          <SubstitutionFields alternatives={exercise.alternatives} form={form} onChange={onChange} />
           <input
             placeholder="Load descriptor (band color, vest, etc — optional)"
             className={inputClass}
@@ -1829,7 +1933,7 @@ function ExerciseRow({
               onChange={(e) => onChange({ reps: e.target.value })}
             />
           </div>
-          <SubstitutionFields form={form} onChange={onChange} />
+          <SubstitutionFields alternatives={exercise.alternatives} form={form} onChange={onChange} />
           <input
             placeholder="Notes (optional)"
             className={inputClass}
@@ -1869,10 +1973,82 @@ function ExerciseRow({
   );
 }
 
+/**
+ * The substitution picker shared by both the guided flow and the manual
+ * form: a dropdown of exercise-library alternatives that share this
+ * exercise's movement_pattern (see /api/sessions/[id]'s `alternatives`
+ * field) — e.g. a Barbell Bench Press swap offers DB Bench, Incline DB
+ * Press, Cable Chest Press, etc., never a pullup or a squat. Picking "
+ * Something else" falls back to free text, for a substitution that isn't in
+ * the library at all (a different gym's weird machine, a band setup, etc.).
+ * This also fixes a real correctness gap the old free-text-only field had:
+ * downstream code (app/api/sessions/[id]/log/route.ts, lib/pps/compile.ts)
+ * already looks `substituted_exercise_id` up in the exercise_library table
+ * to derive its logging tier — a free-typed name almost never matched a
+ * real exercise_id, so that lookup was quietly failing most of the time.
+ * Picking from this list always stores a real exercise_id when one applies.
+ */
+function AlternativeExerciseSelect({
+  alternatives,
+  value,
+  onChange,
+}: {
+  alternatives: Array<{ exercise_id: string; exercise_name: string }>;
+  value: string;
+  onChange: (exerciseId: string) => void;
+}) {
+  const OTHER = "__other__";
+  const isKnownAlternative = alternatives.some((a) => a.exercise_id === value);
+  const [otherSelected, setOtherSelected] = useState(value !== "" && !isKnownAlternative);
+  const selectValue = otherSelected ? OTHER : value;
+
+  return (
+    <div className="space-y-2">
+      <select
+        className={inputClass}
+        value={selectValue}
+        onChange={(e) => {
+          const v = e.target.value;
+          if (v === OTHER) {
+            setOtherSelected(true);
+            onChange("");
+          } else {
+            setOtherSelected(false);
+            onChange(v);
+          }
+        }}
+      >
+        <option value="">What did you do instead?</option>
+        {alternatives.map((a) => (
+          <option key={a.exercise_id} value={a.exercise_id}>
+            {a.exercise_name}
+          </option>
+        ))}
+        <option value={OTHER}>Something else (type it in)</option>
+      </select>
+      {otherSelected && (
+        <input
+          placeholder="What exercise did you do instead?"
+          className={inputClass}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      )}
+      {alternatives.length === 0 && !otherSelected && (
+        <p className="text-xs text-slate-400">
+          No listed alternatives for this exercise — pick &quot;Something else&quot; to describe what you did.
+        </p>
+      )}
+    </div>
+  );
+}
+
 function SubstitutionFields({
+  alternatives,
   form,
   onChange,
 }: {
+  alternatives: Array<{ exercise_id: string; exercise_name: string }>;
   form: ExerciseFormState;
   onChange: (patch: Partial<ExerciseFormState>) => void;
 }) {
@@ -1883,15 +2059,14 @@ function SubstitutionFields({
         I did something different than prescribed
       </label>
       {form.substituted && (
-        <div className="mt-1 flex gap-2">
-          <input
-            placeholder="What did you do instead? (exercise name/id)"
-            className={inputClass}
+        <div className="mt-1 space-y-2">
+          <AlternativeExerciseSelect
+            alternatives={alternatives}
             value={form.substitutedExerciseId}
-            onChange={(e) => onChange({ substitutedExerciseId: e.target.value })}
+            onChange={(v) => onChange({ substitutedExerciseId: v })}
           />
           <input
-            placeholder="Why?"
+            placeholder="Why? (no equipment, different gym, etc.)"
             className={inputClass}
             value={form.substitutionReason}
             onChange={(e) => onChange({ substitutionReason: e.target.value })}

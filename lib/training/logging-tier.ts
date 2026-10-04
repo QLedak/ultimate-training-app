@@ -18,9 +18,18 @@
  * history), and the lighter Tier-2 logging burden — plus its resilience-
  * progression tracking in the Phase Performance Summary — is what matters
  * for those, not full %-based Tier-1 logging.
+ *
+ * Note on warmups: a warmup ramp is attached metadata on a main lift's own
+ * prescribed-exercise entry (see the `warmup` array in phase-builder.ts's
+ * output schema), not a separate exercises[] row with its own exercise_id —
+ * so it never flows through this function at all. There is nothing here to
+ * special-case for warmups.
  */
 
-const TIER_1_MOVEMENT_PATTERNS = new Set([
+// Exported so lib/pps/compile.ts can identify every Tier 1 exercise_id
+// logged in a phase (not just the 5 named canonical barbell lifts) when
+// building the generic per-exercise progression history below.
+export const TIER_1_MOVEMENT_PATTERNS = new Set([
   "Squat",
   "Hinge",
   "Upper Push",

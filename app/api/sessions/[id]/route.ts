@@ -64,6 +64,38 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   const libraryByExerciseId = new Map((libraryRows ?? []).map((r) => [r.exercise_id, r]));
   const loggedByExerciseId = new Map((loggedExercises ?? []).map((e) => [e.exercise_id, e]));
 
+  // "Swap this for something else" dropdown: every other exercise sharing
+  // the SAME movement_pattern tag (e.g. "Upper Push" covers barbell bench,
+  // DB bench, incline DB press, cable chest press, etc.) — coarse-grained
+  // but data-driven, and it's exactly what keeps a bench press swap landing
+  // on another press instead of a pullup or a squat. Deliberately NOT
+  // filtered by the athlete's saved equipment profile here: the whole point
+  // is "I'm at a different gym / don't have what's normally prescribed
+  // today," so every pattern-matched alternative is offered regardless of
+  // what's on file, and the athlete picks whatever they actually have access
+  // to right now.
+  const patterns = Array.from(
+    new Set((libraryRows ?? []).map((r) => r.movement_pattern).filter((p): p is string => !!p))
+  );
+  const { data: alternativeRows, error: alternativesError } = patterns.length
+    ? await supabase
+        .from("exercise_library")
+        .select("exercise_id, exercise_name, movement_pattern")
+        .in("movement_pattern", patterns)
+    : { data: [], error: null };
+  if (alternativesError) return dbError("sessions/[id]", alternativesError);
+
+  const alternativesByPattern = new Map<string, Array<{ exercise_id: string; exercise_name: string }>>();
+  for (const row of alternativeRows ?? []) {
+    const pattern = row.movement_pattern as string;
+    const list = alternativesByPattern.get(pattern) ?? [];
+    list.push({ exercise_id: row.exercise_id as string, exercise_name: row.exercise_name as string });
+    alternativesByPattern.set(pattern, list);
+  }
+  for (const list of alternativesByPattern.values()) {
+    list.sort((a, b) => a.exercise_name.localeCompare(b.exercise_name));
+  }
+
   // "Last time" pre-fill: most recent OTHER session's logged_exercises row
   // per exercise_id, regardless of how long ago (spec: "regardless of how
   // long ago it was last performed"). This is presentation-only pre-fill,
@@ -97,6 +129,14 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       movement_pattern: libraryRow?.movement_pattern ?? null,
       injury_considerations: (libraryRow?.injury_considerations as string[] | undefined) ?? null,
     });
+    // Ramping warmup sets for this lift, if the Phase Builder attached any —
+    // attached metadata on THIS SAME prescribed-exercise entry, never a
+    // separate exercises[] row, so it can't collide with the per-exercise_id
+    // state keying the logging UI and weight-history reads depend on. Purely
+    // informational/display: the athlete never logs these to the database.
+    const warmup = Array.isArray(prescribed.warmup)
+      ? (prescribed.warmup as Array<{ sets_reps: string; suggested_weight: number }>)
+      : [];
     const logged = loggedByExerciseId.get(exerciseId) ?? null;
     const lastTime = lastTimeByExerciseId.get(exerciseId) ?? null;
 
@@ -105,17 +145,25 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       exercise_name: libraryRow?.exercise_name ?? humanizeExerciseId(exerciseId),
       cue: libraryRow?.cue ?? null,
       tier,
+      warmup,
       // Only a real A1/A2-style superset code is shown/grouped on — see
       // lib/training/display-labels.ts for why this guard exists.
       circuit_label: isSupersetLabel(prescribed.circuit_label) ? (prescribed.circuit_label as string).trim() : null,
       prescribed_target: prescribed.sets_reps ?? null,
       prescribed_weight_hint:
-        tier !== 3 && typeof prescribed.sets_reps === "string"
-          ? parsePrescribedWeightHint(prescribed.sets_reps)
+        tier !== 3
+          ? typeof prescribed.sets_reps === "string"
+            ? parsePrescribedWeightHint(prescribed.sets_reps)
+            : null
           : null,
       tempo: prescribed.tempo ?? null,
       rest: prescribed.rest ?? null,
       coach_notes: prescribed.notes ?? null,
+      alternatives: libraryRow?.movement_pattern
+        ? (alternativesByPattern.get(libraryRow.movement_pattern as string) ?? []).filter(
+            (alt) => alt.exercise_id !== exerciseId
+          )
+        : [],
       logged,
       last_time: lastTime
         ? {

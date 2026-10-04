@@ -4,7 +4,9 @@ import {
   CANONICAL_LIFT_EXERCISE_IDS,
   CANONICAL_LIFT_STATE_COLUMN,
   CanonicalLift,
+  canonicalLiftForExercise,
 } from "../training/canonical-lifts";
+import { TIER_1_MOVEMENT_PATTERNS } from "../training/logging-tier";
 import { classifyPerformance } from "./parse-prescription";
 
 const PAIN_KEYWORDS = ["pain", "hurt", "sore", "tweak", "injur", "sharp"];
@@ -66,7 +68,7 @@ export async function compilePhasePerformanceSummary(
         .order("submitted_at", { ascending: false })
         .limit(1)
         .single(),
-      supabase.from("exercise_library").select("exercise_id, injury_considerations"),
+      supabase.from("exercise_library").select("exercise_id, exercise_name, movement_pattern, injury_considerations"),
       supabase
         .from("macrocycle_phases")
         .select("*")
@@ -218,6 +220,76 @@ export async function compilePhasePerformanceSummary(
     }
   }
 
+  // ---- Per-exercise Tier 1 progression history (weight-estimation audit) ----
+  // A canonical lift (back_squat, bench_press, etc.) already gets a durable,
+  // bodyweight-relative 1RM carried in current_athlete_state across phases.
+  // Every OTHER Tier 1 exercise_id (incline DB press, RDL, Bulgarian split
+  // squat, a weighted dip/pull-up variant outside the 5 mapped IDs, etc.) had
+  // no equivalent — the Phase Builder had nothing but a raw weight_used
+  // number to anchor a new rep-scheme's weight on. This mirrors the canonical
+  // loop above (same Epley-estimate-from-high-confidence-sets, same
+  // last-clean-set anchor) but keys by exercise_id directly and covers every
+  // Tier 1 movement pattern, so the model always has a rep-scheme-normalized
+  // number to compute THIS phase's weight from instead of reusing a prior
+  // phase's literal weight under a different sets_reps scheme.
+  const movementPatternByExercise = new Map<string, string | null>(
+    (exerciseLibrary ?? []).map((row) => [row.exercise_id, (row.movement_pattern as string | null) ?? null])
+  );
+  const exerciseNameByExercise = new Map<string, string>(
+    (exerciseLibrary ?? []).map((row) => [row.exercise_id, (row.exercise_name as string) ?? row.exercise_id])
+  );
+  const tier1ExerciseIds = new Set(
+    (loggedExercises ?? [])
+      .map((e) => e.exercise_id as string)
+      .filter((id) => {
+        const pattern = movementPatternByExercise.get(id);
+        return pattern != null && TIER_1_MOVEMENT_PATTERNS.has(pattern);
+      })
+  );
+
+  const tier1ExerciseHistory: Record<string, unknown> = {};
+  for (const exerciseId of tier1ExerciseIds) {
+    const entriesForExercise = (loggedExercises ?? [])
+      .filter((e) => e.exercise_id === exerciseId)
+      .map((e) => ({ ...e, session: sessionById.get(e.session_id) }))
+      .filter((e) => e.session)
+      .sort((a, b) => new Date(a.session!.date).getTime() - new Date(b.session!.date).getTime());
+
+    if (entriesForExercise.length === 0) continue;
+
+    const lastClean = [...entriesForExercise]
+      .reverse()
+      .find(
+        (e) =>
+          classifyPerformance({
+            prescribedTarget: e.prescribed_target,
+            repsCompleted: e.reps_completed,
+            setsCompleted: e.sets_completed,
+            rir: e.rir,
+          }) !== "missed" && e.weight_used != null
+      );
+
+    const highConfidenceEstimates = entriesForExercise
+      .filter((e) => e.rir != null && e.rir <= 2 && e.weight_used != null && e.reps_completed != null)
+      .map((e) => epley1RM(e.weight_used as number, e.reps_completed as number));
+
+    tier1ExerciseHistory[exerciseId] = {
+      exercise_name: exerciseNameByExercise.get(exerciseId) ?? exerciseId,
+      // Cross-reference only — null unless this exercise_id is also one of
+      // the 5 lifts tracked in updated_maxes/current_athlete_state above.
+      canonical_lift: canonicalLiftForExercise(exerciseId),
+      estimated_1rm: highConfidenceEstimates.length > 0 ? Math.max(...highConfidenceEstimates) : null,
+      last_clean_set: lastClean
+        ? {
+            weight_used: lastClean.weight_used,
+            reps_completed: lastClean.reps_completed,
+            sets_reps_prescribed: lastClean.prescribed_target,
+            date: lastClean.session!.date,
+          }
+        : null,
+    };
+  }
+
   // ---- Flags ----
   const flags: string[] = [];
   for (const log of logs ?? []) {
@@ -295,6 +367,7 @@ export async function compilePhasePerformanceSummary(
       adherence,
       updated_maxes: updatedMaxes,
       performance_vs_prescription: performanceVsPrescription,
+      tier1_exercise_history: tier1ExerciseHistory,
       flags,
       resilience_progression_state: resilienceProgressionState,
       reason,

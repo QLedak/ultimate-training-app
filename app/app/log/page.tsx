@@ -115,7 +115,7 @@ function workoutIcon(dayLabel: string): { icon: string; title: string } {
 
 export default function LogDashboardPage() {
   const { athlete, authError, loadError: sessionLoadError } = useAthleteSession("/app/log");
-  const [view, setView] = useState<"week" | "month">("week");
+  const [view, setView] = useState<"week" | "month">("month");
   const [monthCursor, setMonthCursor] = useState(() => startOfMonth(new Date()));
   const [weekCursor, setWeekCursor] = useState(() => startOfWeek(new Date()));
   const [sessionsByDate, setSessionsByDate] = useState<Map<string, SessionSummary[]>>(new Map());
