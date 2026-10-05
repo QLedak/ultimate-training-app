@@ -1038,7 +1038,7 @@
     "space_requirements": "Confined Space Friendly, Low-Ceiling Friendly",
     "cue": "Load the hips back, swing the arms hard, and jump for maximum distance \u2014 land soft with the knees bent and stick it.",
     "regression": null,
-    "progression": null,
+    "progression": "PJ-040",
     "training_age": "novice",
     "season_tag": "Year-round",
     "injury_considerations": [],
@@ -3529,7 +3529,7 @@
     "space_requirements": "Confined Space Friendly, Low-Ceiling Friendly",
     "cue": "Load the hips, swing the arms, and hop for maximum distance on one leg \u2014 stick the landing balanced before you call the rep done.",
     "regression": null,
-    "progression": null,
+    "progression": "PJ-041",
     "training_age": "advanced",
     "season_tag": "Year-round",
     "injury_considerations": [],
@@ -7254,6 +7254,72 @@
     ],
     "contrast_pairing_tendon_specific": null,
     "notes": "Typical dose: 3x20-30s at moderate to hard effort.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "PJ-040",
+    "exercise_name": "Band-Resisted Broad Jump",
+    "priority_tier": "extended",
+    "movement_pattern": "Plyometric / Jump",
+    "primary_purpose": "Horizontal power with band resistance; trains hard, long horizontal force through the first push and a stuck landing.",
+    "equipment_needed": [
+      "bands"
+    ],
+    "equipment_needed_raw": "Bands",
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly, Low-Ceiling Friendly",
+    "cue": "Anchor the band behind you at hip height. Load the hips back, swing the arms hard, and jump forward against the band's pull \u2014 then land soft with the knees bent and stick it before the band drags you back.",
+    "regression": "PJ-006",
+    "progression": null,
+    "training_age": "advanced",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Typical dose: 3-4x3-4, full recovery. Use a band that lets you still reach near your normal jump distance. Use a rack, post or partner as the anchor.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "PJ-041",
+    "exercise_name": "Band-Resisted Single-Leg Broad Hop",
+    "priority_tier": "extended",
+    "movement_pattern": "Plyometric - Single-Leg / Ankle",
+    "primary_purpose": "Single-leg horizontal power with band resistance; builds the horizontal drive and landing control that carry over to accelerating off one leg.",
+    "equipment_needed": [
+      "bands"
+    ],
+    "equipment_needed_raw": "Bands",
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly, Low-Ceiling Friendly",
+    "cue": "Anchor the band behind you at hip height. Load the hips, swing the arms, and hop forward on one leg against the band \u2014 stick the landing balanced and don't let the band pull you out of position.",
+    "regression": "PJ-016",
+    "progression": null,
+    "training_age": "advanced",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Typical dose: 3x2-3/side, full recovery. Progress from the unresisted Single-Leg Hop for Distance (PJ-016). Bilateral version is PJ-040.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "PJ-042",
+    "exercise_name": "Jumping Lunge (Alternating Split Jump)",
+    "priority_tier": "extended",
+    "movement_pattern": "Plyometric / Jump",
+    "primary_purpose": "Alternating split-stance jump that builds explosive single-leg drive, hip extension power and landing control without a barbell.",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": null,
+    "equipment_all": [],
+    "space_requirements": "Requires Overhead Clearance",
+    "cue": "Start in a lunge, jump straight up, and switch legs in the air. Land soft in the opposite lunge with your front knee tracking over your toes, and reset your balance before the next rep.",
+    "regression": "LG-003",
+    "progression": null,
+    "training_age": "both",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Typical dose: 3x6-10 total jumps (3-5 per leg), full recovery between sets. Keep quality high; stop when landings get sloppy.",
     "is_active": true
   }
 ]
