@@ -148,7 +148,7 @@
     "regression": null,
     "progression": null,
     "training_age": "both",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": "Fill in",
@@ -170,7 +170,7 @@
     "regression": "UP-004",
     "progression": null,
     "training_age": "advanced",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -194,7 +194,7 @@
     "regression": "UP-003",
     "progression": "UP-009",
     "training_age": "advanced",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -218,7 +218,7 @@
     "regression": "UP-007",
     "progression": "UP-002",
     "training_age": "novice",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -240,7 +240,7 @@
     "regression": "UP-005",
     "progression": "UP-001",
     "training_age": "advanced",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -262,7 +262,7 @@
     "regression": "UP-008",
     "progression": "UP-004",
     "training_age": "novice",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -286,7 +286,7 @@
     "regression": "UP-007",
     "progression": "UP-003",
     "training_age": "novice",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -305,7 +305,7 @@
     "equipment_all": [],
     "space_requirements": null,
     "cue": "Straight line from head to heels \u2014 squeeze the glutes so the hips don't sag. Chest to the floor, then push the ground away hard.",
-    "regression": null,
+    "regression": "UP-017",
     "progression": "UP-003",
     "training_age": "novice",
     "season_tag": "Year-round",
@@ -330,7 +330,7 @@
     "regression": "UP-007",
     "progression": "UP-005",
     "training_age": "novice",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [
       "shoulder"
     ],
@@ -354,7 +354,7 @@
     "regression": "UP-002",
     "progression": null,
     "training_age": "advanced",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -376,7 +376,7 @@
     "regression": "UL-002",
     "progression": null,
     "training_age": "advanced",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -422,7 +422,7 @@
     "regression": "UL-004",
     "progression": null,
     "training_age": "advanced",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -738,7 +738,7 @@
     "regression": null,
     "progression": null,
     "training_age": "advanced",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -761,7 +761,9 @@
     "progression": "CR-005",
     "training_age": "novice",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -783,7 +785,9 @@
     "progression": "CR-003",
     "training_age": "novice",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -804,8 +808,10 @@
     "regression": "CR-003",
     "progression": null,
     "training_age": "advanced",
-    "season_tag": null,
-    "injury_considerations": [],
+    "season_tag": "Year-round",
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -827,7 +833,9 @@
     "progression": "CR-007",
     "training_age": "novice",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -850,7 +858,9 @@
     "progression": null,
     "training_age": "novice",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -873,7 +883,9 @@
     "progression": null,
     "training_age": "novice",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -894,8 +906,10 @@
     "regression": "CR-005",
     "progression": null,
     "training_age": "advanced",
-    "season_tag": null,
-    "injury_considerations": [],
+    "season_tag": "Year-round",
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -916,7 +930,7 @@
     "regression": null,
     "progression": "PJ-002",
     "training_age": "advanced",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -938,7 +952,7 @@
     "regression": "PJ-001, PJ-026",
     "progression": "PJ-027",
     "training_age": "advanced",
-    "season_tag": null,
+    "season_tag": "Off-season, Pre-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -960,7 +974,7 @@
     "regression": null,
     "progression": null,
     "training_age": "novice",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -982,7 +996,7 @@
     "regression": null,
     "progression": null,
     "training_age": "advanced",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -1004,7 +1018,7 @@
     "regression": null,
     "progression": null,
     "training_age": "advanced",
-    "season_tag": null,
+    "season_tag": "Off-season, Pre-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -1026,7 +1040,7 @@
     "regression": null,
     "progression": null,
     "training_age": "novice",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -1114,7 +1128,7 @@
     "regression": null,
     "progression": "SM-002",
     "training_age": "both",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -1136,7 +1150,7 @@
     "regression": "SM-001",
     "progression": null,
     "training_age": "both",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -1202,7 +1216,7 @@
     "regression": null,
     "progression": "SM-006",
     "training_age": "novice",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -1224,7 +1238,7 @@
     "regression": "SM-005",
     "progression": null,
     "training_age": "advanced",
-    "season_tag": null,
+    "season_tag": "Off-season, Pre-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -1246,7 +1260,7 @@
     "regression": "SM-002",
     "progression": null,
     "training_age": "advanced",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -1268,7 +1282,7 @@
     "regression": "SM-005",
     "progression": null,
     "training_age": "novice",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -1312,7 +1326,7 @@
     "regression": null,
     "progression": null,
     "training_age": "advanced",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -1566,7 +1580,9 @@
     "progression": "IS-007",
     "training_age": "novice",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "patellar_knee"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -1844,7 +1860,7 @@
     "regression": "IS-019",
     "progression": null,
     "training_age": "advanced",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -2146,7 +2162,9 @@
     "progression": "IS-034",
     "training_age": "novice",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -2169,7 +2187,9 @@
     "progression": null,
     "training_age": "advanced",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -2322,7 +2342,7 @@
     "regression": null,
     "progression": "PJ-001",
     "training_age": "novice",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -2344,7 +2364,7 @@
     "regression": null,
     "progression": null,
     "training_age": "advanced",
-    "season_tag": null,
+    "season_tag": "Off-season, Pre-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -2366,7 +2386,7 @@
     "regression": "PJ-003",
     "progression": null,
     "training_age": "novice",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -2388,7 +2408,7 @@
     "regression": null,
     "progression": "PJ-009",
     "training_age": "novice",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -2634,7 +2654,9 @@
     "progression": "CR-003",
     "training_age": "novice",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -2656,7 +2678,9 @@
     "progression": null,
     "training_age": "novice",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -2678,7 +2702,9 @@
     "progression": null,
     "training_age": "novice",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -2986,7 +3012,7 @@
     "regression": null,
     "progression": "CN-033",
     "training_age": "novice",
-    "season_tag": "Off-season, Pre-season",
+    "season_tag": "Off-season, Pre-season, In-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": "Zone 2 continuous, RPE 4-5 (talk-test: full sentences). Dose by phase \u2014 GPP/Reacclimation: 40-60 min; Hypertrophy: 30-45 min; Max Strength: 20-30 min; Power Conversion / Peak: 20-30 min as recovery only; in-season: 20-30 min optional. Run: steady jog. Bike/Row: steady cadence/split.",
@@ -3297,7 +3323,9 @@
     "progression": "IS-033",
     "training_age": "novice",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -3481,7 +3509,7 @@
     "regression": null,
     "progression": "PJ-020",
     "training_age": "advanced",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -3503,7 +3531,7 @@
     "regression": null,
     "progression": null,
     "training_age": "advanced",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": "IM-015 (Max Isometric Split Squat Hold)",
     "notes": null,
@@ -3550,7 +3578,7 @@
     "regression": "PJ-017",
     "progression": null,
     "training_age": "advanced",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -3867,7 +3895,9 @@
     "progression": "MB-005",
     "training_age": "novice",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "groin_adductor"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -4432,7 +4462,9 @@
     "progression": "CR-014",
     "training_age": "novice",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -4455,7 +4487,9 @@
     "progression": null,
     "training_age": "advanced",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -4477,7 +4511,9 @@
     "progression": null,
     "training_age": "advanced",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -4499,7 +4535,9 @@
     "progression": null,
     "training_age": "advanced",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -4522,7 +4560,9 @@
     "progression": null,
     "training_age": "novice",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -4544,7 +4584,9 @@
     "progression": null,
     "training_age": "advanced",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -4815,7 +4857,9 @@
     "progression": null,
     "training_age": "advanced",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -4993,7 +5037,9 @@
     "progression": null,
     "training_age": "novice",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "patellar_knee"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -5016,7 +5062,9 @@
     "progression": null,
     "training_age": "advanced",
     "season_tag": "Off-season, Pre-season",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "patellar_knee"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -5127,7 +5175,9 @@
     "progression": "IM-012",
     "training_age": "novice",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -5149,7 +5199,9 @@
     "progression": "IM-012",
     "training_age": "novice",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -5171,7 +5223,9 @@
     "progression": "CR-032",
     "training_age": "advanced",
     "season_tag": "Off-season, Pre-season",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -5238,7 +5292,9 @@
     "progression": null,
     "training_age": "advanced",
     "season_tag": "Off-season",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -5460,7 +5516,9 @@
     "progression": "IS-012",
     "training_age": "both",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "achilles_calf"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
     "is_active": true
@@ -5789,7 +5847,7 @@
     "regression": null,
     "progression": null,
     "training_age": "both",
-    "season_tag": null,
+    "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
@@ -6419,7 +6477,9 @@
     "progression": null,
     "training_age": "advanced",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "lower_back"
+    ],
     "contrast_pairing_tendon_specific": null,
     "notes": "Crunch-variation slot in Lower Body Strength Day's secondary-pattern core superset (and Upper Body Strength Day's rotational/sagittal core pairing) \u2014 the advanced-tier option alongside CR-028 (Dead Bug with Plate Pass).",
     "is_active": true
@@ -6579,7 +6639,7 @@
     "regression": null,
     "progression": "CN-025",
     "training_age": "both",
-    "season_tag": "Pre-season",
+    "season_tag": "Pre-season, In-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": "Work 20-30s at ~90-95% | Rest 90-150s (about 1:4-1:5) | 5-8 reps. Run: 150-200 yd. Bike: 20-30s hard. Row: 20-30s, about 18-24 strokes. RPE 8-9.",
@@ -6671,7 +6731,7 @@
     "regression": null,
     "progression": "CN-029",
     "training_age": "both",
-    "season_tag": "Off-season, Pre-season",
+    "season_tag": "Off-season, Pre-season, In-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": "Work 30s at ~90-95% | Rest 30s easy | 10-20 reps (1-2 blocks of 8-10, 3 min between blocks). Run: fast, smooth running. Bike: hard, repeatable cadence. Row: 30s steady hard rate. RPE 8.",
@@ -6790,6 +6850,410 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": "Work 10-15 min at ~70-80% HRmax | Rest 2-3 min easy | 2-3 reps. Run: steady run. Bike: steady spin. Row: steady rhythmic rowing. RPE 5-6.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "UP-017",
+    "exercise_name": "Incline / Elevated Push-Up",
+    "priority_tier": "extended",
+    "movement_pattern": "Upper Push",
+    "primary_purpose": "Easier push-up variation that builds toward the full push-up.",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": null,
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Hands on a bench, box or sturdy counter, body in one straight line from head to heels. Lower your chest to the edge, then push the surface away hard \u2014 the lower the surface, the harder it gets.",
+    "regression": null,
+    "progression": "UP-007",
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Progress by lowering the hand height until you reach the floor (Push-Ups, UP-007). Typical dose: 3x8-15.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "UL-013",
+    "exercise_name": "Band-Assisted Pull-Up / Chin-Up",
+    "priority_tier": "extended",
+    "movement_pattern": "Upper Pull",
+    "primary_purpose": "Builds toward unassisted pull-ups with a band taking part of your bodyweight.",
+    "equipment_needed": [
+      "pullup_bar"
+    ],
+    "equipment_needed_raw": "Pull-up bar",
+    "equipment_all": [
+      "bands"
+    ],
+    "space_requirements": "Requires Overhead Clearance",
+    "cue": "Loop the band over the bar and under a foot or knee. Start from a full hang, pull your chest up to the bar, and lower slowly \u2014 the band helps at the bottom, so don't bounce out of it.",
+    "regression": null,
+    "progression": "UL-003",
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Use a thinner band as you get stronger. Typical dose: 3x5-8. Progress to unassisted Pull-Up / Chin-Up (UL-003).",
+    "is_active": true
+  },
+  {
+    "exercise_id": "UL-014",
+    "exercise_name": "Band Row (Standing or Seated)",
+    "priority_tier": "extended",
+    "movement_pattern": "Upper Pull",
+    "primary_purpose": "Horizontal pulling with just a band, for athletes without dumbbells or cables.",
+    "equipment_needed": [
+      "bands"
+    ],
+    "equipment_needed_raw": "Bands",
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Anchor the band at chest height, pull your elbows back and squeeze your shoulder blades together, then control the return. Don't shrug or lean back to finish the rep.",
+    "regression": null,
+    "progression": null,
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Typical dose: 3x10-15. Anchor the band to a door, post or rack.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "SQ-007",
+    "exercise_name": "Tempo Squat (Bodyweight)",
+    "priority_tier": "extended",
+    "movement_pattern": "Squat",
+    "primary_purpose": "Bodyweight squat with a slow lowering phase; builds control and positional strength before external load.",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": null,
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Take three full seconds to lower into the bottom, keep your chest up and knees tracking over your toes, then stand up with intent.",
+    "regression": "SQ-004",
+    "progression": "SQ-002",
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Typical dose: 3x8-12 with a 3-second lowering phase.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "SQ-008",
+    "exercise_name": "Box Squat",
+    "priority_tier": "extended",
+    "movement_pattern": "Squat",
+    "primary_purpose": "Barbell squat to a box, building squat strength with a consistent depth and a controlled sit-back.",
+    "equipment_needed": [
+      "barbell_rack"
+    ],
+    "equipment_needed_raw": "Barbell, Rack",
+    "equipment_all": [
+      "boxes"
+    ],
+    "space_requirements": "Requires Overhead Clearance",
+    "cue": "Sit back and down to the box with your shins vertical, pause briefly without relaxing, then drive up through the floor. Don't rock back or drop onto the box.",
+    "regression": "SQ-002",
+    "progression": "SQ-001",
+    "training_age": "both",
+    "season_tag": "Off-season, Pre-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Set the box height so thighs end up about parallel. Typical dose: 3-5x3-6.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "LG-008",
+    "exercise_name": "Split Squat (Static)",
+    "priority_tier": "extended",
+    "movement_pattern": "Lunge / Single-Leg",
+    "primary_purpose": "Entry single-leg strength; a stationary split stance without the instability of a lunge.",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": null,
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Stand tall in a long stance, drop straight down so the back knee almost touches the floor, and drive up through the front heel. Keep your torso upright and the front knee tracking over your toes.",
+    "regression": null,
+    "progression": "LG-004",
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Hold a dumbbell in each hand once it gets easy. Typical dose: 3x8-12 per leg. Replaces the retired placeholder LG-001.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "HG-009",
+    "exercise_name": "Single-Leg RDL (Bodyweight)",
+    "priority_tier": "extended",
+    "movement_pattern": "Hinge",
+    "primary_purpose": "Single-leg hinge for balance and hamstring/glute control with no external load.",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": null,
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Hinge at the hip, reach long through your back leg, and keep your hips square to the floor. Stand up by squeezing the glute of the standing leg \u2014 don't let the knee lock or the back round.",
+    "regression": "HG-004",
+    "progression": "HG-006",
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Touch a wall or chair lightly for balance if needed. Typical dose: 3x6-10 per leg.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "HG-010",
+    "exercise_name": "Good Morning (Barbell)",
+    "priority_tier": "extended",
+    "movement_pattern": "Hinge",
+    "primary_purpose": "Posterior-chain strength with a barbell on the back; builds hinge strength and hamstring length-under-load.",
+    "equipment_needed": [
+      "barbell_rack"
+    ],
+    "equipment_needed_raw": "Barbell, Rack",
+    "equipment_all": [],
+    "space_requirements": "Requires Overhead Clearance",
+    "cue": "Bar on your upper back, soft knees, push your hips straight back until your torso is nearly parallel to the floor, then drive the hips forward to stand. Keep your back flat the whole time.",
+    "regression": "HG-004",
+    "progression": "HG-005",
+    "training_age": "advanced",
+    "season_tag": "Off-season, Pre-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Light weight relative to squat/deadlift. Typical dose: 3x6-10.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "IS-043",
+    "exercise_name": "Side-Lying Hip Adduction",
+    "priority_tier": "extended",
+    "movement_pattern": "Isolation - Adductor",
+    "primary_purpose": "Adductor strengthening with no equipment; entry point to Copenhagen work.",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": null,
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Lie on your side with the top leg bent in front of you, lift the bottom leg straight up using the inside of the thigh, and lower slowly. Keep your hips stacked.",
+    "regression": null,
+    "progression": "IS-016",
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [
+      "groin_adductor"
+    ],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Typical dose: 2-3x10-15 per side. Progress to Copenhagen Plank (IS-016, needs a bench).",
+    "is_active": true
+  },
+  {
+    "exercise_id": "RS-007",
+    "exercise_name": "Bodyweight Lateral Bound to Vertical Stick",
+    "priority_tier": "extended",
+    "movement_pattern": "Reflexive Strength - Loaded Movement Pattern",
+    "primary_purpose": "Unloaded entry to the lateral-bound reflexive chain; teaches the bound-and-stick before dumbbell load.",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": null,
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Bound sideways off one leg, land on the opposite leg, and stick a quiet, balanced landing before standing tall. Stop and reset if you wobble \u2014 a clean stick matters more than distance.",
+    "regression": null,
+    "progression": "RS-002",
+    "training_age": "novice",
+    "season_tag": "Off-season, Pre-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Typical dose: 3x4-6 per side. Progress to the dumbbell-loaded version (RS-002).",
+    "is_active": true
+  },
+  {
+    "exercise_id": "CD-016",
+    "exercise_name": "L-Drill (3-Cone)",
+    "priority_tier": "extended",
+    "movement_pattern": "Change of Direction",
+    "primary_purpose": "Classic cone drill testing cutting, turning and acceleration through changes of direction.",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "None (cones)",
+    "equipment_all": [],
+    "space_requirements": "Requires Running Room (10+ yd)",
+    "cue": "Stay low, plant hard on the outside foot, and push hard out of every turn. Round the third cone tight and keep your hips down through the whole drill.",
+    "regression": null,
+    "progression": "CD-002",
+    "training_age": "both",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Cones set 5 yd apart in an L shape. Typical dose: 4-6 reps with full recovery. Time it if you want a benchmark.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "CD-017",
+    "exercise_name": "Shuffle-to-Sprint (Self-Cued)",
+    "priority_tier": "extended",
+    "movement_pattern": "Change of Direction",
+    "primary_purpose": "Trains the stop-and-go from a shuffle into a sprint with no partner; the cue comes from a pre-set random sequence.",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "None (cones)",
+    "equipment_all": [],
+    "space_requirements": "Requires Running Room (10+ yd)",
+    "cue": "Shuffle low and stay square, then the moment the cue hits, turn and sprint \u2014 don't wait for it, react to it. Plant hard on the first step and drive out.",
+    "regression": null,
+    "progression": null,
+    "training_age": "both",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Set two cones 5 yd apart and a sprint finish 10 yd away. Use a random timer or audio beep as the cue to keep it reactive without a partner. Typical dose: 4-6 reps with full recovery.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "PJ-039",
+    "exercise_name": "Med-Ball Scoop Toss",
+    "priority_tier": "extended",
+    "movement_pattern": "Plyometric / Jump",
+    "primary_purpose": "Triple-extension power with no barbell: ankle, knee and hip extension into a throw.",
+    "equipment_needed": [
+      "med_ball"
+    ],
+    "equipment_needed_raw": "Medicine ball",
+    "equipment_all": [],
+    "space_requirements": "Requires Overhead Clearance",
+    "cue": "Hinge back, swing the ball between your legs, then explode up through the hips and let the ball fly forward and up. The power comes from your legs and hips, not your arms.",
+    "regression": null,
+    "progression": null,
+    "training_age": "both",
+    "season_tag": "Off-season, Pre-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Typical dose: 3-5x3-5, full recovery. Alternative to the Olympic lifts for athletes without a barbell.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "OL-009",
+    "exercise_name": "Dumbbell Snatch (Single-Arm)",
+    "priority_tier": "extended",
+    "movement_pattern": "Olympic Lift",
+    "primary_purpose": "Single-arm triple-extension power with a dumbbell; a lower-barrier option than the barbell snatch.",
+    "equipment_needed": [
+      "dumbbells"
+    ],
+    "equipment_needed_raw": "Dumbbells",
+    "equipment_all": [],
+    "space_requirements": "Requires Overhead Clearance",
+    "cue": "Hinge the dumbbell back between your legs, explode through the hips, and punch the dumbbell overhead in one fluid motion. Catch it locked out with a stable shoulder.",
+    "regression": "OL-003",
+    "progression": null,
+    "training_age": "advanced",
+    "season_tag": "Off-season, Pre-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Typical dose: 3-5x3-5 per arm, full recovery.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "IS-044",
+    "exercise_name": "Band Biceps Curl",
+    "priority_tier": "extended",
+    "movement_pattern": "Isolation - Arm",
+    "primary_purpose": "Biceps work with just a band, for athletes without dumbbells or cables.",
+    "equipment_needed": [
+      "bands"
+    ],
+    "equipment_needed_raw": "Bands",
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Stand on the band, elbows pinned to your sides, curl up and squeeze, then lower under control. Don't swing the torso.",
+    "regression": null,
+    "progression": null,
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Typical dose: 3x10-15.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "CR-035",
+    "exercise_name": "Russian Twist (Bodyweight)",
+    "priority_tier": "extended",
+    "movement_pattern": "Core - Rotational Power",
+    "primary_purpose": "Entry rotational core work; trains trunk rotation without an external load.",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": null,
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Lean back slightly with your chest up and feet down, then rotate your whole torso side to side \u2014 don't just swing the arms. Move with control.",
+    "regression": null,
+    "progression": "CR-027",
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Typical dose: 3x10-20 total. Progress to Weighted Russian Twist (CR-027).",
+    "is_active": true
+  },
+  {
+    "exercise_id": "IS-045",
+    "exercise_name": "Dead Hang / Towel Hang",
+    "priority_tier": "extended",
+    "movement_pattern": "Isolation - Forearm/Wrist",
+    "primary_purpose": "Grip and forearm endurance, plus shoulder decompression, with no dumbbells needed.",
+    "equipment_needed": [
+      "pullup_bar"
+    ],
+    "equipment_needed_raw": "Pull-up bar",
+    "equipment_all": [],
+    "space_requirements": "Requires Overhead Clearance",
+    "cue": "Hang from the bar with a firm grip, shoulders packed down away from your ears, and breathe. Hold as long as you can with good form.",
+    "regression": null,
+    "progression": null,
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Typical dose: 3x20-45s. Drape a towel over the bar for a harder grip challenge.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "IM-027",
+    "exercise_name": "Isometric Overhead Press Hold (Wall)",
+    "priority_tier": "extended",
+    "movement_pattern": "Isometric - Shoulder",
+    "primary_purpose": "Isometric shoulder loading for throwing resilience; builds tolerance without joint movement.",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": null,
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Press your forearms and hands into the wall overhead as hard as you can without shrugging your shoulders, and hold. Keep your ribs down and your neck relaxed.",
+    "regression": null,
+    "progression": null,
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [
+      "shoulder"
+    ],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Typical dose: 3x20-30s at moderate to hard effort.",
     "is_active": true
   }
 ]

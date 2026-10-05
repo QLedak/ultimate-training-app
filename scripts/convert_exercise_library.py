@@ -59,7 +59,7 @@ INJURY_MAP = [
     (r"hamstring", "hamstring"),
     (r"groin|adductor", "groin_adductor"),
     (r"shoulder", "shoulder"),
-    (r"lower back|\blumbar\b", "lower_back"),
+    (r"lower back|\blumbar\b|\bcore\b", "lower_back"),  # core + lower back are one resilience series
     (r"ankle", "ankle"),
 ]
 
