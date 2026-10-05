@@ -294,7 +294,7 @@
   },
   {
     "exercise_id": "UP-007",
-    "exercise_name": "Push-Up (progression series)",
+    "exercise_name": "Push-Ups",
     "priority_tier": "core_50",
     "movement_pattern": "Upper Push",
     "primary_purpose": "Bodyweight pressing competency; no-equipment option",
@@ -720,7 +720,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CR-002",
@@ -735,7 +735,7 @@
     "equipment_all": [],
     "space_requirements": null,
     "cue": "Load into your back hip, then whip the ball across your body into the wall \u2014 this should feel explosive, like you're throwing a punch with your whole torso.",
-    "regression": "CR-001",
+    "regression": null,
     "progression": null,
     "training_age": "advanced",
     "season_tag": null,
@@ -913,7 +913,7 @@
     "equipment_all": [],
     "space_requirements": "Requires Overhead Clearance",
     "cue": "Load quick, swing the arms, and explode up onto the box \u2014 land soft with the knees bent, don't just jump up and let it slam.",
-    "regression": "IM-001 (Isometric hold at landing position)",
+    "regression": null,
     "progression": "PJ-002",
     "training_age": "advanced",
     "season_tag": null,
@@ -1096,11 +1096,11 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "SM-001",
-    "exercise_name": "Acceleration Mechanics Drill (e.g., wall drill, falling starts)",
+    "exercise_name": "Acceleration Mechanics Drill (e.g., wall drill)",
     "priority_tier": "core_50",
     "movement_pattern": "Sprint Mechanics",
     "primary_purpose": "Deep-cut sprinting demand",
@@ -1294,7 +1294,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": "Fill in",
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CD-002",
@@ -1338,7 +1338,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CD-004",
@@ -1360,7 +1360,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "MB-001",
@@ -1406,7 +1406,7 @@
     ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "IS-002",
@@ -1430,7 +1430,7 @@
     ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "IS-003",
@@ -1470,7 +1470,7 @@
     "equipment_all": [],
     "space_requirements": null,
     "cue": "Brace the hips up and curl the heels in under you \u2014 keep the hips high the whole set, don't let them sag toward the floor.",
-    "regression": "IS-001",
+    "regression": null,
     "progression": "IS-003",
     "training_age": "novice",
     "season_tag": "Year-round",
@@ -1501,7 +1501,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "IS-006",
@@ -1516,7 +1516,7 @@
     "equipment_all": [],
     "space_requirements": null,
     "cue": "Keep a straight line from knees to shoulders and lean back slowly, using the quads to control the descent \u2014 this is a controlled lean, not a fall.",
-    "regression": "IS-005",
+    "regression": null,
     "progression": null,
     "training_age": "advanced",
     "season_tag": "Year-round",
@@ -1615,7 +1615,7 @@
     ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "IS-011",
@@ -1744,7 +1744,7 @@
     "equipment_all": [],
     "space_requirements": null,
     "cue": "Brace the side plank position, then squeeze the ball or bench between your legs as hard as you can and hold \u2014 the top knee should barely move.",
-    "regression": "IS-018",
+    "regression": null,
     "progression": null,
     "training_age": "advanced",
     "season_tag": "Year-round",
@@ -1802,19 +1802,18 @@
     ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "IS-019",
-    "exercise_name": "Glute Bridge (Bodyweight or Barbell)",
+    "exercise_name": "Glute Bridge",
     "priority_tier": "extended",
     "movement_pattern": "Isolation - Glute",
     "primary_purpose": "Glute isolation and activation; entry point to hip thrust pattern",
     "equipment_needed": [
-      "barbell_rack",
       "bodyweight_only"
     ],
-    "equipment_needed_raw": "None or Barbell",
+    "equipment_needed_raw": null,
     "equipment_all": [],
     "space_requirements": null,
     "cue": "Squeeze the glutes hard at the top like you're trying to crack a walnut between your cheeks \u2014 control the way back down.",
@@ -1872,7 +1871,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "IS-022",
@@ -2039,7 +2038,7 @@
     ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "IS-029",
@@ -2195,7 +2194,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "IS-036",
@@ -2217,7 +2216,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "SM-009",
@@ -2283,7 +2282,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "SM-012",
@@ -2415,7 +2414,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "PJ-013",
@@ -2455,7 +2454,7 @@
     "space_requirements": "Low-Ceiling Friendly",
     "cue": "Hips high, hands under the shoulders \u2014 lower the head toward the ground between your hands and press back up. Think of it as a stepping stone to a handstand push-up.",
     "regression": "UP-007",
-    "progression": "UP-011",
+    "progression": null,
     "training_age": "novice",
     "season_tag": "Year-round",
     "injury_considerations": [],
@@ -2483,7 +2482,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CN-901",
@@ -2505,7 +2504,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "HG-004",
@@ -2704,7 +2703,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CN-001",
@@ -2726,7 +2725,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CN-002",
@@ -2748,7 +2747,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CN-003",
@@ -2770,7 +2769,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CN-012",
@@ -2792,7 +2791,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CN-004",
@@ -2814,7 +2813,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CN-005",
@@ -2836,7 +2835,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CN-007",
@@ -2858,7 +2857,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CN-013",
@@ -2880,7 +2879,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CN-014",
@@ -2902,7 +2901,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CN-015",
@@ -2924,7 +2923,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CN-017",
@@ -2946,7 +2945,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CN-008",
@@ -2968,11 +2967,11 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CN-009",
-    "exercise_name": "Steady-State Run/Bike/Row (20-40 min)",
+    "exercise_name": "Run/Bike/Row \u2014 Steady State (20-60 min)",
     "priority_tier": "extended",
     "movement_pattern": "Conditioning - Aerobic Capacity",
     "primary_purpose": "Aerobic base; supports repeat-effort capacity across a tournament weekend (Sec. 3)",
@@ -2980,17 +2979,17 @@
       "bodyweight_only",
       "cardio_machine"
     ],
-    "equipment_needed_raw": "None or Bike/Rower",
+    "equipment_needed_raw": "None (Run), Bike, or Rower",
     "equipment_all": [],
-    "space_requirements": "Confined Space Friendly (if machine-based)",
+    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
     "cue": "Settle into a pace you could sustain the whole time \u2014 steady effort, steady breathing, this is about building your aerobic engine, not testing your max.",
     "regression": null,
-    "progression": null,
+    "progression": "CN-033",
     "training_age": "novice",
-    "season_tag": "Off-season",
+    "season_tag": "Off-season, Pre-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": null,
+    "notes": "Zone 2 continuous, RPE 4-5 (talk-test: full sentences). Dose by phase \u2014 GPP/Reacclimation: 40-60 min; Hypertrophy: 30-45 min; Max Strength: 20-30 min; Power Conversion / Peak: 20-30 min as recovery only; in-season: 20-30 min optional. Run: steady jog. Bike/Row: steady cadence/split.",
     "is_active": true
   },
   {
@@ -3013,7 +3012,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CN-011",
@@ -3036,7 +3035,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CN-016",
@@ -3058,7 +3057,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "IM-002",
@@ -3084,7 +3083,7 @@
     ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "IM-003",
@@ -3230,7 +3229,7 @@
     ],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "IM-010",
@@ -3345,7 +3344,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": "PJ-001 (Box Jump) or PJ-009 (Squat Jump) \u2014 hold max effort, then perform the jump within seconds",
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "IM-015",
@@ -3523,7 +3522,7 @@
     "equipment_all": [],
     "space_requirements": "Confined Space Friendly, Low-Ceiling Friendly",
     "cue": "Hop out and land on one leg \u2014 the moment your foot touches, freeze and hold it. If you wobble or need a second hop to balance, that's the rep giving you feedback.",
-    "regression": "IM-008",
+    "regression": null,
     "progression": "PJ-016",
     "training_age": "advanced",
     "season_tag": "Year-round",
@@ -4429,7 +4428,7 @@
     "equipment_all": [],
     "space_requirements": "Confined Space Friendly",
     "cue": "Half-kneeling so you can't cheat with your hips \u2014 press the band straight out and hold, resisting any rotation through the torso.",
-    "regression": "CR-001",
+    "regression": null,
     "progression": "CR-014",
     "training_age": "novice",
     "season_tag": "Year-round",
@@ -4452,7 +4451,7 @@
     "equipment_all": [],
     "space_requirements": "Confined Space Friendly",
     "cue": "Press the band out and hold your center, then march in place without letting your torso twist toward the band. Slow and controlled beats fast and sloppy.",
-    "regression": "CR-001",
+    "regression": null,
     "progression": null,
     "training_age": "advanced",
     "season_tag": "Year-round",
@@ -4570,7 +4569,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CR-020",
@@ -4727,7 +4726,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CR-027",
@@ -4953,7 +4952,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "UP-012",
@@ -4991,7 +4990,7 @@
     "space_requirements": "Confined Space Friendly",
     "cue": "Back flat against the wall, thighs parallel \u2014 hold steady, breathe, and don't let your knees cave in toward each other.",
     "regression": null,
-    "progression": "IM-001",
+    "progression": null,
     "training_age": "novice",
     "season_tag": "Year-round",
     "injury_considerations": [],
@@ -5013,7 +5012,7 @@
     "equipment_all": [],
     "space_requirements": "Confined Space Friendly",
     "cue": "Set the front knee at the target angle and hold \u2014 steady pressure through the front foot, this one tests your balance as much as your strength.",
-    "regression": "IM-001",
+    "regression": null,
     "progression": null,
     "training_age": "advanced",
     "season_tag": "Off-season, Pre-season",
@@ -5109,7 +5108,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "IM-025",
@@ -5197,7 +5196,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CR-031",
@@ -5220,7 +5219,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CR-032",
@@ -5308,7 +5307,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "SQ-006",
@@ -5330,7 +5329,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "HG-006",
@@ -5356,7 +5355,7 @@
   },
   {
     "exercise_id": "HG-007",
-    "exercise_name": "Kettlebell Swing (Russian)",
+    "exercise_name": "Kettlebell Swing",
     "priority_tier": "extended",
     "movement_pattern": "Hinge",
     "primary_purpose": "Explosive, ballistic hinge variation that trains hip-extension power in a repeatable, lower-skill-cost format than a barbell hinge \u2014 useful conditioning-adjacent power option",
@@ -5684,7 +5683,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CR-033",
@@ -5706,7 +5705,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CD-006",
@@ -5728,7 +5727,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CD-007",
@@ -5750,7 +5749,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CD-008",
@@ -5772,7 +5771,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CD-009",
@@ -5787,8 +5786,8 @@
     "equipment_all": [],
     "space_requirements": "Requires Running Room (10 yd)",
     "cue": "Stay low in the backpedal, then snap the hips and drive forward the instant you flip \u2014 the transition should be one motion, not two.",
-    "regression": "CD-005",
-    "progression": "CD-006",
+    "regression": null,
+    "progression": null,
     "training_age": "both",
     "season_tag": null,
     "injury_considerations": [],
@@ -5816,7 +5815,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CD-011",
@@ -5838,7 +5837,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "CD-012",
@@ -5860,7 +5859,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "RS-001",
@@ -5882,7 +5881,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": "New Reflexive Strength category (added when incorporating Garage Strength-style program design) \u2014 loaded, low-rep, scaffolded sport-movement-pattern work, distinct from the Plyometric/Jump (Reactive Strength) category above. This progression is our own build for ultimate's cutting/separation pattern, not a reused example from any outside source.",
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "RS-002",
@@ -5897,7 +5896,7 @@
     "equipment_all": [],
     "space_requirements": "Confined Space Friendly",
     "cue": "Bound laterally like before, but this time finish by driving straight up into a stick \u2014 redirect the momentum from sideways to vertical without losing your landing control.",
-    "regression": "RS-001",
+    "regression": null,
     "progression": "RS-003",
     "training_age": "both",
     "season_tag": "Off-season, Pre-season",
@@ -5930,17 +5929,17 @@
   },
   {
     "exercise_id": "RS-004",
-    "exercise_name": "KB Loaded Deceleration Step (Entry)",
+    "exercise_name": "Band Loaded Deceleration Step (Entry)",
     "priority_tier": "core_50",
     "movement_pattern": "Reflexive Strength - Loaded Movement Pattern",
     "primary_purpose": "Entry point into a second scaffolded chain training the mark/close-out pattern \u2014 a loaded deceleration into a held athletic stance, building the braking strength that underlies closing out on a thrower under control",
     "equipment_needed": [
-      "kettlebell"
+      "bands"
     ],
-    "equipment_needed_raw": "Kettlebell",
+    "equipment_needed_raw": "Bands",
     "equipment_all": [],
     "space_requirements": "Requires Running Room (Short)",
-    "cue": "Hold the kettlebell at your chest, take two building steps, then plant hard and stick a low, balanced stance \u2014 the goal is stopping on a dime, not drifting through the landing.",
+    "cue": "Loop a band around your hips, anchored low behind you. Take two building steps against the band tension, then plant hard and stick a low, balanced stance \u2014 the band is trying to pull you off balance, so the goal is stopping on a dime, not drifting through the landing.",
     "regression": null,
     "progression": "RS-005",
     "training_age": "novice",
@@ -5952,19 +5951,19 @@
   },
   {
     "exercise_id": "RS-005",
-    "exercise_name": "KB Loaded Deceleration Step to Reactive Redirect",
+    "exercise_name": "Band Loaded Deceleration Step to Reactive Redirect",
     "priority_tier": "extended",
     "movement_pattern": "Reflexive Strength - Loaded Movement Pattern",
     "primary_purpose": "Adds a reactive re-acceleration off the decelerated stance \u2014 middle link in the mark/close-out chain, training the stop-and-go quality of staying attached to a cutter after closing the gap",
     "equipment_needed": [
-      "kettlebell"
+      "bands"
     ],
-    "equipment_needed_raw": "Kettlebell",
+    "equipment_needed_raw": "Bands",
     "equipment_all": [],
     "space_requirements": "Requires Running Room (Short)",
     "cue": "Stick the deceleration exactly like before, but the second you're balanced, redirect and accelerate hard in a new direction on a coach or partner's call \u2014 the stick and the re-accel are one skill, not two.",
     "regression": "RS-004",
-    "progression": "RS-006",
+    "progression": null,
     "training_age": "both",
     "season_tag": "Pre-season, In-season",
     "injury_considerations": [],
@@ -5992,7 +5991,7 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": null,
-    "is_active": true
+    "is_active": false
   },
   {
     "exercise_id": "PJ-028",
@@ -6171,7 +6170,7 @@
     "equipment_all": [],
     "space_requirements": "Confined Space Friendly",
     "cue": "Take three lateral steps against the band, chopping them down as you decelerate \u2014 finish balanced and in control, not falling into the last step.",
-    "regression": "CD-005 (Lateral Shuffle, Confined Space)",
+    "regression": null,
     "progression": "CD-014 (Resisted 3-Step Lateral Deceleration to Shuffle)",
     "training_age": "both",
     "season_tag": "Year-round",
@@ -6215,7 +6214,7 @@
     "equipment_all": [],
     "space_requirements": "Confined Space Friendly",
     "cue": "Same shuffle as the unloaded version \u2014 stay low, feet don't cross \u2014 but drive harder off the trail leg to fight through the band's pull.",
-    "regression": "CD-005 (Lateral Shuffle, Confined Space)",
+    "regression": null,
     "progression": null,
     "training_age": "advanced",
     "season_tag": "Year-round",
@@ -6423,6 +6422,374 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": "Crunch-variation slot in Lower Body Strength Day's secondary-pattern core superset (and Upper Body Strength Day's rotational/sagittal core pairing) \u2014 the advanced-tier option alongside CR-028 (Dead Bug with Plate Pass).",
+    "is_active": true
+  },
+  {
+    "exercise_id": "CN-018",
+    "exercise_name": "Run/Bike/Row \u2014 Max Sprints (5-10s)",
+    "priority_tier": "extended",
+    "movement_pattern": "Conditioning - Alactic / Speed",
+    "primary_purpose": "Pure alactic (ATP-PC) power: the shortest all-out efforts, trained fresh with full recovery.",
+    "equipment_needed": [
+      "bodyweight_only",
+      "cardio_machine"
+    ],
+    "equipment_needed_raw": "None (Run), Bike, or Rower",
+    "equipment_all": [],
+    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "cue": "All-out from the first second \u2014 this is a sprint, not a pace. Stop the moment the clock says go home, then fully recover; if the last rep isn't as fast as the first, we're done.",
+    "regression": null,
+    "progression": "CN-019",
+    "training_age": "both",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Work 5-10s max effort | Rest 60-90s (about 1:10) | 6-10 reps, 1 block. Quality-gated: stop when output drops ~5-10%. Run: 10-30 yd sprint, walk back. Bike: assault/spin bike, seated or standing, max watts. Row: 5-8 hard strokes at max power. RPE 10.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "CN-019",
+    "exercise_name": "Run/Bike/Row \u2014 Power Intervals (10-15s)",
+    "priority_tier": "extended",
+    "movement_pattern": "Conditioning - Alactic / Speed",
+    "primary_purpose": "Alactic power with a little glycolytic spillover; the classic \"short burst\" interval.",
+    "equipment_needed": [
+      "bodyweight_only",
+      "cardio_machine"
+    ],
+    "equipment_needed_raw": "None (Run), Bike, or Rower",
+    "equipment_all": [],
+    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "cue": "Max effort, every rep \u2014 the first 5 seconds should feel violent, and you hold on for the rest. Rest means rest: walk, breathe, and come back fresh.",
+    "regression": "CN-018",
+    "progression": "CN-020",
+    "training_age": "both",
+    "season_tag": "Year-round",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Work 10-15s max effort | Rest 90-120s (about 1:8) | 6-8 reps. Run: 40-80 yd. Bike: 10-15s all-out. Row: 10-15s, around 8-12 strokes. RPE 10.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "CN-020",
+    "exercise_name": "Run/Bike/Row \u2014 Speed Intervals (15-20s)",
+    "priority_tier": "extended",
+    "movement_pattern": "Conditioning - Alactic / Speed",
+    "primary_purpose": "Top of the alactic window: sustaining maximal output as the phosphocreatine system starts to run down.",
+    "equipment_needed": [
+      "bodyweight_only",
+      "cardio_machine"
+    ],
+    "equipment_needed_raw": "None (Run), Bike, or Rower",
+    "equipment_all": [],
+    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "cue": "Attack the whole interval \u2014 don't pace the first half, and keep your form clean as it gets hard. Full recovery between reps so every one counts.",
+    "regression": "CN-019",
+    "progression": null,
+    "training_age": "advanced",
+    "season_tag": "Off-season, Pre-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Work 15-20s max effort | Rest 2-3 min (about 1:8) | 4-6 reps. Run: 100-150 yd. Bike: 15-20s all-out. Row: 15-20s, about 14-18 strokes. RPE 9-10. Advanced because the end of the interval carries real fatigue.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "CN-021",
+    "exercise_name": "Run/Bike/Row \u2014 Repeated Sprints (5-10s on / 20-30s off)",
+    "priority_tier": "extended",
+    "movement_pattern": "Conditioning - Repeated Sprint Ability",
+    "primary_purpose": "Repeated-sprint ability: many short max efforts with incomplete recovery \u2014 the closest match to the cut-and-burst pattern of a point.",
+    "equipment_needed": [
+      "bodyweight_only",
+      "cardio_machine"
+    ],
+    "equipment_needed_raw": "None (Run), Bike, or Rower",
+    "equipment_all": [],
+    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "cue": "Every rep at max \u2014 the point is holding speed while the rest gets shorter than you want. If you can't hit speed anymore, end the set.",
+    "regression": null,
+    "progression": "CN-022",
+    "training_age": "both",
+    "season_tag": "Pre-season, In-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Work 5-10s max | Rest 20-30s | 6-10 reps per set, 2-3 sets, 3-4 min between sets. Run: 10-20 yd sprints with a quick jog or walk back. Bike: max-watt bursts. Row: 5-8 hard strokes. RPE 9-10.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "CN-022",
+    "exercise_name": "Run/Bike/Row \u2014 Repeated Sprints (10-15s on / 30-45s off)",
+    "priority_tier": "extended",
+    "movement_pattern": "Conditioning - Repeated Sprint Ability",
+    "primary_purpose": "Longer repeated sprints with a game-realistic work:rest ratio; builds the ability to repeat high-intensity bursts across a tournament day.",
+    "equipment_needed": [
+      "bodyweight_only",
+      "cardio_machine"
+    ],
+    "equipment_needed_raw": "None (Run), Bike, or Rower",
+    "equipment_all": [],
+    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "cue": "Hard, honest sprints and honest rest \u2014 go hard when it's go time, actually recover when it's rest time. Hold the same speed on the last rep as the first.",
+    "regression": "CN-021",
+    "progression": "CN-023",
+    "training_age": "both",
+    "season_tag": "Pre-season, In-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Work 10-15s | Rest 30-45s | 6-8 reps per set, 2-3 sets, 3-4 min between sets. Run: 30-60 yd sprints. Bike: hard 10-15s efforts. Row: 10-15s hard. RPE 9.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "CN-023",
+    "exercise_name": "Run/Bike/Row \u2014 Point Simulation (30-45s on / 45-60s off)",
+    "priority_tier": "extended",
+    "movement_pattern": "Conditioning - Repeated Sprint Ability",
+    "primary_purpose": "Mimics an actual point (30-90s of intermittent high-intensity play) with game-like recovery between points.",
+    "equipment_needed": [
+      "bodyweight_only",
+      "cardio_machine"
+    ],
+    "equipment_needed_raw": "None (Run), Bike, or Rower",
+    "equipment_all": [],
+    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "cue": "Treat each round like a real point \u2014 surge, settle, surge again \u2014 and use the break to bring your breathing down. The last point should look like the first.",
+    "regression": "CN-022",
+    "progression": null,
+    "training_age": "advanced",
+    "season_tag": "Pre-season, In-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Work 30-45s as surges (e.g. 10s hard / 5s easy repeating) | Rest 45-60s | 5-7 rounds, 1-2 sets, 4-5 min between sets. Run: shuttle or straight-line surges. Bike: 10s hard / 5s easy. Row: 10s hard / 5s easy. RPE 8-9.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "CN-024",
+    "exercise_name": "Run/Bike/Row \u2014 Short Glycolytic Intervals (20-30s)",
+    "priority_tier": "extended",
+    "movement_pattern": "Conditioning - Glycolytic / Anaerobic",
+    "primary_purpose": "Entry glycolytic (anaerobic) work: hard, short efforts that build buffering and speed-endurance without long lactate exposure.",
+    "equipment_needed": [
+      "bodyweight_only",
+      "cardio_machine"
+    ],
+    "equipment_needed_raw": "None (Run), Bike, or Rower",
+    "equipment_all": [],
+    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "cue": "Hard and controlled, about 90-95% \u2014 fast but not flailing. Hold your form to the end of every interval and use the full rest.",
+    "regression": null,
+    "progression": "CN-025",
+    "training_age": "both",
+    "season_tag": "Pre-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Work 20-30s at ~90-95% | Rest 90-150s (about 1:4-1:5) | 5-8 reps. Run: 150-200 yd. Bike: 20-30s hard. Row: 20-30s, about 18-24 strokes. RPE 8-9.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "CN-025",
+    "exercise_name": "Run/Bike/Row \u2014 Glycolytic Intervals (30-45s)",
+    "priority_tier": "extended",
+    "movement_pattern": "Conditioning - Glycolytic / Anaerobic",
+    "primary_purpose": "Mid-range glycolytic capacity; the work length of a typical high-intensity stretch within a point.",
+    "equipment_needed": [
+      "bodyweight_only",
+      "cardio_machine"
+    ],
+    "equipment_needed_raw": "None (Run), Bike, or Rower",
+    "equipment_all": [],
+    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "cue": "Strong, even pace \u2014 start at a speed you can hold to the finish. It should hurt in the last third, and your form should still be there.",
+    "regression": "CN-024",
+    "progression": "CN-026",
+    "training_age": "both",
+    "season_tag": "Pre-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Work 30-45s at ~90% | Rest 90-135s (about 1:3) | 4-6 reps. Run: 200-300 yd. Bike: 30-45s hard. Row: 30-45s hard, steady rate. RPE 8-9.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "CN-026",
+    "exercise_name": "Run/Bike/Row \u2014 Lactate Tolerance Intervals (45-60s)",
+    "priority_tier": "extended",
+    "movement_pattern": "Conditioning - Glycolytic / Anaerobic",
+    "primary_purpose": "Builds tolerance to sustained high lactate; closes the gap between short bursts and aerobic power work.",
+    "equipment_needed": [
+      "bodyweight_only",
+      "cardio_machine"
+    ],
+    "equipment_needed_raw": "None (Run), Bike, or Rower",
+    "equipment_all": [],
+    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "cue": "Aggressive but controlled \u2014 go out hard, settle, and fight to hold the pace to the end. The last 10 seconds are the rep.",
+    "regression": "CN-025",
+    "progression": "CN-027",
+    "training_age": "advanced",
+    "season_tag": "Pre-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Work 45-60s at ~90% | Rest 2-3 min (about 1:3) | 4-6 reps. Run: 300-400 yd (a 300-yd shuttle works). Bike: 45-60s hard. Row: 45-60s hard. RPE 9.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "CN-027",
+    "exercise_name": "Run/Bike/Row \u2014 Extended Glycolytic Intervals (60-90s)",
+    "priority_tier": "extended",
+    "movement_pattern": "Conditioning - Glycolytic / Anaerobic",
+    "primary_purpose": "Top of the glycolytic range; overlaps into aerobic power and teaches pacing under heavy fatigue.",
+    "equipment_needed": [
+      "bodyweight_only",
+      "cardio_machine"
+    ],
+    "equipment_needed_raw": "None (Run), Bike, or Rower",
+    "equipment_all": [],
+    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "cue": "Smart start, strong finish \u2014 find a pace you can hold the whole interval, because the back half is where it gets decided. Rest fully so the next one is still quality.",
+    "regression": "CN-026",
+    "progression": null,
+    "training_age": "advanced",
+    "season_tag": "Pre-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Work 60-90s at ~85-90% | Rest 3-4 min (about 1:2-1:3) | 3-5 reps. Run: 400-600 yd. Bike: 60-90s hard. Row: 60-90s hard. RPE 8-9.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "CN-028",
+    "exercise_name": "Run/Bike/Row \u2014 30/30 Intervals (30s on / 30s off)",
+    "priority_tier": "extended",
+    "movement_pattern": "Conditioning - Aerobic Power",
+    "primary_purpose": "Aerobic power (VO2max): short hard intervals with equal rest keep oxygen uptake near max for long total time.",
+    "equipment_needed": [
+      "bodyweight_only",
+      "cardio_machine"
+    ],
+    "equipment_needed_raw": "None (Run), Bike, or Rower",
+    "equipment_all": [],
+    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "cue": "Hard but repeatable \u2014 about 90-95% of your top effort, and the same speed on the last interval as the first. Easy jog or spin in the 30s off, don't stop.",
+    "regression": null,
+    "progression": "CN-029",
+    "training_age": "both",
+    "season_tag": "Off-season, Pre-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Work 30s at ~90-95% | Rest 30s easy | 10-20 reps (1-2 blocks of 8-10, 3 min between blocks). Run: fast, smooth running. Bike: hard, repeatable cadence. Row: 30s steady hard rate. RPE 8.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "CN-029",
+    "exercise_name": "Run/Bike/Row \u2014 Aerobic Power Intervals (2 min)",
+    "priority_tier": "extended",
+    "movement_pattern": "Conditioning - Aerobic Power",
+    "primary_purpose": "VO2max development with a manageable length; the rep you can repeat many times.",
+    "equipment_needed": [
+      "bodyweight_only",
+      "cardio_machine"
+    ],
+    "equipment_needed_raw": "None (Run), Bike, or Rower",
+    "equipment_all": [],
+    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "cue": "Controlled and strong from the start \u2014 a pace you could just barely hold for 3 minutes. Breathe in rhythm and keep your form.",
+    "regression": "CN-028",
+    "progression": "CN-030",
+    "training_age": "both",
+    "season_tag": "Off-season, Pre-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Work 2 min at ~90-95% HRmax | Rest 2 min easy | 5-8 reps. Run: track or road, even pace. Bike: steady hard watts. Row: steady, low-to-mid stroke rate. RPE 8.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "CN-030",
+    "exercise_name": "Run/Bike/Row \u2014 Aerobic Power Intervals (3 min)",
+    "priority_tier": "extended",
+    "movement_pattern": "Conditioning - Aerobic Power",
+    "primary_purpose": "VO2max intervals at a length where oxygen uptake is held near max for the whole rep.",
+    "equipment_needed": [
+      "bodyweight_only",
+      "cardio_machine"
+    ],
+    "equipment_needed_raw": "None (Run), Bike, or Rower",
+    "equipment_all": [],
+    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "cue": "Settle in by the first 30 seconds, then hold. You should finish thinking you had maybe one more minute \u2014 no more.",
+    "regression": "CN-029",
+    "progression": "CN-031",
+    "training_age": "both",
+    "season_tag": "Off-season, Pre-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Work 3 min at ~90-95% HRmax | Rest 2-3 min easy | 4-6 reps. Run: even pace. Bike: steady hard watts. Row: steady hard split. RPE 8.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "CN-031",
+    "exercise_name": "Run/Bike/Row \u2014 Aerobic Power Intervals (4 min)",
+    "priority_tier": "extended",
+    "movement_pattern": "Conditioning - Aerobic Power",
+    "primary_purpose": "The classic 4x4 aerobic power session; the most time near max oxygen uptake for a single interval length.",
+    "equipment_needed": [
+      "bodyweight_only",
+      "cardio_machine"
+    ],
+    "equipment_needed_raw": "None (Run), Bike, or Rower",
+    "equipment_all": [],
+    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "cue": "Even, strong pace the whole 4 minutes. Don't blow up in the first minute \u2014 the last minute should feel hard but still controlled.",
+    "regression": "CN-030",
+    "progression": null,
+    "training_age": "advanced",
+    "season_tag": "Off-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Work 4 min at ~90-95% HRmax | Rest 3 min easy | 4 reps. Run: even pace. Bike: steady hard watts. Row: steady hard split. RPE 8-9.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "CN-032",
+    "exercise_name": "Run/Bike/Row \u2014 Threshold / Tempo Intervals (5-8 min)",
+    "priority_tier": "extended",
+    "movement_pattern": "Conditioning - Aerobic Capacity",
+    "primary_purpose": "Aerobic capacity at the top of the aerobic range: comfortably-hard efforts that raise the pace you can hold for a long time.",
+    "equipment_needed": [
+      "bodyweight_only",
+      "cardio_machine"
+    ],
+    "equipment_needed_raw": "None (Run), Bike, or Rower",
+    "equipment_all": [],
+    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "cue": "Comfortably hard \u2014 you could talk in short phrases but wouldn't want to. Even splits, steady breathing.",
+    "regression": "CN-033",
+    "progression": null,
+    "training_age": "both",
+    "season_tag": "Off-season, Pre-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Work 5-8 min at ~80-85% HRmax | Rest 1-2 min easy | 3-5 reps. Run: even pace. Bike: steady cadence. Row: steady, controlled split. RPE 6-7.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "CN-033",
+    "exercise_name": "Run/Bike/Row \u2014 Long Aerobic Intervals (10-15 min)",
+    "priority_tier": "extended",
+    "movement_pattern": "Conditioning - Aerobic Capacity",
+    "primary_purpose": "Bridges interval work and steady state: long, controlled aerobic efforts with short breaks.",
+    "equipment_needed": [
+      "bodyweight_only",
+      "cardio_machine"
+    ],
+    "equipment_needed_raw": "None (Run), Bike, or Rower",
+    "equipment_all": [],
+    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "cue": "Easy-to-moderate and relaxed \u2014 hold the same pace the whole time, finishing feeling like you could do more.",
+    "regression": "CN-009",
+    "progression": "CN-032",
+    "training_age": "novice",
+    "season_tag": "Off-season",
+    "injury_considerations": [],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Work 10-15 min at ~70-80% HRmax | Rest 2-3 min easy | 2-3 reps. Run: steady run. Bike: steady spin. Row: steady rhythmic rowing. RPE 5-6.",
     "is_active": true
   }
 ]
