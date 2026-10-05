@@ -82,6 +82,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
         .from("exercise_library")
         .select("exercise_id, exercise_name, movement_pattern")
         .in("movement_pattern", patterns)
+        .eq("is_active", true) // retired exercises are never offered as a swap
     : { data: [], error: null };
   if (alternativesError) return dbError("sessions/[id]", alternativesError);
 

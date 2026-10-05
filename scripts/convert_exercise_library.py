@@ -7,6 +7,9 @@ Run this any time the source spreadsheet changes:
 It normalizes the free-text "Equipment Needed" and "Injury Considerations"
 columns into the controlled vocabularies used by intake-funnel-spec.md and
 athlete_injury_reports, while keeping the raw text alongside for reference.
+Equipment Needed is an ANY-OF list; the "Required Together (All)" column lists
+items that must ALSO be present (e.g. Dumbbells + Bench). The "Status" column
+(Active/Retired) controls whether a row is ever prescribed or offered as a swap.
 The equipment mapping is a best-effort dictionary, not a guarantee — rows
 using specialty gym machines (leg curl machine, reverse hyper, etc.) get
 mapped to "barbell_rack" as a full-gym proxy, since the app's equipment
@@ -30,19 +33,23 @@ EQUIPMENT_MAP = [
     (r"dumbbell", "dumbbells"),
     (r"medicine ball", "med_ball"),
     (r"\bbox\b|\bboxes\b|\bstep\b|\bplatform\b", "boxes"),
-    (r"sled", "sled"),
+    (r"sled|harness", "sled"),
     (r"field space|turf|track", "turf_track"),
     (r"assault bike|rower|rowing machine|ski erg|stationary bike|bike", "cardio_machine"),
-    (r"trap bar|safety squat bar|barbell|\brack\b|landmine|hyper bench|hyper machine|"
-     r"calf raise machine|leg curl machine|leg extension machine|adductor machine|"
-     r"weight plate|incline bench|\bbench\b", "barbell_rack"),
+    # Machine-style benches are a full-gym proxy (no dedicated tag); checked
+    # BEFORE the generic bench entry so "hyper bench"/"nordic bench" stay proxied.
+    (r"hyper bench|nordic bench|hyper machine|calf raise machine|leg curl machine|"
+     r"leg extension machine|adductor machine", "barbell_rack"),
+    # A flat/incline bench is its own tag, matching the intake form's "Bench" option.
+    (r"incline bench|\bbench\b", "bench"),
+    (r"trap bar|safety squat bar|barbell|\brack\b|landmine|weight plate", "barbell_rack"),
 ]
 
 BODYWEIGHT_MARKERS = [
     "none", "bodyweight", "wall", "doorway", "doorframe", "partner", "cones",
     "agility ladder", "jump rope", "stability ball", "trx", "suspension trainer",
-    "dip bars", "rings", "ankle weight", "light load", "light dumbbell",
-    "light weight", "harness", "battle ropes", "mini hurdles",
+    "dip bars", "rings", "ankle weight", "light load", 
+    "light weight", "battle ropes", "mini hurdles",
 ]
 
 INJURY_MAP = [
@@ -83,6 +90,27 @@ def normalize_equipment(raw: str):
     return sorted(tags), unmatched
 
 
+def clean(v):
+    """Spreadsheet cells sometimes hold the literal text 'None'/'N/A' for 'empty'."""
+    if v is None:
+        return None
+    if isinstance(v, str) and v.strip().lower() in ("", "none", "n/a"):
+        return None
+    return v
+
+
+def normalize_required_together(raw: str):
+    """'Required Together (All)' column: every item listed must be present."""
+    tags = set()
+    for part in re.split(r",| and ", clean(raw) or ""):
+        part_clean = part.strip().lower()
+        for pattern, tag in EQUIPMENT_MAP:
+            if re.search(pattern, part_clean):
+                tags.add(tag)
+                break
+    return sorted(tags)
+
+
 def normalize_injuries(raw: str):
     if not raw:
         return []
@@ -106,11 +134,16 @@ def main():
         if not exercise_id:
             continue
 
+        row = list(row) + [None] * (17 - len(row))
         (
             _id, name, tier, pattern, purpose, equipment_raw, space,
             cue, regression, progression, training_age, season_tag,
-            injury_raw, contrast_pairing, notes,
-        ) = row
+            injury_raw, contrast_pairing, notes, required_together, status,
+        ) = row[:17]
+        equipment_raw, space, regression, progression, season_tag, notes, contrast_pairing = (
+            clean(equipment_raw), clean(space), clean(regression), clean(progression),
+            clean(season_tag), clean(notes), clean(contrast_pairing),
+        )
 
         equipment_tags, unmatched = normalize_equipment(equipment_raw or "")
         all_unmatched.update(unmatched)
@@ -123,6 +156,8 @@ def main():
             "primary_purpose": purpose,
             "equipment_needed": equipment_tags,
             "equipment_needed_raw": equipment_raw,
+            # equipment_needed = ANY-OF list; equipment_all = must ALSO have all of these.
+            "equipment_all": normalize_required_together(required_together),
             "space_requirements": space,
             "cue": cue,
             "regression": regression,
@@ -132,6 +167,9 @@ def main():
             "injury_considerations": normalize_injuries(injury_raw or ""),
             "contrast_pairing_tendon_specific": contrast_pairing,
             "notes": notes,
+            # Retired rows stay in the table (old sessions/logs still resolve) but are
+            # never offered to the Phase Builder or in the swap dropdown.
+            "is_active": (status or "Active").strip().lower() != "retired",
         })
 
     with open(OUT, "w") as f:

@@ -14,7 +14,12 @@
  */
 export const CANONICAL_LIFT_EXERCISE_IDS = {
   back_squat: ["SQ-001"],
-  bench_press: ["UP-002", "UP-003"],
+  // Barbell only. Dumbbell Bench Press (UP-003) used to be mapped here too,
+  // but its logged weight is PER HAND, so an athlete who only logged dumbbell
+  // bench would get a barbell bench max a fraction of the real number (and
+  // every barbell percentage after that would be far too light). DB bench
+  // still gets its own rep-scheme-normalized history via tier1_exercise_history.
+  bench_press: ["UP-002"],
   deadlift: ["HG-001", "HG-003"], // Trap Bar Deadlift, Conventional Barbell Deadlift
   power_clean: ["OL-001", "OL-002"], // Power Clean, Hang Power Clean
   pullup: ["UL-003"],

@@ -22,7 +22,8 @@ type ExerciseRow = {
   priority_tier: "core_50" | "extended";
   movement_pattern: string;
   primary_purpose: string | null;
-  equipment_needed: string[];
+  equipment_needed: string[]; // ANY-OF: athlete needs at least one
+  equipment_all: string[]; // ALL-OF: athlete must also have every one of these
   equipment_needed_raw: string | null;
   space_requirements: string | null;
   cue: string | null;
@@ -33,6 +34,7 @@ type ExerciseRow = {
   injury_considerations: string[];
   contrast_pairing_tendon_specific: string | null;
   notes: string | null;
+  is_active: boolean; // false = retired: never prescribed or offered as a swap
 };
 
 async function main() {
