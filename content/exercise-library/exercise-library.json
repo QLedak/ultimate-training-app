@@ -3007,7 +3007,7 @@
     ],
     "equipment_needed_raw": "None (Run), Bike, or Rower",
     "equipment_all": [],
-    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "space_requirements": "Confined Space Friendly (if machine-based)",
     "cue": "Settle into a pace you could sustain the whole time \u2014 steady effort, steady breathing, this is about building your aerobic engine, not testing your max.",
     "regression": null,
     "progression": "CN-033",
@@ -3015,7 +3015,7 @@
     "season_tag": "Off-season, Pre-season, In-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Zone 2 continuous, RPE 4-5 (talk-test: full sentences). Dose by phase \u2014 GPP/Reacclimation: 40-60 min; Hypertrophy: 30-45 min; Max Strength: 20-30 min; Power Conversion / Peak: 20-30 min as recovery only; in-season: 20-30 min optional. Run: steady jog. Bike/Row: steady cadence/split.",
+    "notes": "Work 20-60 min continuous | RPE 4-5 (talk-test: full sentences). Dose by phase \u2014 GPP/Reacclimation: 40-60 min; Hypertrophy: 30-45 min; Max Strength: 20-30 min; Power Conversion / Peak: 20-30 min as recovery only; in-season: 20-30 min optional. Athlete chooses run, bike or row.",
     "is_active": true
   },
   {
@@ -6496,7 +6496,7 @@
     ],
     "equipment_needed_raw": "None (Run), Bike, or Rower",
     "equipment_all": [],
-    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "space_requirements": "Confined Space Friendly (if machine-based)",
     "cue": "All-out from the first second \u2014 this is a sprint, not a pace. Stop the moment the clock says go home, then fully recover; if the last rep isn't as fast as the first, we're done.",
     "regression": null,
     "progression": "CN-019",
@@ -6504,7 +6504,7 @@
     "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Work 5-10s max effort | Rest 60-90s (about 1:10) | 6-10 reps, 1 block. Quality-gated: stop when output drops ~5-10%. Run: 10-30 yd sprint, walk back. Bike: assault/spin bike, seated or standing, max watts. Row: 5-8 hard strokes at max power. RPE 10.",
+    "notes": "Work 5-10s | Rest 60-90s | 6-10 reps, 1 block | RPE 10. Athlete chooses run, bike or row.",
     "is_active": true
   },
   {
@@ -6519,7 +6519,7 @@
     ],
     "equipment_needed_raw": "None (Run), Bike, or Rower",
     "equipment_all": [],
-    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "space_requirements": "Confined Space Friendly (if machine-based)",
     "cue": "Max effort, every rep \u2014 the first 5 seconds should feel violent, and you hold on for the rest. Rest means rest: walk, breathe, and come back fresh.",
     "regression": "CN-018",
     "progression": "CN-020",
@@ -6527,7 +6527,7 @@
     "season_tag": "Year-round",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Work 10-15s max effort | Rest 90-120s (about 1:8) | 6-8 reps. Run: 40-80 yd. Bike: 10-15s all-out. Row: 10-15s, around 8-12 strokes. RPE 10.",
+    "notes": "Work 10-15s | Rest 90-120s | 6-8 reps | RPE 10. Athlete chooses run, bike or row.",
     "is_active": true
   },
   {
@@ -6542,7 +6542,7 @@
     ],
     "equipment_needed_raw": "None (Run), Bike, or Rower",
     "equipment_all": [],
-    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "space_requirements": "Confined Space Friendly (if machine-based)",
     "cue": "Attack the whole interval \u2014 don't pace the first half, and keep your form clean as it gets hard. Full recovery between reps so every one counts.",
     "regression": "CN-019",
     "progression": null,
@@ -6550,7 +6550,7 @@
     "season_tag": "Off-season, Pre-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Work 15-20s max effort | Rest 2-3 min (about 1:8) | 4-6 reps. Run: 100-150 yd. Bike: 15-20s all-out. Row: 15-20s, about 14-18 strokes. RPE 9-10. Advanced because the end of the interval carries real fatigue.",
+    "notes": "Work 15-20s | Rest 2-3 min | 4-6 reps | RPE 9-10. Athlete chooses run, bike or row.",
     "is_active": true
   },
   {
@@ -6565,7 +6565,7 @@
     ],
     "equipment_needed_raw": "None (Run), Bike, or Rower",
     "equipment_all": [],
-    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "space_requirements": "Confined Space Friendly (if machine-based)",
     "cue": "Every rep at max \u2014 the point is holding speed while the rest gets shorter than you want. If you can't hit speed anymore, end the set.",
     "regression": null,
     "progression": "CN-022",
@@ -6573,7 +6573,7 @@
     "season_tag": "Pre-season, In-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Work 5-10s max | Rest 20-30s | 6-10 reps per set, 2-3 sets, 3-4 min between sets. Run: 10-20 yd sprints with a quick jog or walk back. Bike: max-watt bursts. Row: 5-8 hard strokes. RPE 9-10.",
+    "notes": "Work 5-10s | Rest 20-30s | 6-10 reps per set, 2-3 sets, 3-4 min between sets | RPE 9-10. Athlete chooses run, bike or row.",
     "is_active": true
   },
   {
@@ -6588,7 +6588,7 @@
     ],
     "equipment_needed_raw": "None (Run), Bike, or Rower",
     "equipment_all": [],
-    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "space_requirements": "Confined Space Friendly (if machine-based)",
     "cue": "Hard, honest sprints and honest rest \u2014 go hard when it's go time, actually recover when it's rest time. Hold the same speed on the last rep as the first.",
     "regression": "CN-021",
     "progression": "CN-023",
@@ -6596,7 +6596,7 @@
     "season_tag": "Pre-season, In-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Work 10-15s | Rest 30-45s | 6-8 reps per set, 2-3 sets, 3-4 min between sets. Run: 30-60 yd sprints. Bike: hard 10-15s efforts. Row: 10-15s hard. RPE 9.",
+    "notes": "Work 10-15s | Rest 30-45s | 6-8 reps per set, 2-3 sets, 3-4 min between sets | RPE 9. Athlete chooses run, bike or row.",
     "is_active": true
   },
   {
@@ -6611,7 +6611,7 @@
     ],
     "equipment_needed_raw": "None (Run), Bike, or Rower",
     "equipment_all": [],
-    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "space_requirements": "Confined Space Friendly (if machine-based)",
     "cue": "Treat each round like a real point \u2014 surge, settle, surge again \u2014 and use the break to bring your breathing down. The last point should look like the first.",
     "regression": "CN-022",
     "progression": null,
@@ -6619,7 +6619,7 @@
     "season_tag": "Pre-season, In-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Work 30-45s as surges (e.g. 10s hard / 5s easy repeating) | Rest 45-60s | 5-7 rounds, 1-2 sets, 4-5 min between sets. Run: shuttle or straight-line surges. Bike: 10s hard / 5s easy. Row: 10s hard / 5s easy. RPE 8-9.",
+    "notes": "Work 30-45s as surges (about 10s hard / 5s easy) | Rest 45-60s | 5-7 rounds per set, 1-2 sets, 4-5 min between sets | RPE 8-9. Athlete chooses run, bike or row.",
     "is_active": true
   },
   {
@@ -6634,7 +6634,7 @@
     ],
     "equipment_needed_raw": "None (Run), Bike, or Rower",
     "equipment_all": [],
-    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "space_requirements": "Confined Space Friendly (if machine-based)",
     "cue": "Hard and controlled, about 90-95% \u2014 fast but not flailing. Hold your form to the end of every interval and use the full rest.",
     "regression": null,
     "progression": "CN-025",
@@ -6642,7 +6642,7 @@
     "season_tag": "Pre-season, In-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Work 20-30s at ~90-95% | Rest 90-150s (about 1:4-1:5) | 5-8 reps. Run: 150-200 yd. Bike: 20-30s hard. Row: 20-30s, about 18-24 strokes. RPE 8-9.",
+    "notes": "Work 20-30s | Rest 90-150s | 5-8 reps | RPE 8-9. Athlete chooses run, bike or row.",
     "is_active": true
   },
   {
@@ -6657,7 +6657,7 @@
     ],
     "equipment_needed_raw": "None (Run), Bike, or Rower",
     "equipment_all": [],
-    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "space_requirements": "Confined Space Friendly (if machine-based)",
     "cue": "Strong, even pace \u2014 start at a speed you can hold to the finish. It should hurt in the last third, and your form should still be there.",
     "regression": "CN-024",
     "progression": "CN-026",
@@ -6665,7 +6665,7 @@
     "season_tag": "Pre-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Work 30-45s at ~90% | Rest 90-135s (about 1:3) | 4-6 reps. Run: 200-300 yd. Bike: 30-45s hard. Row: 30-45s hard, steady rate. RPE 8-9.",
+    "notes": "Work 30-45s | Rest 90-135s | 4-6 reps | RPE 8-9. Athlete chooses run, bike or row.",
     "is_active": true
   },
   {
@@ -6680,7 +6680,7 @@
     ],
     "equipment_needed_raw": "None (Run), Bike, or Rower",
     "equipment_all": [],
-    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "space_requirements": "Confined Space Friendly (if machine-based)",
     "cue": "Aggressive but controlled \u2014 go out hard, settle, and fight to hold the pace to the end. The last 10 seconds are the rep.",
     "regression": "CN-025",
     "progression": "CN-027",
@@ -6688,7 +6688,7 @@
     "season_tag": "Pre-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Work 45-60s at ~90% | Rest 2-3 min (about 1:3) | 4-6 reps. Run: 300-400 yd (a 300-yd shuttle works). Bike: 45-60s hard. Row: 45-60s hard. RPE 9.",
+    "notes": "Work 45-60s | Rest 2-3 min | 4-6 reps | RPE 9. Athlete chooses run, bike or row.",
     "is_active": true
   },
   {
@@ -6703,7 +6703,7 @@
     ],
     "equipment_needed_raw": "None (Run), Bike, or Rower",
     "equipment_all": [],
-    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "space_requirements": "Confined Space Friendly (if machine-based)",
     "cue": "Smart start, strong finish \u2014 find a pace you can hold the whole interval, because the back half is where it gets decided. Rest fully so the next one is still quality.",
     "regression": "CN-026",
     "progression": null,
@@ -6711,7 +6711,7 @@
     "season_tag": "Pre-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Work 60-90s at ~85-90% | Rest 3-4 min (about 1:2-1:3) | 3-5 reps. Run: 400-600 yd. Bike: 60-90s hard. Row: 60-90s hard. RPE 8-9.",
+    "notes": "Work 60-90s | Rest 3-4 min | 3-5 reps | RPE 8-9. Athlete chooses run, bike or row.",
     "is_active": true
   },
   {
@@ -6726,7 +6726,7 @@
     ],
     "equipment_needed_raw": "None (Run), Bike, or Rower",
     "equipment_all": [],
-    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "space_requirements": "Confined Space Friendly (if machine-based)",
     "cue": "Hard but repeatable \u2014 about 90-95% of your top effort, and the same speed on the last interval as the first. Easy jog or spin in the 30s off, don't stop.",
     "regression": null,
     "progression": "CN-029",
@@ -6734,7 +6734,7 @@
     "season_tag": "Off-season, Pre-season, In-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Work 30s at ~90-95% | Rest 30s easy | 10-20 reps (1-2 blocks of 8-10, 3 min between blocks). Run: fast, smooth running. Bike: hard, repeatable cadence. Row: 30s steady hard rate. RPE 8.",
+    "notes": "Work 30s | Rest 30s easy | 10-20 reps (1-2 blocks of 8-10, 3 min between blocks) | RPE 8. Athlete chooses run, bike or row.",
     "is_active": true
   },
   {
@@ -6749,7 +6749,7 @@
     ],
     "equipment_needed_raw": "None (Run), Bike, or Rower",
     "equipment_all": [],
-    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "space_requirements": "Confined Space Friendly (if machine-based)",
     "cue": "Controlled and strong from the start \u2014 a pace you could just barely hold for 3 minutes. Breathe in rhythm and keep your form.",
     "regression": "CN-028",
     "progression": "CN-030",
@@ -6757,7 +6757,7 @@
     "season_tag": "Off-season, Pre-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Work 2 min at ~90-95% HRmax | Rest 2 min easy | 5-8 reps. Run: track or road, even pace. Bike: steady hard watts. Row: steady, low-to-mid stroke rate. RPE 8.",
+    "notes": "Work 2 min | Rest 2 min easy | 5-8 reps | RPE 8. Athlete chooses run, bike or row.",
     "is_active": true
   },
   {
@@ -6772,7 +6772,7 @@
     ],
     "equipment_needed_raw": "None (Run), Bike, or Rower",
     "equipment_all": [],
-    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "space_requirements": "Confined Space Friendly (if machine-based)",
     "cue": "Settle in by the first 30 seconds, then hold. You should finish thinking you had maybe one more minute \u2014 no more.",
     "regression": "CN-029",
     "progression": "CN-031",
@@ -6780,7 +6780,7 @@
     "season_tag": "Off-season, Pre-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Work 3 min at ~90-95% HRmax | Rest 2-3 min easy | 4-6 reps. Run: even pace. Bike: steady hard watts. Row: steady hard split. RPE 8.",
+    "notes": "Work 3 min | Rest 2-3 min easy | 4-6 reps | RPE 8. Athlete chooses run, bike or row.",
     "is_active": true
   },
   {
@@ -6795,7 +6795,7 @@
     ],
     "equipment_needed_raw": "None (Run), Bike, or Rower",
     "equipment_all": [],
-    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "space_requirements": "Confined Space Friendly (if machine-based)",
     "cue": "Even, strong pace the whole 4 minutes. Don't blow up in the first minute \u2014 the last minute should feel hard but still controlled.",
     "regression": "CN-030",
     "progression": null,
@@ -6803,7 +6803,7 @@
     "season_tag": "Off-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Work 4 min at ~90-95% HRmax | Rest 3 min easy | 4 reps. Run: even pace. Bike: steady hard watts. Row: steady hard split. RPE 8-9.",
+    "notes": "Work 4 min | Rest 3 min easy | 4 reps | RPE 8-9. Athlete chooses run, bike or row.",
     "is_active": true
   },
   {
@@ -6818,7 +6818,7 @@
     ],
     "equipment_needed_raw": "None (Run), Bike, or Rower",
     "equipment_all": [],
-    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "space_requirements": "Confined Space Friendly (if machine-based)",
     "cue": "Comfortably hard \u2014 you could talk in short phrases but wouldn't want to. Even splits, steady breathing.",
     "regression": "CN-033",
     "progression": null,
@@ -6826,7 +6826,7 @@
     "season_tag": "Off-season, Pre-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Work 5-8 min at ~80-85% HRmax | Rest 1-2 min easy | 3-5 reps. Run: even pace. Bike: steady cadence. Row: steady, controlled split. RPE 6-7.",
+    "notes": "Work 5-8 min | Rest 1-2 min easy | 3-5 reps | RPE 6-7. Athlete chooses run, bike or row.",
     "is_active": true
   },
   {
@@ -6841,7 +6841,7 @@
     ],
     "equipment_needed_raw": "None (Run), Bike, or Rower",
     "equipment_all": [],
-    "space_requirements": "Run needs open room (see notes); Bike/Row are confined-space friendly",
+    "space_requirements": "Confined Space Friendly (if machine-based)",
     "cue": "Easy-to-moderate and relaxed \u2014 hold the same pace the whole time, finishing feeling like you could do more.",
     "regression": "CN-009",
     "progression": "CN-032",
@@ -6849,7 +6849,7 @@
     "season_tag": "Off-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Work 10-15 min at ~70-80% HRmax | Rest 2-3 min easy | 2-3 reps. Run: steady run. Bike: steady spin. Row: steady rhythmic rowing. RPE 5-6.",
+    "notes": "Work 10-15 min | Rest 2-3 min easy | 2-3 reps | RPE 5-6. Athlete chooses run, bike or row.",
     "is_active": true
   },
   {

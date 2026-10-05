@@ -361,36 +361,21 @@ voice, and prior programming decisions, all provided below.
   traceable to the exercise's own role above, not copied reflexively from a
   similarly-named exercise elsewhere.
 
-## Rest periods
-- The "Rest" column has had no explicit guidance until now, and the example
-  programs are not a reliable source to copy rest values from directly — the
-  coach's own raw sheets sometimes show short rest (e.g. 30s) next to a heavy
-  low-rep compound set, which reads as a transcription gap, not a deliberate
-  prescription; don't propagate a short rest value just because an example
-  program shows one next to a similar exercise. Set rest from the exercise's
-  own intensity/role using this guidance instead:
-  - Heavy compound Tier 1 work at low reps (1-5 reps, ~85%+ 1RM — e.g. a
-    5x3 Back Squat or Bench Press): 120-180s. Full neuromuscular recovery
-    matters more than session density here.
-  - Moderate-rep Tier 1 work (6-10 reps): 90-120s.
-  - Higher-rep Tier 1/hypertrophy-range work (10+ reps) and most Tier 2
-    resilience/standing prehab work: 60-90s.
-  - Tier 3 accessory/isolation work: 45-60s.
-  - Olympic-lift variants, plyometrics, and other power/speed work: 2-3+ min
-    (120-180s+) even at low apparent fatigue — these are limited by
-    movement QUALITY and CNS freshness, not muscular recovery, so cutting
-    rest short to save time defeats the point of the exercise.
-  - A true superset/circuit pair (a real A1/A2 circuit_label grouping) rests
-    minimally or not at all BETWEEN its own members — the rest value in that
-    case describes the break AFTER the full round, not between A1 and A2.
-  - Conditioning/interval work (e.g. "20s on/40s off") specifies its own
-    work:rest ratio directly in sets_reps/notes — the guidance above doesn't
-    apply there.
-  These are starting defaults, not a rigid rule — training age, phase intent
-  (e.g. a true taper can run tighter), and the coach's own voice in an example
-  program can still shape the exact number, but every rest value should be
-  traceable to the exercise's own role above, not copied reflexively from a
-  similarly-named exercise elsewhere.
+## Conditioning prescriptions (Run/Bike/Row)
+Every drill in the library's Conditioning categories is modality-agnostic: the
+athlete chooses whether to run, bike or row, and the app does not pick for
+them. For any conditioning entry you write:
+- Name the exercise exactly as the library does (each one is labeled
+  "Run/Bike/Row — ..."). Do not substitute a specific modality, distance,
+  machine, or equipment into the exercise name, sets_reps, or notes.
+- Put ONLY the dose in sets_reps: the work time (or time range), the number
+  of reps/rounds/sets, and the rest. Examples: "6-8 x 10-15s, rest 90-120s";
+  "4 x 5 min, rest 90s easy".
+- Put the intensity as an RPE (1-10) in notes. Do not use heart-rate zones,
+  %HRmax, pace, power, or any other intensity measure — the library's own
+  RPE for the drill is the starting point, adjusted for phase and training age.
+- Do not add per-modality tips ("on the bike do X, on the rower do Y"). If a
+  tip is genuinely needed, keep it modality-neutral.
 
 ## Building this phase
 1. Confirm the phase's goal, dates, and template against the Macrocycle
