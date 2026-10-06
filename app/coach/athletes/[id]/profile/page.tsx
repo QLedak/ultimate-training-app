@@ -153,7 +153,7 @@ export default function CoachAthleteProfilePage({ params }: { params: { id: stri
     <>
       <NavBar role="coach" name={coach?.name ?? null} links={NAV_LINKS} />
       <main className="mx-auto max-w-3xl px-6 pb-16">
-        <Link href="/coach" className="text-sm text-brand underline">
+        <Link href="/coach" className="text-sm text-brand-text underline">
           ← Coach dashboard
         </Link>
 
@@ -168,7 +168,7 @@ export default function CoachAthleteProfilePage({ params }: { params: { id: stri
               </h1>
               <Link
                 href={`/coach/athletes/${data.athlete.id}/program`}
-                className="text-sm text-brand underline"
+                className="text-sm text-brand-text underline"
               >
                 View current program →
               </Link>

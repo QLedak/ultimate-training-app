@@ -15,13 +15,13 @@ export default function MarketingHome() {
       <div className="flex gap-3">
         <Link
           href="/app/intake"
-          className="rounded-md bg-brand px-6 py-3 font-medium text-white hover:bg-blue-700"
+          className="rounded-md bg-brand px-6 py-3 font-medium text-brand-on hover:bg-brand-hover"
         >
           Start your intake
         </Link>
         <Link
           href="/login"
-          className="rounded-md border border-slate-300 px-6 py-3 font-medium text-slate-700 hover:border-brand hover:text-brand"
+          className="rounded-md border border-slate-300 px-6 py-3 font-medium text-slate-700 hover:border-brand hover:text-brand-text"
         >
           Log in
         </Link>

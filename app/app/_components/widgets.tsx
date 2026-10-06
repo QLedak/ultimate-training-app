@@ -73,7 +73,7 @@ export function BodyweightWidget({ athleteId }: { athleteId: string }) {
               <span className="text-slate-400">Not logged yet</span>
             )}
           </div>
-          <button type="button" onClick={() => setEditing(true)} className="text-sm text-brand underline">
+          <button type="button" onClick={() => setEditing(true)} className="text-sm text-brand-text underline">
             {latestIsToday ? "Update" : "Log today's weight"}
           </button>
         </div>
@@ -86,13 +86,13 @@ export function BodyweightWidget({ athleteId }: { athleteId: string }) {
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && save()}
-            className="w-32 rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-brand focus:outline-none"
+            className="w-32 rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-brand-text focus:outline-none"
           />
           <button
             type="button"
             onClick={save}
             disabled={saving}
-            className="rounded-md bg-brand px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="rounded-md bg-brand px-3 py-1.5 text-sm font-medium text-brand-on hover:bg-brand-hover disabled:opacity-50"
           >
             {saving ? "Saving…" : "Save"}
           </button>
@@ -160,7 +160,7 @@ export function RebuildRequestWidget({ athleteId }: { athleteId: string }) {
 
   if (!open) {
     return (
-      <button type="button" onClick={() => setOpen(true)} className="mb-6 text-sm text-brand underline">
+      <button type="button" onClick={() => setOpen(true)} className="mb-6 text-sm text-brand-text underline">
         Something changed? Request a plan update
       </button>
     );
@@ -184,7 +184,7 @@ export function RebuildRequestWidget({ athleteId }: { athleteId: string }) {
       </div>
       <textarea
         placeholder="Tell your coach a bit more (what changed, what hurts, etc.)"
-        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none"
+        className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-text focus:outline-none"
         rows={3}
         value={detail}
         onChange={(e) => setDetail(e.target.value)}
@@ -195,7 +195,7 @@ export function RebuildRequestWidget({ athleteId }: { athleteId: string }) {
           type="button"
           onClick={submit}
           disabled={submitting}
-          className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-on hover:bg-brand-hover disabled:opacity-50"
         >
           {submitting ? "Sending…" : "Send to my coach"}
         </button>

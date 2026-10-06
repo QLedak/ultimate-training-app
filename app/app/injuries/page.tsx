@@ -35,7 +35,7 @@ const CHARACTER_OPTIONS = [
   { value: "tight_sore_gradual", label: "Tight/sore, gradual or after activity" },
 ];
 
-const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none";
+const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-text focus:outline-none";
 
 /**
  * Its own page, on its own nav tab — this used to be buried inside
@@ -134,7 +134,7 @@ export default function InjuryStatusPage() {
       <main className="mx-auto max-w-xl px-6 py-10">
         <p className="text-sm text-slate-600">
           You&apos;re logged in, but there&apos;s no athlete profile for this account yet.{" "}
-          <Link href="/app/intake" className="text-brand underline">Complete intake</Link>.
+          <Link href="/app/intake" className="text-brand-text underline">Complete intake</Link>.
         </p>
       </main>
     );
@@ -183,7 +183,7 @@ export default function InjuryStatusPage() {
                       type="button"
                       onClick={() => handleInjuryCheckIn(inj.location, "resolved")}
                       disabled={injurySavingLocation === inj.location}
-                      className="rounded-md bg-brand px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                      className="rounded-md bg-brand px-3 py-1.5 text-sm font-medium text-brand-on hover:bg-brand-hover disabled:opacity-50"
                     >
                       {injurySavingLocation === inj.location ? "Saving…" : "Resolved"}
                     </button>
@@ -239,7 +239,7 @@ export default function InjuryStatusPage() {
               type="button"
               onClick={handleReportNewInjury}
               disabled={!newInjuryLocation || reportingInjury}
-              className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-on hover:bg-brand-hover disabled:opacity-50"
             >
               {reportingInjury ? "Logging…" : "Report injury"}
             </button>

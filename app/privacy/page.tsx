@@ -13,7 +13,7 @@ import Link from "next/link";
 export default function PrivacyPage() {
   return (
     <main className="mx-auto max-w-2xl px-6 py-16">
-      <Link href="/login" className="text-sm text-brand underline">
+      <Link href="/login" className="text-sm text-brand-text underline">
         ← Back
       </Link>
 
@@ -68,7 +68,7 @@ export default function PrivacyPage() {
           <p>
             We retain your data for as long as your account is active, so your training history remains useful to
             your program. You can request deletion of your account and associated data at any time by contacting{" "}
-            <a href="mailto:qledak@gmail.com" className="text-brand underline">qledak@gmail.com</a>; we&apos;ll
+            <a href="mailto:qledak@gmail.com" className="text-brand-text underline">qledak@gmail.com</a>; we&apos;ll
             delete it except where we&apos;re required to retain records by law.
           </p>
         </section>
@@ -78,7 +78,7 @@ export default function PrivacyPage() {
           <p>
             Depending on where you live, you may have rights to access, correct, export, or delete your personal
             data, and to object to certain processing. Contact{" "}
-            <a href="mailto:qledak@gmail.com" className="text-brand underline">qledak@gmail.com</a> to exercise
+            <a href="mailto:qledak@gmail.com" className="text-brand-text underline">qledak@gmail.com</a> to exercise
             these rights.
           </p>
         </section>
@@ -109,7 +109,7 @@ export default function PrivacyPage() {
           <h2 className="text-base font-semibold text-brand-dark">9. Contact</h2>
           <p>
             Questions about this policy? Contact us at{" "}
-            <a href="mailto:qledak@gmail.com" className="text-brand underline">qledak@gmail.com</a>.
+            <a href="mailto:qledak@gmail.com" className="text-brand-text underline">qledak@gmail.com</a>.
           </p>
         </section>
       </div>

@@ -38,7 +38,7 @@ const GOAL_LABELS: Record<string, string> = {
 function statusStyle(status: Phase["status"]) {
   switch (status) {
     case "active":
-      return "border-brand bg-blue-50";
+      return "border-brand bg-brand-tint";
     case "completed":
       return "border-slate-200 bg-slate-50 opacity-70";
     case "superseded":
@@ -51,7 +51,7 @@ function statusStyle(status: Phase["status"]) {
 function statusLabel(status: Phase["status"]) {
   switch (status) {
     case "active":
-      return <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-medium text-white">Current</span>;
+      return <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-medium text-brand-on">Current</span>;
     case "completed":
       return <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600">Done</span>;
     case "superseded":
@@ -86,7 +86,7 @@ export default function ProgramOverviewPage() {
       <main className="mx-auto max-w-xl px-6 py-10">
         <p className="text-sm text-slate-600">
           You&apos;re logged in, but there&apos;s no athlete profile for this account yet.{" "}
-          <Link href="/app/intake" className="text-brand underline">Complete intake</Link>.
+          <Link href="/app/intake" className="text-brand-text underline">Complete intake</Link>.
         </p>
       </main>
     );
@@ -172,13 +172,13 @@ export default function ProgramOverviewPage() {
       <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Link
           href="/app/schedule"
-          className="block rounded-md border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700 hover:border-brand hover:text-brand"
+          className="block rounded-md border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700 hover:border-brand hover:text-brand-text"
         >
           Edit schedule / add a tournament
         </Link>
         <Link
           href="/app/injuries"
-          className="block rounded-md border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700 hover:border-brand hover:text-brand"
+          className="block rounded-md border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700 hover:border-brand hover:text-brand-text"
         >
           Update injury status
         </Link>

@@ -54,7 +54,7 @@ export function NavBar({
                 href={link.href}
                 className={
                   isActive(link.href)
-                    ? "text-sm font-medium text-brand"
+                    ? "text-sm font-medium text-brand-text"
                     : "text-sm font-medium text-slate-500 hover:text-brand-dark"
                 }
               >

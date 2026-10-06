@@ -52,7 +52,7 @@ export default function AthleteHomePage() {
         </p>
         <Link
           href="/app/intake"
-          className="mt-4 rounded-md bg-brand px-4 py-2 text-center text-sm font-medium text-white hover:bg-blue-700"
+          className="mt-4 rounded-md bg-brand px-4 py-2 text-center text-sm font-medium text-brand-on hover:bg-brand-hover"
         >
           Complete intake
         </Link>
@@ -90,7 +90,7 @@ export default function AthleteHomePage() {
           <div className="mb-6 rounded-lg border border-slate-200 p-4">
             {todaysSession ? (
               <>
-                <span className="text-xs font-semibold uppercase tracking-wide text-brand">Today</span>
+                <span className="text-xs font-semibold uppercase tracking-wide text-brand-text">Today</span>
                 <div className="mt-1 flex items-center justify-between">
                   <div>
                     <p className="font-medium text-brand-dark">{todaysSession.day_label}</p>
@@ -101,7 +101,7 @@ export default function AthleteHomePage() {
                   </div>
                   <Link
                     href={`/app/log/${todaysSession.id}`}
-                    className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                    className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-on hover:bg-brand-hover"
                   >
                     {todaysSession.status ? "View" : "Log it"}
                   </Link>

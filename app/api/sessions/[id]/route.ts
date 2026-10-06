@@ -46,7 +46,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       exerciseIds.length
         ? supabase
             .from("exercise_library")
-            .select("exercise_id, exercise_name, cue, movement_pattern, injury_considerations")
+            .select("exercise_id, exercise_name, cue, movement_pattern, injury_considerations, equipment_needed, equipment_all")
             .in("exercise_id", exerciseIds)
         : Promise.resolve({ data: [], error: null }),
       supabase
@@ -80,17 +80,29 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   const { data: alternativeRows, error: alternativesError } = patterns.length
     ? await supabase
         .from("exercise_library")
-        .select("exercise_id, exercise_name, movement_pattern")
+        .select("exercise_id, exercise_name, movement_pattern, equipment_needed, equipment_all")
         .in("movement_pattern", patterns)
         .eq("is_active", true) // retired exercises are never offered as a swap
     : { data: [], error: null };
   if (alternativesError) return dbError("sessions/[id]", alternativesError);
 
-  const alternativesByPattern = new Map<string, Array<{ exercise_id: string; exercise_name: string }>>();
+  // True when the movement is loaded with dumbbells — drives the "enter the
+  // weight PER dumbbell" hint in the logging UI.
+  const usesDumbbells = (row: { equipment_needed?: unknown; equipment_all?: unknown }) =>
+    [row.equipment_needed, row.equipment_all].some((v) => Array.isArray(v) && v.includes("dumbbells"));
+
+  const alternativesByPattern = new Map<
+    string,
+    Array<{ exercise_id: string; exercise_name: string; uses_dumbbells: boolean }>
+  >();
   for (const row of alternativeRows ?? []) {
     const pattern = row.movement_pattern as string;
     const list = alternativesByPattern.get(pattern) ?? [];
-    list.push({ exercise_id: row.exercise_id as string, exercise_name: row.exercise_name as string });
+    list.push({
+      exercise_id: row.exercise_id as string,
+      exercise_name: row.exercise_name as string,
+      uses_dumbbells: usesDumbbells(row),
+    });
     alternativesByPattern.set(pattern, list);
   }
   for (const list of alternativesByPattern.values()) {
@@ -146,6 +158,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       exercise_name: libraryRow?.exercise_name ?? humanizeExerciseId(exerciseId),
       cue: libraryRow?.cue ?? null,
       tier,
+      uses_dumbbells: libraryRow ? usesDumbbells(libraryRow) : false,
       warmup,
       // Only a real A1/A2-style superset code is shown/grouped on — see
       // lib/training/display-labels.ts for why this guard exists.

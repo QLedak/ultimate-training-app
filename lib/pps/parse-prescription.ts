@@ -76,10 +76,14 @@ export type ParsedTimedTarget = { sets: number | null; seconds: number };
 export function parseTimedTarget(target: string | null | undefined): ParsedTimedTarget | null {
   if (!target) return null;
 
-  const setsFirst = target.match(/(\d+)\s*x\s*:?(\d+)\s*(sec|second|s\b|min|minute|m\b)/i);
+  // Sets x duration, e.g. "3x30s", "3 x 30 sec", "6-8 x 30s", "3 x 20-30s", "4 x 5 min".
+  // Ranges take the top of the duration range (the number the athlete is timing toward).
+  const setsFirst = target.match(
+    /(\d+)(?:\s*-\s*\d+)?\s*[x\u00d7]\s*:?(\d+)(?:\s*-\s*(\d+))?\s*(sec|second|s\b|min|minute|m\b)/i
+  );
   if (setsFirst) {
-    const value = parseInt(setsFirst[2], 10);
-    const unit = setsFirst[3].toLowerCase();
+    const value = parseInt(setsFirst[3] ?? setsFirst[2], 10);
+    const unit = setsFirst[4].toLowerCase();
     return { sets: parseInt(setsFirst[1], 10), seconds: unit.startsWith("m") ? value * 60 : value };
   }
 

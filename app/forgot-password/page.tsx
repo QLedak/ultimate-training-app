@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
-const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none";
+const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-text focus:outline-none";
 
 /**
  * Role-agnostic — works for both athlete and coach accounts, since both are
@@ -44,7 +44,7 @@ export default function ForgotPasswordPage() {
         <p className="mt-2 text-sm text-slate-600">
           If an account exists for {email}, we&apos;ve sent a link to reset your password.
         </p>
-        <Link href="/login" className="mt-6 text-sm text-brand underline">
+        <Link href="/login" className="mt-6 text-sm text-brand-text underline">
           Back to login
         </Link>
       </main>
@@ -70,14 +70,14 @@ export default function ForgotPasswordPage() {
           type="button"
           onClick={handleSubmit}
           disabled={submitting || !email}
-          className="w-full rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="w-full rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-on hover:bg-brand-hover disabled:opacity-50"
         >
           {submitting ? "Sending…" : "Send reset link"}
         </button>
       </div>
 
       <p className="mt-6 text-xs text-slate-500">
-        <Link href="/login" className="text-brand underline">Back to login</Link>
+        <Link href="/login" className="text-brand-text underline">Back to login</Link>
       </p>
     </main>
   );

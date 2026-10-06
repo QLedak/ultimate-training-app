@@ -23,7 +23,7 @@ type DaysChangeRequest = {
   requested_at: string;
 };
 
-const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none";
+const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-text focus:outline-none";
 const DAYS_OPTIONS = [2, 3, 4, 5, 6];
 
 /**
@@ -170,7 +170,7 @@ export default function EditSchedulePage() {
       <main className="mx-auto max-w-xl px-6 py-10">
         <p className="text-sm text-slate-600">
           You&apos;re logged in, but there&apos;s no athlete profile for this account yet.{" "}
-          <Link href="/app/intake" className="text-brand underline">Complete intake</Link>.
+          <Link href="/app/intake" className="text-brand-text underline">Complete intake</Link>.
         </p>
       </main>
     );
@@ -236,7 +236,7 @@ export default function EditSchedulePage() {
                     onClick={() => setRequestedDays(d)}
                     disabled={d === currentDays}
                     className={`h-10 w-10 rounded-md border text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40 ${
-                      requestedDays === d ? "border-brand bg-blue-50 text-brand-dark" : "border-slate-300 text-slate-700"
+                      requestedDays === d ? "border-brand bg-brand-tint text-brand-dark" : "border-slate-300 text-slate-700"
                     }`}
                   >
                     {d}
@@ -253,7 +253,7 @@ export default function EditSchedulePage() {
                 type="button"
                 onClick={handleRequestDaysChange}
                 disabled={requestedDays === "" || daysSaving}
-                className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-on hover:bg-brand-hover disabled:opacity-50"
               >
                 {daysSaving ? "Sending…" : "Request change"}
               </button>
@@ -263,7 +263,7 @@ export default function EditSchedulePage() {
 
         <Link
           href="/app/injuries"
-          className="mt-6 block rounded-md border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700 hover:border-brand hover:text-brand"
+          className="mt-6 block rounded-md border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700 hover:border-brand hover:text-brand-text"
         >
           Update injury status →
         </Link>
@@ -291,7 +291,7 @@ export default function EditSchedulePage() {
             {tournaments.map((t, i) => (
               <div
                 key={i}
-                className={`space-y-2 rounded-md border p-3 ${t.is_priority ? "border-brand bg-blue-50" : "border-slate-200"}`}
+                className={`space-y-2 rounded-md border p-3 ${t.is_priority ? "border-brand bg-brand-tint" : "border-slate-200"}`}
               >
                 <div className="flex gap-2">
                   <input
@@ -322,7 +322,7 @@ export default function EditSchedulePage() {
                 </label>
               </div>
             ))}
-            <button type="button" onClick={addTournament} className="text-sm text-brand underline">
+            <button type="button" onClick={addTournament} className="text-sm text-brand-text underline">
               + Add a tournament or league weekend
             </button>
           </div>
@@ -332,7 +332,7 @@ export default function EditSchedulePage() {
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="mt-8 w-full rounded-md bg-brand px-4 py-3.5 text-base font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className="mt-8 w-full rounded-md bg-brand px-4 py-3.5 text-base font-medium text-brand-on hover:bg-brand-hover disabled:opacity-50"
         >
           {saving ? "Saving…" : "Save schedule"}
         </button>

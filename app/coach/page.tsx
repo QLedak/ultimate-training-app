@@ -258,7 +258,7 @@ export default function CoachHomePage() {
             </Link>
             <Link
               href={`/coach/athletes/${a.id}/profile`}
-              className="ml-2 text-xs text-slate-400 underline hover:text-brand"
+              className="ml-2 text-xs text-slate-400 underline hover:text-brand-text"
             >
               Profile
             </Link>
@@ -288,7 +288,7 @@ export default function CoachHomePage() {
                 type="button"
                 onClick={() => buildSeasonPlan(a)}
                 disabled={generatingId === a.id}
-                className="rounded-full border border-brand px-2 py-0.5 text-xs font-medium text-brand hover:bg-blue-50 disabled:opacity-50"
+                className="rounded-full border border-brand px-2 py-0.5 text-xs font-medium text-brand-text hover:bg-brand-tint disabled:opacity-50"
               >
                 {generatingId === a.id ? "Building…" : "Build season plan"}
               </button>
@@ -298,7 +298,7 @@ export default function CoachHomePage() {
                 type="button"
                 onClick={() => generatePhaseDraft(a)}
                 disabled={generatingId === a.id}
-                className="rounded-full border border-brand px-2 py-0.5 text-xs font-medium text-brand hover:bg-blue-50 disabled:opacity-50"
+                className="rounded-full border border-brand px-2 py-0.5 text-xs font-medium text-brand-text hover:bg-brand-tint disabled:opacity-50"
               >
                 {generatingId === a.id ? "Generating…" : "Generate phase draft"}
               </button>
@@ -366,7 +366,7 @@ export default function CoachHomePage() {
               placeholder="Search athletes…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full max-w-xs rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-brand focus:outline-none"
+              className="w-full max-w-xs rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-brand-text focus:outline-none"
             />
             <select
               value={sort}

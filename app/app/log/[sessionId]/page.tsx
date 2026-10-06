@@ -38,7 +38,9 @@ type SessionDetail = {
     tempo: string | null;
     rest: string | null;
     coach_notes: string | null;
-    alternatives: Array<{ exercise_id: string; exercise_name: string }>;
+    alternatives: Array<{ exercise_id: string; exercise_name: string; uses_dumbbells?: boolean }>;
+    // True when loaded with dumbbells — shows the "per dumbbell" weight hint.
+    uses_dumbbells?: boolean;
     // Ramping warmup sets for this lift, lightest to heaviest — attached
     // display-only guidance, never a separately logged set. Empty/absent for
     // anything that isn't a Tier-1 main lift with a fixed working weight.
@@ -359,7 +361,7 @@ export default function SessionLogPage() {
 
   if (loadError) {
     return (
-      <main className="mx-auto max-w-xl px-6 py-10">
+      <main className="mx-auto max-w-xl px-4 py-5 sm:px-6 sm:py-10">
         <p className="rounded-md bg-red-50 p-3 text-sm text-red-600">{loadError}</p>
         <Link href="/app/log" className="mt-4 inline-block text-sm text-brand underline">
           Back to schedule
@@ -370,7 +372,7 @@ export default function SessionLogPage() {
 
   if (!data) {
     return (
-      <main className="mx-auto max-w-xl px-6 py-10">
+      <main className="mx-auto max-w-xl px-4 py-5 sm:px-6 sm:py-10">
         <p className="text-sm text-slate-500">Loading…</p>
       </main>
     );
@@ -412,7 +414,7 @@ export default function SessionLogPage() {
 
   if (mode === "manual") {
     return (
-      <main className="mx-auto max-w-xl px-6 py-10">
+      <main className="mx-auto max-w-xl px-4 py-5 sm:px-6 sm:py-10">
         <button type="button" onClick={() => setMode("overview")} className="text-xs text-slate-400 underline">
           ← Back
         </button>
@@ -527,7 +529,7 @@ export default function SessionLogPage() {
   const alreadyLogged = !!data.session_log;
 
   return (
-    <main className="mx-auto max-w-xl px-6 py-10">
+    <main className="mx-auto max-w-xl px-4 py-5 sm:px-6 sm:py-10">
       <Link href="/app/log" className="text-xs text-slate-400 underline">
         ← Back to schedule
       </Link>
@@ -651,6 +653,9 @@ type GuidedSetState = {
   // prescription/last-time hint. Cleared the moment the athlete edits the
   // weight field by hand, so it never masks their own entry as a suggestion.
   autoSuggested?: boolean;
+  // True once the athlete typed this set's weight or used "apply to all" —
+  // autoregulation never overwrites a weight the athlete chose themselves.
+  manualWeight?: boolean;
 };
 
 type GuidedExerciseState = {
@@ -734,7 +739,11 @@ function initExerciseState(exercise: SessionDetail["exercises"][number]): Guided
           : exercise.last_time?.weight_used != null
           ? String(exercise.last_time.weight_used)
           : "";
-      s.reps = targetInfo.minReps != null ? String(targetInfo.minReps) : "";
+      // Timed holds/intervals (3x30s) must NOT prefill reps: for those sets
+      // `reps` stores the seconds actually held, and prefilling the target made
+      // the countdown open already at 0:00 and let the set be logged untimed.
+      const isTimed = parseTimedTarget(exercise.prescribed_target ?? "") != null;
+      s.reps = !isTimed && targetInfo.minReps != null ? String(targetInfo.minReps) : "";
       sets.push(s);
     }
   }
@@ -841,7 +850,7 @@ function GuidedWorkout({
 
   if (!initialized) {
     return (
-      <main className="mx-auto max-w-xl px-6 py-10">
+      <main className="mx-auto max-w-xl px-4 py-5 sm:px-6 sm:py-10">
         <p className="text-sm text-slate-500">Loading…</p>
       </main>
     );
@@ -862,7 +871,10 @@ function GuidedWorkout({
         const merged = { ...s, ...patch };
         // Typing a weight in by hand overrides any auto-suggestion — once the
         // athlete has touched the field it's their number, not ours.
-        if ("weight" in patch && !("autoSuggested" in patch)) merged.autoSuggested = false;
+        if ("weight" in patch && !("autoSuggested" in patch)) {
+          merged.autoSuggested = false;
+          merged.manualWeight = true;
+        }
         return merged;
       });
       return { ...prev, [exerciseId]: { ...current, sets: nextSets } };
@@ -879,15 +891,27 @@ function GuidedWorkout({
     updateExerciseState(exerciseId, { sets: current.sets.filter((_, i) => i !== setIndex) });
   }
 
-  /** Copies the first not-yet-logged set's weight/reps onto every other
-   * not-yet-logged set — the "I don't want to keep looking at my phone"
-   * shortcut from testing feedback. Already-logged sets are left alone. */
+  /** Copies the first not-yet-logged set's weight and reps (or, for a timed
+   * hold/interval, the recorded seconds) onto every other not-yet-logged set.
+   * Already-logged sets are left alone. Copied weights are flagged manual so
+   * the effort-based autoregulation in logSet can't silently overwrite them
+   * after the next set is logged (that was the "apply to all didn't work"
+   * report). Blank fields on the template never erase values on other sets. */
   function applyToAllSets(exerciseId: string) {
     const current = states[exerciseId];
     const template = current.sets.find((s) => !s.logged);
     if (!template) return;
     updateExerciseState(exerciseId, {
-      sets: current.sets.map((s) => (s.logged ? s : { ...s, weight: template.weight, reps: template.reps })),
+      sets: current.sets.map((s) => {
+        if (s.logged || s === template) return s;
+        return {
+          ...s,
+          weight: template.weight !== "" ? template.weight : s.weight,
+          reps: template.reps !== "" ? template.reps : s.reps,
+          autoSuggested: false,
+          manualWeight: template.weight !== "" ? true : s.manualWeight,
+        };
+      }),
     });
   }
 
@@ -908,7 +932,7 @@ function GuidedWorkout({
       const priorWeight = parseFloat(loggedSet.weight);
       const suggestion = !Number.isNaN(priorWeight) && priorWeight > 0 ? suggestNextWeight(priorWeight, loggedSet.rir) : null;
       const nextSet = exState.sets[setIndex + 1];
-      if (suggestion && nextSet && !nextSet.logged) {
+      if (suggestion && nextSet && !nextSet.logged && !nextSet.manualWeight) {
         updateSet(exercise.exercise_id, setIndex + 1, { weight: String(suggestion.weight), autoSuggested: true });
       }
     }
@@ -1006,7 +1030,7 @@ function GuidedWorkout({
   if (finishing) {
     const { exercises: payload, anySkipped } = buildFinalPayload();
     return (
-      <main className="mx-auto max-w-xl px-6 py-10">
+      <main className="mx-auto max-w-xl px-4 py-5 sm:px-6 sm:py-10">
         <h1 className="text-2xl font-bold text-brand-dark">Nice work — that's the workout.</h1>
         <p className="mt-2 text-sm text-slate-600">
           {payload.length} of {exercises.length} exercises logged.
@@ -1037,7 +1061,7 @@ function GuidedWorkout({
   const stepExercises = step.exerciseIndexes.map((i) => exercises[i]);
 
   return (
-    <main className="mx-auto max-w-xl px-6 py-10">
+    <main className="mx-auto max-w-xl px-4 py-5 sm:px-6 sm:py-10">
       <div className="mb-2 flex items-center justify-between">
         <button type="button" onClick={onExit} className="text-xs text-slate-400 underline">
           Exit workout
@@ -1047,7 +1071,7 @@ function GuidedWorkout({
         </span>
       </div>
 
-      <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+      <div className="mb-3 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
         <div
           className="h-full rounded-full bg-brand transition-all"
           style={{ width: `${(stepIndex / steps.length) * 100}%` }}
@@ -1118,6 +1142,17 @@ function GuidedWorkout({
           {isLastStep ? "Finish workout" : "Next →"}
         </button>
       </div>
+
+      {!isLastStep && steps[stepIndex + 1] && (
+        <div className="mt-4 rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Coming up next</p>
+          <p className="text-sm font-medium text-slate-700">
+            {steps[stepIndex + 1].exerciseIndexes
+              .map((i) => exercises[i].exercise_name)
+              .join(" + ")}
+          </p>
+        </div>
+      )}
     </main>
   );
 }
@@ -1183,7 +1218,7 @@ function EffortSlider({
         // h-8 (rather than the browser's thin default track) gives the
         // slider a bigger touch target — this gets dragged mid-set, often
         // one-handed, so it needs to be easy to grab without looking closely.
-        className="h-8 w-full accent-brand disabled:opacity-50"
+        className="h-7 w-full accent-brand disabled:opacity-50"
       />
       <div className="mt-1 flex justify-between text-[10px] text-slate-400">
         <span>Very easy</span>
@@ -1193,73 +1228,81 @@ function EffortSlider({
   );
 }
 
-/** Counts DOWN from the target hold time, for a timed/isometric exercise
- * (plank, dead hang, wall sit) — testing feedback: it used to count up from
- * zero, which doesn't tell the athlete how much longer to hold. Elapsed time
- * is still tracked internally (clamped at the target, since a hold can't run
- * negative on the display), and stopping still writes the elapsed whole
- * seconds held into `onDone` — the caller stores it in the same `reps` field
- * a rep-based exercise would use (the schema has no separate duration
- * column). If the athlete holds past the target, the display sits at 0:00
- * rather than going negative; `elapsed` behind the scenes keeps counting so
- * a hold that runs long is still logged accurately. Purely local/in-page
- * state — unlike the rest timer, there's no need for this to survive
- * navigation, since the athlete is actively performing the hold while
- * watching it. */
+/** Counts DOWN from the target time for a timed exercise (plank hold, wall
+ * sit, interval). Every set starts at the full target and only begins counting
+ * when Start is pressed. Stopping records the whole seconds actually held into
+ * `onDone` — the caller stores that in the set's `reps` field (the schema has
+ * no duration column). Past the target the display sits at 0:00 and "Time's
+ * up" shows while the real elapsed time keeps counting so a long hold is still
+ * logged accurately.
+ *
+ * `recordedSeconds` is the set's saved value (set.reps). When it is filled —
+ * after Stop, or after "apply to all" copied a time onto this set — the timer
+ * shows that recorded time with a Redo button instead of a fresh countdown, so
+ * it always agrees with the set's data. Local/in-page state only. */
 function WorkTimer({
   targetSeconds,
-  initialSeconds,
-  disabled,
+  recordedSeconds,
   onDone,
+  onClear,
 }: {
   targetSeconds: number;
-  initialSeconds: number;
-  disabled?: boolean;
+  recordedSeconds: string;
   onDone: (seconds: number) => void;
+  onClear: () => void;
 }) {
   const [running, setRunning] = useState(false);
-  const [elapsed, setElapsed] = useState(initialSeconds);
+  const [elapsed, setElapsed] = useState(0);
 
   useEffect(() => {
     if (!running) return;
-    const start = Date.now() - elapsed * 1000;
-    const interval = setInterval(() => setElapsed(Math.round((Date.now() - start) / 1000)), 250);
+    const start = Date.now();
+    setElapsed(0);
+    const interval = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 200);
     return () => clearInterval(interval);
-    // Only re-anchor when (re)started — elapsed updates come from the
-    // interval itself while running.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running]);
 
+  const fmt = (total: number) => `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
+
+  if (!running && recordedSeconds !== "") {
+    const rec = Number(recordedSeconds);
+    return (
+      <div className="rounded-md border border-green-300 bg-green-50 p-2 text-center">
+        <p className="text-xs text-slate-500">Recorded (target {fmt(targetSeconds)})</p>
+        <p className="text-2xl font-bold tabular-nums text-brand-dark">{fmt(Number.isFinite(rec) ? rec : 0)}</p>
+        <button type="button" onClick={onClear} className="mt-1 text-xs text-brand underline">
+          Redo timer
+        </button>
+      </div>
+    );
+  }
+
   const atTarget = targetSeconds > 0 && elapsed >= targetSeconds;
-  const remaining = Math.max(0, targetSeconds - elapsed);
-  const minutes = Math.floor(remaining / 60);
-  const seconds = remaining % 60;
+  const remaining = running ? Math.max(0, targetSeconds - elapsed) : targetSeconds;
 
   return (
-    <div className={`rounded-md border p-3 text-center ${atTarget ? "border-green-300 bg-green-50" : "border-slate-200"}`}>
-      <p className="text-xs text-slate-500">Target: {targetSeconds}s</p>
-      <p className="mt-1 text-3xl font-bold tabular-nums text-brand-dark">
-        {minutes}:{String(seconds).padStart(2, "0")}
-      </p>
-      {atTarget && <p className="text-xs font-medium text-green-700">Time&apos;s up — keep holding or stop</p>}
+    <div className={`rounded-md border p-2 text-center ${atTarget ? "border-green-300 bg-green-50" : "border-slate-200"}`}>
+      <p className="text-xs text-slate-500">Target: {fmt(targetSeconds)}</p>
+      <p className="text-3xl font-bold tabular-nums text-brand-dark">{fmt(remaining)}</p>
+      {atTarget && <p className="text-xs font-medium text-green-700">Time&apos;s up — stop when ready</p>}
+      {running && !atTarget && <p className="text-xs text-slate-400">{fmt(elapsed)} elapsed</p>}
       <div className="mt-2 flex gap-2">
         {!running ? (
           <button
             type="button"
-            disabled={disabled}
             onClick={() => setRunning(true)}
-            className="flex-1 rounded-md bg-brand px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-40"
+            className="flex-1 rounded-md bg-brand px-3 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
           >
-            {elapsed > 0 ? "Resume" : "Start hold"}
+            Start timer
           </button>
         ) : (
           <button
             type="button"
             onClick={() => {
               setRunning(false);
-              onDone(elapsed);
+              onDone(Math.max(1, elapsed));
             }}
-            className="flex-1 rounded-md bg-brand-dark px-3 py-2 text-sm font-medium text-white hover:opacity-90"
+            className="flex-1 rounded-md bg-brand-dark px-3 py-2.5 text-sm font-medium text-white hover:opacity-90"
           >
             Stop
           </button>
@@ -1269,12 +1312,17 @@ function WorkTimer({
   );
 }
 
+function effortLabel(v: EffortLevel | ""): string {
+  return EFFORT_SCALE.find((e) => e.value === v)?.shortLabel ?? "";
+}
+
 function GuidedSetRow({
   setNumber,
   tier,
   set,
   weekType,
   timedSeconds,
+  perDumbbell,
   onChange,
   onLog,
   onRemove,
@@ -1284,34 +1332,59 @@ function GuidedSetRow({
   set: GuidedSetState;
   weekType: "build" | "deload" | "test";
   timedSeconds: number | null;
+  perDumbbell: boolean;
   onChange: (patch: Partial<GuidedSetState>) => void;
   onLog: () => void;
   onRemove?: () => void;
 }) {
-  // Logged sets are normally shown read-only/disabled, but testing feedback
-  // asked for a way to go back and fix a set logged with the wrong weight —
-  // this lets the athlete temporarily re-open an already-logged set's fields.
-  // Nothing about `set.logged` itself changes while editing (so the set stays
-  // counted toward the workout), and the final submit payload always reads
-  // these fields' current values, not a snapshot taken at log time — so an
-  // edit here takes effect without any extra plumbing.
+  // Logged sets collapse to a one-line summary (compact on mobile) with an
+  // Edit button that temporarily re-opens the fields. `set.logged` never
+  // changes while editing and the final payload reads current field values,
+  // so an edit takes effect without extra plumbing.
   const [editing, setEditing] = useState(false);
   const locked = set.logged && !editing;
   const canLog = timedSeconds != null ? !!set.reps : tier === 1 ? !!(set.weight && set.reps && set.rir) : tier === 2 ? !!set.rir : true;
+  const optional = tier === 1 ? "" : " (optional)";
+  const weightPlaceholder = perDumbbell
+    ? `Weight PER dumbbell${optional}`
+    : tier === 1
+    ? "Weight (lb)"
+    : `Weight${optional}`;
+  const perDbHint = perDumbbell ? (
+    <p className="text-[11px] leading-tight text-slate-500">
+      Enter the weight of <strong>one</strong> dumbbell — not the combined total.
+    </p>
+  ) : null;
+
+  if (locked) {
+    const summary =
+      timedSeconds != null
+        ? `${set.reps}s`
+        : [set.weight ? `${set.weight} lb${perDumbbell ? " ea" : ""}` : "", set.reps ? `× ${set.reps}` : ""]
+            .filter(Boolean)
+            .join(" ") || "Done";
+    const eff = tier !== 3 && timedSeconds == null ? effortLabel(set.rir) : "";
+    return (
+      <div className="flex items-center justify-between rounded-md border border-green-300 bg-green-50 px-3 py-2">
+        <span className="text-sm text-green-800">
+          <span className="font-semibold">Set {setNumber} ✓</span> · {summary}
+          {eff && <span className="text-green-700"> · {eff}</span>}
+        </span>
+        <button type="button" onClick={() => setEditing(true)} className="text-xs text-brand underline">
+          Edit
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className={`rounded-md border p-3 ${locked ? "border-green-300 bg-green-50" : "border-slate-200"}`}>
-      <div className="mb-2 flex items-center justify-between">
+    <div className="rounded-md border border-slate-200 p-2.5 sm:p-3">
+      <div className="mb-1.5 flex items-center justify-between">
         <span className="text-sm font-semibold text-slate-700">Set {setNumber}</span>
         <div className="flex items-center gap-2">
-          {locked && <span className="text-xs font-medium text-green-700">Logged</span>}
           {set.logged && (
-            <button
-              type="button"
-              onClick={() => setEditing((e) => !e)}
-              className="text-xs text-brand underline"
-            >
-              {editing ? "Cancel" : "Edit"}
+            <button type="button" onClick={() => setEditing(false)} className="text-xs text-brand underline">
+              Cancel
             </button>
           )}
           {onRemove && !set.logged && (
@@ -1325,32 +1398,32 @@ function GuidedSetRow({
       {timedSeconds != null ? (
         <div className="space-y-2">
           {tier !== 3 && (
-            <input
-              type="number"
-              placeholder="Weight/load (optional)"
-              className={inputClass}
-              value={set.weight}
-              disabled={locked}
-              onChange={(e) => onChange({ weight: e.target.value })}
-            />
+            <>
+              <input
+                type="number"
+                inputMode="decimal"
+                placeholder={perDumbbell ? "Weight PER dumbbell (optional)" : "Weight/load (optional)"}
+                className={inputClass}
+                value={set.weight}
+                onChange={(e) => onChange({ weight: e.target.value })}
+              />
+              {perDbHint}
+            </>
           )}
-          {!set.logged ? (
-            <WorkTimer
-              targetSeconds={timedSeconds}
-              initialSeconds={set.reps ? Number(set.reps) : 0}
-              onDone={(seconds) => onChange({ reps: String(seconds) })}
-            />
-          ) : editing ? (
-            <input
-              type="number"
-              placeholder="Seconds held"
-              className={inputClass}
-              value={set.reps}
-              onChange={(e) => onChange({ reps: e.target.value })}
-            />
-          ) : (
-            <p className="text-sm text-slate-600">Held for {set.reps}s</p>
-          )}
+          <WorkTimer
+            targetSeconds={timedSeconds}
+            recordedSeconds={set.reps}
+            onDone={(seconds) => onChange({ reps: String(seconds) })}
+            onClear={() => onChange({ reps: "" })}
+          />
+          <input
+            type="number"
+            inputMode="numeric"
+            placeholder="…or type seconds held"
+            className={inputClass}
+            value={set.reps}
+            onChange={(e) => onChange({ reps: e.target.value })}
+          />
         </div>
       ) : (
         <>
@@ -1359,22 +1432,23 @@ function GuidedSetRow({
               <div className="flex gap-2">
                 <input
                   type="number"
-                  placeholder="Weight (lb)"
+                  inputMode="decimal"
+                  placeholder={weightPlaceholder}
                   className={inputClass}
                   value={set.weight}
-                  disabled={locked}
                   onChange={(e) => onChange({ weight: e.target.value })}
                 />
                 <input
                   type="number"
+                  inputMode="numeric"
                   placeholder="Reps"
                   className={inputClass}
                   value={set.reps}
-                  disabled={locked}
                   onChange={(e) => onChange({ reps: e.target.value })}
                 />
               </div>
-              <EffortSlider value={set.rir} disabled={locked} onChange={(v) => onChange({ rir: v })} />
+              {perDbHint}
+              <EffortSlider value={set.rir} onChange={(v) => onChange({ rir: v })} />
               {!set.logged && set.autoSuggested && (
                 <p className="text-xs text-brand">
                   Weight adjusted from your last set&apos;s effort — edit it if this isn&apos;t right.
@@ -1385,25 +1459,26 @@ function GuidedSetRow({
 
           {tier === 2 && (
             <div className="space-y-2">
-              <EffortSlider value={set.rir} disabled={locked} onChange={(v) => onChange({ rir: v })} />
+              <EffortSlider value={set.rir} onChange={(v) => onChange({ rir: v })} />
               <div className="flex gap-2">
                 <input
                   type="number"
-                  placeholder="Weight/load (optional)"
+                  inputMode="decimal"
+                  placeholder={weightPlaceholder}
                   className={inputClass}
                   value={set.weight}
-                  disabled={locked}
                   onChange={(e) => onChange({ weight: e.target.value })}
                 />
                 <input
                   type="number"
+                  inputMode="numeric"
                   placeholder="Reps (optional)"
                   className={inputClass}
                   value={set.reps}
-                  disabled={locked}
                   onChange={(e) => onChange({ reps: e.target.value })}
                 />
               </div>
+              {perDbHint}
               {!set.logged && set.autoSuggested && (
                 <p className="text-xs text-brand">
                   Weight adjusted from your last set&apos;s effort — edit it if this isn&apos;t right.
@@ -1413,23 +1488,26 @@ function GuidedSetRow({
           )}
 
           {tier === 3 && (
-            <div className="flex gap-2">
-              <input
-                type="number"
-                placeholder="Weight (optional)"
-                className={inputClass}
-                value={set.weight}
-                disabled={locked}
-                onChange={(e) => onChange({ weight: e.target.value })}
-              />
-              <input
-                type="number"
-                placeholder="Reps (optional)"
-                className={inputClass}
-                value={set.reps}
-                disabled={locked}
-                onChange={(e) => onChange({ reps: e.target.value })}
-              />
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  placeholder={weightPlaceholder}
+                  className={inputClass}
+                  value={set.weight}
+                  onChange={(e) => onChange({ weight: e.target.value })}
+                />
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  placeholder="Reps (optional)"
+                  className={inputClass}
+                  value={set.reps}
+                  onChange={(e) => onChange({ reps: e.target.value })}
+                />
+              </div>
+              {perDbHint}
             </div>
           )}
         </>
@@ -1437,22 +1515,20 @@ function GuidedSetRow({
 
       {weekType === "test" && tier === 1 && null /* true-max checkbox lives at the exercise level, not per set */}
 
-      {(!set.logged || editing) && (
-        <button
-          type="button"
-          onClick={() => {
-            if (editing) {
-              setEditing(false);
-            } else {
-              onLog();
-            }
-          }}
-          disabled={!canLog}
-          className="mt-3 w-full rounded-md bg-brand px-4 py-3.5 text-base font-medium text-white hover:bg-blue-700 disabled:opacity-40"
-        >
-          {editing ? "Save changes" : "Log set"}
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={() => {
+          if (editing) {
+            setEditing(false);
+          } else {
+            onLog();
+          }
+        }}
+        disabled={!canLog}
+        className="mt-2.5 w-full rounded-md bg-brand px-4 py-3 text-base font-medium text-white hover:bg-blue-700 disabled:opacity-40"
+      >
+        {editing ? "Save changes" : "Log set"}
+      </button>
     </div>
   );
 }
@@ -1485,6 +1561,13 @@ function ExerciseGuidedBody({
   onLogSet: (setIndex: number) => void;
 }) {
   const timed = parseTimedTarget(exercise.prescribed_target ?? "");
+  const [showNotes, setShowNotes] = useState(!!state.notes);
+  // If the athlete swapped to a listed alternative, use THAT exercise's
+  // equipment to decide whether the per-dumbbell hint applies.
+  const swappedAlt = state.substituted
+    ? exercise.alternatives.find((a) => a.exercise_id === state.substitutedExerciseId)
+    : undefined;
+  const perDumbbell = swappedAlt ? !!swappedAlt.uses_dumbbells : !!exercise.uses_dumbbells;
   const hasUnloggedSets = state.sets.some((s) => !s.logged);
   const multipleUnlogged = state.sets.filter((s) => !s.logged).length > 1;
 
@@ -1500,16 +1583,23 @@ function ExerciseGuidedBody({
   const restAfterSetIndex = restActiveHere ? state.doneIndex - 1 : -1;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2 sm:space-y-3">
       {multipleUnlogged && (
         <button
           type="button"
           onClick={onApplyToAll}
           className="w-full rounded-md border border-dashed border-brand px-3 py-2 text-xs font-medium text-brand hover:bg-blue-50"
         >
-          Use the same weight/reps for every remaining set
+          {timed ? "Copy this set's weight & time to every remaining set" : "Copy this set's weight & reps to every remaining set"}
         </button>
       )}
+
+      <input
+        placeholder="Band color / load note (optional, e.g. red band)"
+        className={inputClass}
+        value={state.loadDescriptor}
+        onChange={(e) => onUpdateExercise({ loadDescriptor: e.target.value })}
+      />
 
       {state.sets.map((set, i) => (
         <div key={i}>
@@ -1519,6 +1609,7 @@ function ExerciseGuidedBody({
             set={set}
             weekType={weekType}
             timedSeconds={timed?.seconds ?? null}
+            perDumbbell={perDumbbell}
             onChange={(patch) => onUpdateSet(i, patch)}
             onLog={() => onLogSet(i)}
             onRemove={state.sets.length > 1 ? () => onRemoveSet(i) : undefined}
@@ -1537,30 +1628,20 @@ function ExerciseGuidedBody({
         </button>
       )}
 
-      <div className="rounded-md border border-slate-200 p-3">
-        <label className="flex items-center gap-2 text-xs text-slate-600">
-          <input
-            type="checkbox"
-            checked={state.substituted}
-            onChange={(e) => onUpdateExercise({ substituted: e.target.checked })}
-          />
-          I did something different than prescribed
-        </label>
-        {state.substituted && (
-          <div className="mt-2 space-y-2">
-            <AlternativeExerciseSelect
-              alternatives={exercise.alternatives}
-              value={state.substitutedExerciseId}
-              onChange={(v) => onUpdateExercise({ substitutedExerciseId: v })}
-            />
-            <input
-              placeholder="Why? (no equipment, different gym, etc.)"
-              className={inputClass}
-              value={state.substitutionReason}
-              onChange={(e) => onUpdateExercise({ substitutionReason: e.target.value })}
-            />
-          </div>
-        )}
+      {showNotes ? (
+        <input
+          placeholder="Notes (optional)"
+          className={inputClass}
+          value={state.notes}
+          onChange={(e) => onUpdateExercise({ notes: e.target.value })}
+        />
+      ) : (
+        <button type="button" onClick={() => setShowNotes(true)} className="text-xs text-slate-500 underline">
+          + Add a note
+        </button>
+      )}
+
+      <div>
         {weekType === "test" && exercise.tier === 1 && (
           <label className="mt-2 flex items-center gap-2 text-xs text-slate-600">
             <input
@@ -1587,10 +1668,10 @@ function WarmupChecklist({ warmup }: { warmup: Array<{ sets_reps: string; sugges
   if (!warmup || warmup.length === 0) return null;
 
   return (
-    <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3">
-      <p className="text-xs font-semibold uppercase tracking-wide text-amber-700">
-        Warmup — not a working set
-      </p>
+    <details className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-2.5">
+      <summary className="cursor-pointer text-xs font-semibold uppercase tracking-wide text-amber-700">
+        Warmup sets ({warmup.length}) — not working sets
+      </summary>
       <ul className="mt-2 space-y-1">
         {warmup.map((w, i) => (
           <li key={i} className="flex items-center gap-2 text-sm text-amber-900">
@@ -1611,31 +1692,114 @@ function WarmupChecklist({ warmup }: { warmup: Array<{ sets_reps: string; sugges
           </li>
         ))}
       </ul>
+    </details>
+  );
+}
+
+/** Swap picker shown right under the prescribed exercise's name at the top of
+ * the step: a dropdown whose first option is "keep the prescribed exercise"
+ * and whose other options are same-movement-pattern alternatives from the
+ * library, plus "Something else" for free text. Choosing anything other than
+ * the prescribed exercise marks the exercise as substituted (what gets logged
+ * and sent to the server); a short "why" box appears underneath. */
+function SwapPicker({
+  exercise,
+  state,
+  onUpdateExercise,
+}: {
+  exercise: SessionDetail["exercises"][number];
+  state: GuidedExerciseState;
+  onUpdateExercise: (patch: Partial<GuidedExerciseState>) => void;
+}) {
+  const OTHER = "__other__";
+  const isKnown = exercise.alternatives.some((a) => a.exercise_id === state.substitutedExerciseId);
+  const selectValue = !state.substituted ? "" : isKnown ? state.substitutedExerciseId : OTHER;
+
+  return (
+    <div
+      className={`mt-2 rounded-md border px-2.5 py-2 ${
+        state.substituted ? "border-amber-300 bg-amber-50" : "border-slate-200 bg-slate-50"
+      }`}
+    >
+      <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+        Swap this exercise
+      </label>
+      <select
+        className={inputClass}
+        value={selectValue}
+        onChange={(e) => {
+          const v = e.target.value;
+          if (v === "") onUpdateExercise({ substituted: false, substitutedExerciseId: "", substitutionReason: "" });
+          else if (v === OTHER) onUpdateExercise({ substituted: true, substitutedExerciseId: "" });
+          else onUpdateExercise({ substituted: true, substitutedExerciseId: v });
+        }}
+      >
+        <option value="">Keep as prescribed: {exercise.exercise_name}</option>
+        {exercise.alternatives.map((a) => (
+          <option key={a.exercise_id} value={a.exercise_id}>
+            Do instead: {a.exercise_name}
+          </option>
+        ))}
+        <option value={OTHER}>Do something else (type it in)</option>
+      </select>
+      {state.substituted && (
+        <div className="mt-2 space-y-2">
+          {selectValue === OTHER && (
+            <input
+              placeholder="What exercise did you do instead?"
+              className={inputClass}
+              value={state.substitutedExerciseId}
+              onChange={(e) => onUpdateExercise({ substitutedExerciseId: e.target.value })}
+            />
+          )}
+          <input
+            placeholder="Why? (no equipment, different gym, etc.)"
+            className={inputClass}
+            value={state.substitutionReason}
+            onChange={(e) => onUpdateExercise({ substitutionReason: e.target.value })}
+          />
+        </div>
+      )}
     </div>
   );
 }
 
-function ExerciseHeader({ exercise }: { exercise: SessionDetail["exercises"][number] }) {
+function ExerciseHeader({
+  exercise,
+  state,
+  onUpdateExercise,
+}: {
+  exercise: SessionDetail["exercises"][number];
+  state: GuidedExerciseState;
+  onUpdateExercise: (patch: Partial<GuidedExerciseState>) => void;
+}) {
+  const hasDetails = !!(exercise.cue || exercise.coach_notes);
   return (
-    <>
-      <h1 className="text-2xl font-bold text-brand-dark">
+    <div className="min-w-0 flex-1">
+      <h1 className="text-xl font-bold leading-tight text-brand-dark sm:text-2xl">
         {exercise.circuit_label ? `${exercise.circuit_label}. ` : ""}
         {exercise.exercise_name}
       </h1>
-      <p className="mt-1 text-sm text-slate-500">
+      <p className="mt-0.5 text-sm text-slate-500">
         Target: {exercise.prescribed_target || "—"}
         {exercise.tempo && ` · Tempo: ${exercise.tempo}`}
       </p>
-      {exercise.cue && <p className="mt-2 text-sm text-slate-600">{exercise.cue}</p>}
-      {exercise.coach_notes && <p className="mt-1 text-xs italic text-slate-500">{exercise.coach_notes}</p>}
+      <SwapPicker exercise={exercise} state={state} onUpdateExercise={onUpdateExercise} />
+      {hasDetails && (
+        <details className="mt-2 text-sm text-slate-600">
+          <summary className="cursor-pointer text-xs font-medium text-brand">Cue &amp; coach notes</summary>
+          {exercise.cue && <p className="mt-1">{exercise.cue}</p>}
+          {exercise.coach_notes && <p className="mt-1 text-xs italic text-slate-500">{exercise.coach_notes}</p>}
+        </details>
+      )}
       {exercise.last_time && (
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-1.5 text-xs text-slate-400">
           Last time ({exercise.last_time.date}): {exercise.last_time.load_descriptor || exercise.last_time.weight_used}
           {exercise.last_time.reps_completed ? ` x ${exercise.last_time.reps_completed}` : ""}
         </p>
       )}
       <WarmupChecklist warmup={exercise.warmup} />
-    </>
+    </div>
   );
 }
 
@@ -1666,8 +1830,8 @@ function SingleExerciseStep({
 }) {
   return (
     <div>
-      <ExerciseHeader exercise={exercise} />
-      <div className="mt-6">
+      <ExerciseHeader exercise={exercise} state={state} onUpdateExercise={onUpdateExercise} />
+      <div className="mt-3 sm:mt-6">
         <ExerciseGuidedBody
           exercise={exercise}
           state={state}
@@ -1742,12 +1906,16 @@ function SupersetStep({
           return (
             <div
               key={ex.exercise_id}
-              className={`rounded-lg border p-4 ${
+              className={`rounded-lg border p-3 sm:p-4 ${
                 isActive ? "border-brand bg-blue-50/40" : allLogged ? "border-green-200 bg-green-50" : "border-slate-200"
               }`}
             >
-              <div className="flex items-center justify-between">
-                <ExerciseHeader exercise={ex} />
+              <div className="flex items-start justify-between">
+                <ExerciseHeader
+                  exercise={ex}
+                  state={state}
+                  onUpdateExercise={(patch) => onUpdateExercise(ex.exercise_id, patch)}
+                />
                 {isActive && !allLogged && (
                   <span className="ml-2 shrink-0 rounded-full bg-brand px-2 py-0.5 text-xs font-medium text-white">
                     Up next
@@ -1761,7 +1929,7 @@ function SupersetStep({
               </div>
 
               {isActive && !allLogged ? (
-                <div className="mt-4">
+                <div className="mt-3">
                   <ExerciseGuidedBody
                     exercise={ex}
                     state={state}
@@ -1867,7 +2035,7 @@ function ExerciseRow({
           <div className="flex gap-2">
             <input
               type="number"
-              placeholder="Weight (lb)"
+              placeholder={exercise.uses_dumbbells ? "Weight PER dumbbell (lb)" : "Weight (lb)"}
               className={inputClass}
               value={form.weight}
               onChange={(e) => onChange({ weight: e.target.value })}
@@ -1920,7 +2088,7 @@ function ExerciseRow({
           <div className="flex gap-2">
             <input
               type="number"
-              placeholder="Weight/load (optional)"
+              placeholder={exercise.uses_dumbbells ? "Weight PER dumbbell (optional)" : "Weight/load (optional)"}
               className={inputClass}
               value={form.weight}
               onChange={(e) => onChange({ weight: e.target.value })}
@@ -1953,7 +2121,7 @@ function ExerciseRow({
             <div className="flex gap-2">
               <input
                 type="number"
-                placeholder="Weight (optional)"
+                placeholder={exercise.uses_dumbbells ? "Weight PER dumbbell (optional)" : "Weight (optional)"}
                 className={inputClass}
                 value={form.weight}
                 onChange={(e) => onChange({ weight: e.target.value })}
