@@ -41,6 +41,8 @@ type SessionDetail = {
     alternatives: Array<{ exercise_id: string; exercise_name: string; uses_dumbbells?: boolean }>;
     // True when loaded with dumbbells — shows the "per dumbbell" weight hint.
     uses_dumbbells?: boolean;
+    // Active injury areas this exercise is tagged for (nudge to update status).
+    active_injury_locations?: string[];
     // Ramping warmup sets for this lift, lightest to heaviest — attached
     // display-only guidance, never a separately logged set. Empty/absent for
     // anything that isn't a Tier-1 main lift with a fixed working weight.
@@ -60,6 +62,7 @@ type SessionDetail = {
       weight_used: number | null;
       reps_completed: number | null;
       load_descriptor: string | null;
+      notes?: string | null;
       date: string | null;
     } | null;
   }>;
@@ -1594,12 +1597,6 @@ function ExerciseGuidedBody({
         </button>
       )}
 
-      <input
-        placeholder="Band color / load note (optional, e.g. red band)"
-        className={inputClass}
-        value={state.loadDescriptor}
-        onChange={(e) => onUpdateExercise({ loadDescriptor: e.target.value })}
-      />
 
       {state.sets.map((set, i) => (
         <div key={i}>
@@ -1630,7 +1627,7 @@ function ExerciseGuidedBody({
 
       {showNotes ? (
         <input
-          placeholder="Notes (optional)"
+          placeholder="Notes:"
           className={inputClass}
           value={state.notes}
           onChange={(e) => onUpdateExercise({ notes: e.target.value })}
@@ -1785,6 +1782,15 @@ function ExerciseHeader({
         {exercise.tempo && ` · Tempo: ${exercise.tempo}`}
       </p>
       <SwapPicker exercise={exercise} state={state} onUpdateExercise={onUpdateExercise} />
+      {(exercise.active_injury_locations?.length ?? 0) > 0 && (
+        <p className="mt-2 rounded-md bg-amber-50 px-2.5 py-1.5 text-xs text-amber-800">
+          This one is for your {exercise.active_injury_locations!.map((l) => l.replace(/_/g, " ")).join(", ")}. Not
+          bothering you anymore?{" "}
+          <a href="/app/injuries" className="font-medium underline">
+            Update your injury status
+          </a>
+        </p>
+      )}
       {hasDetails && (
         <details className="mt-2 text-sm text-slate-600">
           <summary className="cursor-pointer text-xs font-medium text-brand">Cue &amp; coach notes</summary>
@@ -1796,6 +1802,7 @@ function ExerciseHeader({
         <p className="mt-1.5 text-xs text-slate-400">
           Last time ({exercise.last_time.date}): {exercise.last_time.load_descriptor || exercise.last_time.weight_used}
           {exercise.last_time.reps_completed ? ` x ${exercise.last_time.reps_completed}` : ""}
+          {exercise.last_time.notes ? ` — ${exercise.last_time.notes}` : ""}
         </p>
       )}
       <WarmupChecklist warmup={exercise.warmup} />
@@ -2026,6 +2033,7 @@ function ExerciseRow({
         <p className="mb-2 text-xs text-slate-400">
           Last time ({exercise.last_time.date}): {exercise.last_time.load_descriptor || exercise.last_time.weight_used}
           {exercise.last_time.reps_completed ? ` x ${exercise.last_time.reps_completed}` : ""}
+          {exercise.last_time.notes ? ` — ${exercise.last_time.notes}` : ""}
         </p>
       )}
       <WarmupChecklist warmup={exercise.warmup} />

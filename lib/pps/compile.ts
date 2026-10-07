@@ -8,6 +8,8 @@ import {
 } from "../training/canonical-lifts";
 import { TIER_1_MOVEMENT_PATTERNS } from "../training/logging-tier";
 import { classifyPerformance } from "./parse-prescription";
+import { activatePlannedSeasonIfStarting } from "../generation/season-bridge";
+import { finalizePendingInjuryResolutions } from "../generation/injury-status";
 
 const PAIN_KEYWORDS = ["pain", "hurt", "sore", "tweak", "injur", "sharp"];
 
@@ -352,7 +354,19 @@ export async function compilePhasePerformanceSummary(
   let upcomingSchedule: unknown[] = [];
   if (nextPhase && intake) {
     const inWindow = (start: string, end: string) => start <= nextPhase.end_date && end >= nextPhase.start_date;
-    const tournaments = ((intake.tournament_weekends as { start_date: string; end_date: string; label?: string }[]) ?? []).filter(
+    // The next phase may be the first of a planned next season, whose calendar isn't on intake yet.
+    const { data: plannedSeason } = await supabase
+      .from("seasons")
+      .select("tournament_weekends")
+      .eq("athlete_id", athleteId)
+      .eq("status", "planned")
+      .eq("skeleton_id", phase.skeleton_id)
+      .eq("first_phase_number", nextPhase.phase_number)
+      .maybeSingle();
+    const tournamentSource = (plannedSeason?.tournament_weekends ?? intake.tournament_weekends) as
+      | { start_date: string; end_date: string; label?: string }[]
+      | null;
+    const tournaments = (tournamentSource ?? []).filter(
       (t) => inWindow(t.start_date, t.end_date)
     );
     upcomingSchedule = tournaments;
@@ -421,6 +435,17 @@ export async function compilePhasePerformanceSummary(
         .update({ status: "active" })
         .eq("id", nextPhase.id);
       if (activateError) throw new Error(activateError.message);
+    }
+    // Injuries the athlete marked resolved during the phase that just ended
+    // now move onto heavy slow resistance in the new phase.
+    if (nextPhase) {
+      await finalizePendingInjuryResolutions(supabase, { athleteId, newActivePhaseId: nextPhase.id as string });
+      // First phase of a planned next season? Then that season is now the active one.
+      await activatePlannedSeasonIfStarting(supabase, {
+        athleteId,
+        skeletonId: phase.skeleton_id as string,
+        phaseNumber: nextPhase.phase_number as number,
+      });
     }
   }
 

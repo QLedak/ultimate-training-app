@@ -3,6 +3,7 @@ import { runPhaseBuilder, PhaseBuilderInput, PhaseBuilderOutput, PhaseWeek } fro
 import { Situation } from "../corpus/retrieve";
 import { deriveTrainingAge } from "../training/training-age";
 import { bucketEquipment } from "../training/equipment";
+import { applyPendingResolutionsForPhase } from "./injury-status";
 import { compilePhasePerformanceSummary } from "../pps/compile";
 
 // A phase longer than this many weeks is generated across multiple calls
@@ -277,6 +278,20 @@ async function buildPhaseContext(supabase: SupabaseClient, params: { athleteId: 
     .limit(1)
     .maybeSingle();
 
+  // An injury the athlete marked "resolved" during an earlier phase moves to
+  // heavy slow resistance starting with THIS phase if it isn't the phase they
+  // reported it in (finish-the-phase rule). Applied in memory here; persisted at
+  // the phase transition (lib/pps/compile.ts).
+  const resolvedForThisPhase = applyPendingResolutionsForPhase(
+    {
+      current_active_injuries: (currentState.current_active_injuries as never[]) ?? [],
+      standing_resilience_regions: (currentState.standing_resilience_regions as never[]) ?? [],
+    },
+    phaseId
+  );
+  currentState.current_active_injuries = resolvedForThisPhase.current_active_injuries;
+  currentState.standing_resilience_regions = resolvedForThisPhase.standing_resilience_regions;
+
   const equipment = (currentState.equipment as string[]) ?? [];
   const injuryLocations = ((currentState.standing_resilience_regions as { location: string }[]) ?? []).map(
     (r) => r.location
@@ -284,7 +299,11 @@ async function buildPhaseContext(supabase: SupabaseClient, params: { athleteId: 
 
   const situation: Situation = {
     phaseGoal: phase.goal,
-    trainingAge: deriveTrainingAge(intake?.years_structured_training, intake?.lifting_experience_selfdescribe),
+    trainingAge: deriveTrainingAge(
+      intake?.years_structured_training,
+      intake?.lifting_experience_selfdescribe,
+      intake?.submitted_at
+    ),
     injuryLocations,
     daysPerWeek: currentState.training_days_per_week,
     equipmentContext: bucketEquipment(equipment),

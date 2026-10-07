@@ -56,6 +56,18 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
         .neq("id", sessionId),
     ]);
 
+  // Active injuries (for the "still bothering you?" nudge on exercises tied to one).
+  const { data: injuryState } = await supabase
+    .from("current_athlete_state")
+    .select("current_active_injuries")
+    .eq("athlete_id", session.athlete_id)
+    .maybeSingle();
+  const activeInjuryLocations = (
+    ((injuryState?.current_active_injuries as Array<{ location: string; pending_resolution?: unknown }>) ?? [])
+      .filter((i) => !i.pending_resolution)
+      .map((i) => i.location)
+  );
+
   if (logError) return dbError("sessions/[id]", logError);
   if (exercisesError) return dbError("sessions/[id]", exercisesError);
   if (libraryError) return dbError("sessions/[id]", libraryError);
@@ -159,6 +171,11 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       cue: libraryRow?.cue ?? null,
       tier,
       uses_dumbbells: libraryRow ? usesDumbbells(libraryRow) : false,
+      // Active injury areas this exercise is tagged for — the logging page asks
+      // "still bothering you?" so an athlete never stays on isometrics by accident.
+      active_injury_locations: ((libraryRow?.injury_considerations as string[] | undefined) ?? []).filter((loc) =>
+        activeInjuryLocations.includes(loc)
+      ),
       warmup,
       // Only a real A1/A2-style superset code is shown/grouped on — see
       // lib/training/display-labels.ts for why this guard exists.
@@ -184,6 +201,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
             weight_used: lastTime.weight_used,
             reps_completed: lastTime.reps_completed,
             load_descriptor: lastTime.load_descriptor,
+            notes: (lastTime.notes as string | null) ?? null,
             date: dateBySessionId.get(lastTime.session_id as string) ?? null,
           }
         : null,

@@ -4,14 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { NavBar } from "@/components/nav/NavBar";
 import { useAthleteSession } from "./_components/useAthleteSession";
-import { BodyweightWidget, RebuildRequestWidget } from "./_components/widgets";
+import { BodyweightWidget, InjuryCheckInBanner, NextSeasonBanner, RebuildRequestWidget } from "./_components/widgets";
+import { ATHLETE_NAV_LINKS } from "./_components/nav-links";
 
-const NAV_LINKS = [
-  { href: "/app", label: "Home" },
-  { href: "/app/log", label: "Schedule" },
-  { href: "/app/log/program", label: "Overview" },
-  { href: "/app/injuries", label: "Injuries" },
-];
+const NAV_LINKS = ATHLETE_NAV_LINKS;
 
 type SessionSummary = {
   id: string;
@@ -52,7 +48,7 @@ export default function AthleteHomePage() {
         </p>
         <Link
           href="/app/intake"
-          className="mt-4 rounded-md bg-brand px-4 py-2 text-center text-sm font-medium text-brand-on hover:bg-brand-hover"
+          className="mt-4 rounded-md bg-brand px-4 py-2 text-center text-sm font-medium text-white hover:bg-blue-700"
         >
           Complete intake
         </Link>
@@ -90,7 +86,7 @@ export default function AthleteHomePage() {
           <div className="mb-6 rounded-lg border border-slate-200 p-4">
             {todaysSession ? (
               <>
-                <span className="text-xs font-semibold uppercase tracking-wide text-brand-text">Today</span>
+                <span className="text-xs font-semibold uppercase tracking-wide text-brand">Today</span>
                 <div className="mt-1 flex items-center justify-between">
                   <div>
                     <p className="font-medium text-brand-dark">{todaysSession.day_label}</p>
@@ -101,7 +97,7 @@ export default function AthleteHomePage() {
                   </div>
                   <Link
                     href={`/app/log/${todaysSession.id}`}
-                    className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-on hover:bg-brand-hover"
+                    className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                   >
                     {todaysSession.status ? "View" : "Log it"}
                   </Link>
@@ -123,6 +119,8 @@ export default function AthleteHomePage() {
           </div>
         )}
 
+        <NextSeasonBanner athleteId={athlete.id} />
+        <InjuryCheckInBanner athleteId={athlete.id} />
         <BodyweightWidget athleteId={athlete.id} />
         <RebuildRequestWidget athleteId={athlete.id} />
 

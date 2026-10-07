@@ -118,14 +118,16 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         location,
         status: status as Status,
         note,
-        currentPhaseGoal: activePhase?.goal ?? null,
+        currentPhaseId: activePhase?.id ?? null,
       });
       reasonDetail = `Athlete reported their ${location} issue is ${
         status === "resolved" ? "resolved" : "still bothering them"
       }${note ? ` — note: "${note}"` : ""}.`;
       successMessage =
         status === "resolved"
-          ? `Marked your ${location} issue as resolved — it'll move onto standing resilience work instead of the return-from-injury progression.`
+          ? activePhase
+            ? `Great — glad your ${location} is feeling better. We'll finish this phase as planned, then move you into strengthening work for it in your next phase.`
+            : `Marked your ${location} issue as resolved — it moves onto standing strengthening work instead of the return-from-injury progression.`
           : `Got it — your ${location} issue is still noted as active, and your program will keep progressing it through the return protocol.`;
     }
   } catch (err) {
@@ -140,6 +142,13 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   } = { injury_status: injuryState, phaseDraft: null, message: successMessage };
 
   if (!activePhase) {
+    return NextResponse.json(result);
+  }
+
+  // A resolved check-in never rebuilds the current phase: it finishes as
+  // planned and the area moves to heavy slow resistance in the NEXT phase
+  // (lib/generation/injury-status.ts, applyPendingResolutionsForPhase).
+  if (action === "check_in" && status === "resolved") {
     return NextResponse.json(result);
   }
 

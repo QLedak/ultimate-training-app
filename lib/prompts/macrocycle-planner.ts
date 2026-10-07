@@ -52,9 +52,9 @@ const SKELETON_TOOL = {
               type: "string",
               description:
                 "A generic label built from the DAY STRUCTURE TEMPLATES' six fixed day types " +
-                "(Lower Body Strength, Upper Body Strength, Athlete Day, Impulse Day, Hypertrophy " +
-                "Day, Energy System Day) — e.g. 'Lower/Upper/Athlete (3-day)' or 'Lower/Upper/" +
-                "Athlete/Impulse/Hypertrophy/Energy System (6-day)'. Every template, at every phase, " +
+                "(Lower Strength, Upper Strength 1, Athlete Day, Lower Body Power, Upper " +
+                "Strength 2, Energy Systems) — e.g. 'Lower 1/Upper 1/Athlete (3-day)' or 'Lower 1/Upper 1/" +
+                "Athlete/Lower Power/Upper 2/Energy Systems (6-day)'. Every template, at every phase, " +
                 "includes exactly the athlete's days/week worth of day types taken in that fixed " +
                 "priority order — never an Upper/Lower-only or full-body-pattern split, and never " +
                 "the primary reference program's own '4A'/'4B'/day-letter names, which describe an " +
@@ -107,6 +107,17 @@ export type MacrocyclePlannerInput = {
     week_count: number;
   }>;
   computedPhaseFlags?: string[];
+  // Present when this is the athlete's NEXT season plan (year-over-year) — see
+  // lib/generation/macrocycle.ts buildNextSeasonInputs.
+  nextSeason?: {
+    season_label: string;
+    first_phase_number: number;
+    resume_date: string;
+    include_gpp: boolean;
+    bridge_gpp_already_done: boolean;
+    previous_season_review: Record<string, unknown> | null;
+    kept_phases: Array<Record<string, unknown>>;
+  };
   // Set both to regenerate an edited version of an existing draft (the
   // "chat edit" path in review-approval-flow-spec.md) instead of a fresh v1.
   currentDraftOutput?: MacrocyclePlannerOutput;
@@ -146,10 +157,10 @@ export async function runMacrocyclePlanner(
     "# DAY STRUCTURE TEMPLATES (six fixed day types — governs weekly_template_label and phase structure)",
     daysPerWeek
       ? `This athlete trains ${daysPerWeek} days/week. Every phase's weekly_template_label must reflect ` +
-        `exactly the first ${daysPerWeek} day types from the priority-order table below (Lower Body ` +
-        `Strength, Upper Body Strength, Athlete Day, Impulse Day, Hypertrophy Day, Energy System Day, in ` +
+        `exactly the first ${daysPerWeek} day types from the priority-order table below (Lower ` +
+        `Strength 1, Upper Strength 1, Athlete Day, Lower Body Power, Upper Strength 2, Energy Systems, in ` +
         `that order) — the same fixed set at every phase in this skeleton, not a different split shape per ` +
-        `phase. A league/game day satisfies the Energy System day's role and is never counted as one of ` +
+        `phase. A league/game day satisfies the Energy Systems day's role and is never counted as one of ` +
         `the athlete's chosen training days.`
       : "Every phase's weekly_template_label must reflect exactly the athlete's days/week worth of day " +
         "types from the priority-order table below, taken in that fixed order — the same fixed set at " +
@@ -231,6 +242,30 @@ export async function runMacrocyclePlanner(
           ...(input.computedPhaseFlags && input.computedPhaseFlags.length
             ? ["", "Automatic flags from this computation (include these, worded naturally, in your own flags array):",
                 ...input.computedPhaseFlags.map((f) => `- ${f}`)]
+            : []),
+        ]
+      : []),
+    ...(input.nextSeason
+      ? [
+          "",
+          "# NEXT SEASON PLAN — READ CAREFULLY",
+          `This is the athlete's plan for their NEXT season (${input.nextSeason.season_label}), continuing from ` +
+            "their existing training. The phases below are APPENDED after the blocks listed here, which already " +
+            "exist and must not be changed:",
+          JSON.stringify(input.nextSeason.kept_phases, null, 2),
+          `The first phase to plan is phase_number ${input.nextSeason.first_phase_number}, starting ` +
+            `${input.nextSeason.resume_date}. ` +
+            (input.nextSeason.include_gpp
+              ? "It opens with a GPP/Re-acclimation block: the athlete is coming off competition and eases back " +
+                "into higher volume before the build."
+              : "A GPP/Re-acclimation block has ALREADY been completed in the athlete's off-season bridge, so do " +
+                "NOT add another — GPP is only ever used once, right after a season ends."),
+          "Use the same weekly_template_label shape as the existing blocks unless the athlete's days/week changed " +
+            "(see intake training_days_per_week). Maxes and training history carry across seasons — the Phase " +
+            "Builder reads them from the athlete's latest summary — so write the skeleton as a continuation, " +
+            "not a fresh start. Mention in your rationale how last season's results shaped this plan.",
+          ...(input.nextSeason.previous_season_review
+            ? ["Last season's review (adherence, max changes):", JSON.stringify(input.nextSeason.previous_season_review, null, 2)]
             : []),
         ]
       : []),

@@ -22,6 +22,8 @@ type AthleteRow = {
   has_intake: boolean;
   has_skeleton: boolean;
   active_injuries_count: number;
+  season_stage: "no_plan" | "in_season_plan" | "ending_soon" | "bridge";
+  next_season: { label: string; season_start: string | null; draft_status: string; approved: boolean } | null;
 };
 type DaysChangeRequest = { id: string; athlete_id: string };
 
@@ -79,6 +81,21 @@ function computeFlags(a: AthleteRow, hasPendingDaysChange: boolean): Flag[] {
       key: "injury",
       label: `${a.active_injuries_count} active injur${a.active_injuries_count === 1 ? "y" : "ies"}`,
       className: "bg-red-100 text-red-700",
+    });
+  }
+  if (a.season_stage === "bridge") {
+    flags.push({ key: "bridge", label: "Bridge plan (provisional)", className: "bg-indigo-100 text-indigo-800" });
+    if (!a.next_season) {
+      flags.push({ key: "awaiting_season", label: "Season complete — awaiting next season dates", className: "bg-amber-100 text-amber-800" });
+    }
+  } else if (a.season_stage === "ending_soon" && !a.next_season) {
+    flags.push({ key: "season_ending", label: "Season ending — no next season dates yet", className: "bg-blue-100 text-blue-800" });
+  }
+  if (a.next_season && !a.next_season.approved && a.pending_drafts_count === 0) {
+    flags.push({
+      key: "next_season_unbuilt",
+      label: `${a.next_season.label} dates in — plan not built`,
+      className: "bg-amber-100 text-amber-800",
     });
   }
   if (a.has_intake && !a.has_skeleton) {
@@ -148,6 +165,24 @@ export default function CoachHomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ athleteId: athlete.id }),
       });
+      const data = await res.json();
+      if (data.error) {
+        setGenerateError(`${athlete.name ?? athlete.email}: ${data.error}`);
+      } else {
+        window.location.href = `/review/${data.draft.id}`;
+      }
+    } catch (e) {
+      setGenerateError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setGeneratingId(null);
+    }
+  }
+
+  async function buildNextSeasonPlan(athlete: AthleteRow) {
+    setGeneratingId(athlete.id);
+    setGenerateError(null);
+    try {
+      const res = await fetch(`/api/coach/athletes/${athlete.id}/next-season-plan`, { method: "POST" });
       const data = await res.json();
       if (data.error) {
         setGenerateError(`${athlete.name ?? athlete.email}: ${data.error}`);
@@ -258,7 +293,7 @@ export default function CoachHomePage() {
             </Link>
             <Link
               href={`/coach/athletes/${a.id}/profile`}
-              className="ml-2 text-xs text-slate-400 underline hover:text-brand-text"
+              className="ml-2 text-xs text-slate-400 underline hover:text-brand"
             >
               Profile
             </Link>
@@ -288,9 +323,19 @@ export default function CoachHomePage() {
                 type="button"
                 onClick={() => buildSeasonPlan(a)}
                 disabled={generatingId === a.id}
-                className="rounded-full border border-brand px-2 py-0.5 text-xs font-medium text-brand-text hover:bg-brand-tint disabled:opacity-50"
+                className="rounded-full border border-brand px-2 py-0.5 text-xs font-medium text-brand hover:bg-blue-50 disabled:opacity-50"
               >
                 {generatingId === a.id ? "Building…" : "Build season plan"}
+              </button>
+            )}
+            {a.next_season && !a.next_season.approved && a.pending_drafts_count === 0 && (
+              <button
+                type="button"
+                onClick={() => buildNextSeasonPlan(a)}
+                disabled={generatingId === a.id}
+                className="rounded-full border border-brand px-2 py-0.5 text-xs font-medium text-brand hover:bg-blue-50 disabled:opacity-50"
+              >
+                {generatingId === a.id ? "Building…" : "Build next season plan"}
               </button>
             )}
             {a.active_phase && a.pending_drafts_count === 0 && (
@@ -298,7 +343,7 @@ export default function CoachHomePage() {
                 type="button"
                 onClick={() => generatePhaseDraft(a)}
                 disabled={generatingId === a.id}
-                className="rounded-full border border-brand px-2 py-0.5 text-xs font-medium text-brand-text hover:bg-brand-tint disabled:opacity-50"
+                className="rounded-full border border-brand px-2 py-0.5 text-xs font-medium text-brand hover:bg-blue-50 disabled:opacity-50"
               >
                 {generatingId === a.id ? "Generating…" : "Generate phase draft"}
               </button>
@@ -366,7 +411,7 @@ export default function CoachHomePage() {
               placeholder="Search athletes…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full max-w-xs rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-brand-text focus:outline-none"
+              className="w-full max-w-xs rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-brand focus:outline-none"
             />
             <select
               value={sort}

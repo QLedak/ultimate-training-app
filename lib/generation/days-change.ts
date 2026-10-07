@@ -107,7 +107,7 @@ export async function approveDaysChangeRequest(
   // ---- 3 & 4: only if the athlete actually has an active plan to move ----
   const { data: skeleton } = await supabase
     .from("macrocycle_skeletons")
-    .select("id")
+    .select("id, is_bridge")
     .eq("athlete_id", athleteId)
     .eq("is_active", true)
     .maybeSingle();
@@ -123,7 +123,16 @@ export async function approveDaysChangeRequest(
     activePhase = data ?? null;
   }
 
-  if (skeleton) {
+  // An off-season bridge is built by the app, not a Planner draft — there is no season skeleton
+  // to regenerate, so only the current block gets rebuilt (below) and later blocks pick up the new day count.
+  if (skeleton?.is_bridge && activePhase) {
+    await compilePhasePerformanceSummary(supabase, {
+      phaseId: activePhase.id,
+      reason: "rebuild_skeleton_scoped",
+      reasonDetail,
+    });
+  }
+  if (skeleton && !skeleton.is_bridge) {
     try {
       // Flag the interruption on the active phase (if any) before
       // regenerating — same PhasePerformanceSummary compile every other

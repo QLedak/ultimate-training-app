@@ -73,7 +73,7 @@
     "movement_pattern": "Hinge",
     "primary_purpose": "Posterior chain strength; hamstring/glute force for sprinting and cutting",
     "equipment_needed": [
-      "barbell_rack"
+      "trap_bar"
     ],
     "equipment_needed_raw": "Trap Bar",
     "equipment_all": [],
@@ -1560,7 +1560,7 @@
       "patellar_knee"
     ],
     "contrast_pairing_tendon_specific": null,
-    "notes": null,
+    "notes": "Isometric (ACTIVE knee chain end): IM-019 wall sit \u2192 IS-046 SL wall sit \u2192 IS-007 Spanish squat hold.",
     "is_active": true
   },
   {
@@ -1584,8 +1584,8 @@
       "patellar_knee"
     ],
     "contrast_pairing_tendon_specific": null,
-    "notes": null,
-    "is_active": true
+    "notes": "Retired \u2014 duplicate of IM-019 Isometric Wall Sit.",
+    "is_active": false
   },
   {
     "exercise_id": "IS-009",
@@ -1654,7 +1654,7 @@
       "achilles_calf"
     ],
     "contrast_pairing_tendon_specific": null,
-    "notes": null,
+    "notes": "Calf chain: isos (active) \u2192 IS-011 single-leg calf raise (HSR step for minimal-equipment athletes) \u2192 IS-052 dumbbell version \u2192 IS-038 barbell HSR.",
     "is_active": true
   },
   {
@@ -4881,9 +4881,12 @@
     "progression": null,
     "training_age": "advanced",
     "season_tag": "Off-season, Pre-season",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "acl_knee",
+      "patellar_knee"
+    ],
     "contrast_pairing_tendon_specific": null,
-    "notes": null,
+    "notes": "Knee chain loading end point after heel-elevated squats.",
     "is_active": true
   },
   {
@@ -5086,9 +5089,11 @@
     "progression": "IM-022",
     "training_age": "novice",
     "season_tag": "Year-round",
-    "injury_considerations": [],
+    "injury_considerations": [
+      "hamstring"
+    ],
     "contrast_pairing_tendon_specific": null,
-    "notes": null,
+    "notes": "Hamstring chain step 1 (ACTIVE injury): bridge iso \u2192 IS-047 walkouts.",
     "is_active": true
   },
   {
@@ -6070,7 +6075,7 @@
     "season_tag": "Off-season, Pre-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Technical-coordination slot on Lower Body Strength Day and Impulse Day for athletes new to training (see day-structure-templates-spec: Olympic-lift gating) \u2014 a loaded jump pattern without the Olympic lift's catch/receiving position.",
+    "notes": "Technical-coordination slot on Lower Strength Day and Lower Body Power Day for athletes new to training (see day-structure-templates-spec: Olympic-lift gating) \u2014 a loaded jump pattern without the Olympic lift's catch/receiving position.",
     "is_active": true
   },
   {
@@ -6080,7 +6085,7 @@
     "movement_pattern": "Plyometric / Jump",
     "primary_purpose": "Loaded triple-extension power at a higher load than a dumbbell allows, still without a catch/receiving position to coach",
     "equipment_needed": [
-      "barbell_rack"
+      "trap_bar"
     ],
     "equipment_needed_raw": "Trap Bar",
     "equipment_all": [],
@@ -6092,7 +6097,7 @@
     "season_tag": "Off-season, Pre-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Technical-coordination slot on Lower Body Strength Day and Impulse Day for athletes new to training (see day-structure-templates-spec: Olympic-lift gating) \u2014 bridges DB Jump up to the loads an Olympic-lift variation would use.",
+    "notes": "Technical-coordination slot on Lower Strength Day and Lower Body Power Day for athletes new to training (see day-structure-templates-spec: Olympic-lift gating) \u2014 bridges DB Jump up to the loads an Olympic-lift variation would use.",
     "is_active": true
   },
   {
@@ -6412,7 +6417,7 @@
     "season_tag": "Off-season, Pre-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Upper-body technical-coordination slot on Upper Body Strength Day and Hypertrophy Day for athletes new to training \u2014 the beginner on-ramp into the plyo push-up progression.",
+    "notes": "Upper-body technical-coordination slot on Upper Strength 1 Day and Upper Strength 2 Day for athletes new to training \u2014 the beginner on-ramp into the plyo push-up progression.",
     "is_active": true
   },
   {
@@ -6434,7 +6439,7 @@
     "season_tag": "Off-season, Pre-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Upper-body technical-coordination slot on Upper Body Strength Day and Hypertrophy Day for athletes new to training \u2014 bridges the kneeling regression up to the full plyo push-up.",
+    "notes": "Upper-body technical-coordination slot on Upper Strength 1 Day and Upper Strength 2 Day for athletes new to training \u2014 bridges the kneeling regression up to the full plyo push-up.",
     "is_active": true
   },
   {
@@ -6456,7 +6461,7 @@
     "season_tag": "Off-season, Pre-season",
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Upper-body technical-coordination slot on Upper Body Strength Day for athletes new to training \u2014 the beginner-friendly stand-in for a jerk/push-press variation until the athlete is ready for the standing, leg-driven version.",
+    "notes": "Upper-body technical-coordination slot on Upper Strength 1 Day for athletes new to training \u2014 the beginner-friendly stand-in for a jerk/push-press variation until the athlete is ready for the standing, leg-driven version.",
     "is_active": true
   },
   {
@@ -6481,7 +6486,7 @@
       "lower_back"
     ],
     "contrast_pairing_tendon_specific": null,
-    "notes": "Crunch-variation slot in Lower Body Strength Day's secondary-pattern core superset (and Upper Body Strength Day's rotational/sagittal core pairing) \u2014 the advanced-tier option alongside CR-028 (Dead Bug with Plate Pass).",
+    "notes": "Crunch-variation slot in Lower Strength Day's secondary-pattern core superset (and Upper Strength 1 Day's rotational/sagittal core pairing) \u2014 the advanced-tier option alongside CR-028 (Dead Bug with Plate Pass).",
     "is_active": true
   },
   {
@@ -7320,6 +7325,225 @@
     "injury_considerations": [],
     "contrast_pairing_tendon_specific": null,
     "notes": "Typical dose: 3x6-10 total jumps (3-5 per leg), full recovery between sets. Keep quality high; stop when landings get sloppy.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "IS-046",
+    "exercise_name": "Single-Leg Wall Sit",
+    "priority_tier": "extended",
+    "movement_pattern": "Isometric - Knee/ACL",
+    "primary_purpose": "Single-leg quad/knee isometric hold \u2014 step 2 of the knee isometric chain for active patellar/knee pain",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "None (Bodyweight)",
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Back flat on the wall, one leg out in front, thigh near parallel \u2014 hold steady and breathe. Switch legs when you're done, don't rush the clock.",
+    "regression": "IM-019",
+    "progression": "IS-007",
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [
+      "patellar_knee"
+    ],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Knee chain (ACTIVE injury): IM-019 wall sit \u2192 IS-046 single-leg wall sit \u2192 IS-007 Spanish squat. Timed hold per leg.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "LG-009",
+    "exercise_name": "Heel-Elevated Squat (Barbell)",
+    "priority_tier": "extended",
+    "movement_pattern": "Squat",
+    "primary_purpose": "Quad-dominant squat with heels raised for greater knee travel \u2014 loading step of the knee HSR chain (patellar tendon/knee resilience)",
+    "equipment_needed": [
+      "barbell_rack"
+    ],
+    "equipment_needed_raw": "Barbell, Rack",
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Heels up on small plates, chest tall, and sit straight down between your hips with the knees tracking over the toes. Slow on the way down, drive the floor away.",
+    "regression": "LG-010",
+    "progression": null,
+    "training_age": "both",
+    "season_tag": "Year-round",
+    "injury_considerations": [
+      "acl_knee",
+      "patellar_knee"
+    ],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Knee chain (HISTORICAL injury / loading): heel-elevated squat (barbell or dumbbell) \u2192 pistol squat (LG-007). Use 3s down / 1-2s up tempo as HSR.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "LG-010",
+    "exercise_name": "Heel-Elevated Squat (Dumbbell)",
+    "priority_tier": "extended",
+    "movement_pattern": "Squat",
+    "primary_purpose": "Quad-dominant squat with heels raised for greater knee travel \u2014 dumbbell/minimal-equipment option in the knee HSR chain",
+    "equipment_needed": [
+      "dumbbells"
+    ],
+    "equipment_needed_raw": "Dumbbell",
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Heels up on a small plate, hold the dumbbell at your chest, and sit straight down with the knees tracking forward. Slow down, steady up.",
+    "regression": "SQ-002",
+    "progression": "LG-009",
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [
+      "acl_knee",
+      "patellar_knee"
+    ],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Knee chain (HISTORICAL injury / loading) for dumbbell-only athletes; progresses to LG-009 or LG-007.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "IS-047",
+    "exercise_name": "Hamstring Bridge Walkout",
+    "priority_tier": "extended",
+    "movement_pattern": "Isolation - Hamstring",
+    "primary_purpose": "Dynamic bridge walkouts \u2014 step 2 of the hamstring chain, bridges the gap between the isometric bridge and loaded curls",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "None (Bodyweight)",
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Bridge up high, then walk your feet out slowly while keeping the hips up \u2014 walk back in under control, don't let the hips drop.",
+    "regression": "IM-021",
+    "progression": "IS-048",
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [
+      "hamstring"
+    ],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Hamstring chain: IM-021 bridge iso \u2192 IS-047 walkouts \u2192 IS-048 SL heel-elevated bridge \u2192 IS-004/IS-049 SB curl \u2192 IS-003 Nordic.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "IS-048",
+    "exercise_name": "Single-Leg Heel-Elevated Hamstring Bridge",
+    "priority_tier": "extended",
+    "movement_pattern": "Isolation - Hamstring",
+    "primary_purpose": "Single-leg hamstring-biased bridge with the heel raised \u2014 step 3 of the hamstring chain",
+    "equipment_needed": [
+      "bench",
+      "boxes"
+    ],
+    "equipment_needed_raw": "Bench or Step",
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Heel up on the bench, other leg straight up in the air. Drive through the heel and bridge up high \u2014 hips level, no twisting.",
+    "regression": "IS-047",
+    "progression": "IS-004",
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [
+      "hamstring"
+    ],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Hamstring chain step 3 (see IS-047).",
+    "is_active": true
+  },
+  {
+    "exercise_id": "IS-049",
+    "exercise_name": "Single-Leg Stability Ball Hamstring Curl",
+    "priority_tier": "extended",
+    "movement_pattern": "Isolation - Hamstring",
+    "primary_purpose": "Single-leg hamstring curl \u2014 progression of IS-004 on the way to the Nordic curl",
+    "equipment_needed": [
+      "bodyweight_only"
+    ],
+    "equipment_needed_raw": "Stability Ball",
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly",
+    "cue": "One heel on the ball, other leg up. Bridge high and curl the ball in under you \u2014 keep the hips up the whole set.",
+    "regression": "IS-004",
+    "progression": "IS-003",
+    "training_age": "both",
+    "season_tag": "Year-round",
+    "injury_considerations": [
+      "hamstring"
+    ],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Hamstring chain: bilateral IS-004 first, then this single-leg version, then IS-003 Nordic.",
+    "is_active": true
+  },
+  {
+    "exercise_id": "IS-050",
+    "exercise_name": "Copenhagen Dip (From Knee)",
+    "priority_tier": "extended",
+    "movement_pattern": "Isolation - Adductor",
+    "primary_purpose": "Dynamic adductor strengthening from a knee-supported lever \u2014 step 3 of the groin chain",
+    "equipment_needed": [
+      "bench"
+    ],
+    "equipment_needed_raw": "Bench",
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Top leg on the bench, bottom knee on the floor. Lower your hips slowly and raise back up \u2014 squeeze the inner thigh, stay long through the body.",
+    "regression": "IM-005",
+    "progression": "IS-051",
+    "training_age": "advanced",
+    "season_tag": "Year-round",
+    "injury_considerations": [
+      "groin_adductor"
+    ],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Groin chain: IM-004 squeeze iso \u2192 IM-005 Copenhagen iso \u2192 IS-050 dips from knee \u2192 IS-051 dips from straight leg (IS-016 plank is an alternate).",
+    "is_active": true
+  },
+  {
+    "exercise_id": "IS-051",
+    "exercise_name": "Copenhagen Dip (Straight Leg)",
+    "priority_tier": "extended",
+    "movement_pattern": "Isolation - Adductor",
+    "primary_purpose": "Full-lever Copenhagen dip \u2014 end of the groin chain",
+    "equipment_needed": [
+      "bench"
+    ],
+    "equipment_needed_raw": "Bench",
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Top foot (or knee) on the bench, bottom leg straight off the floor. Lower your hips slowly and raise back up under control.",
+    "regression": "IS-050",
+    "progression": null,
+    "training_age": "advanced",
+    "season_tag": "Year-round",
+    "injury_considerations": [
+      "groin_adductor"
+    ],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Groin chain end point (see IS-050).",
+    "is_active": true
+  },
+  {
+    "exercise_id": "IS-052",
+    "exercise_name": "Single-Leg Calf Raise (Dumbbell)",
+    "priority_tier": "extended",
+    "movement_pattern": "Isolation - Calf",
+    "primary_purpose": "Dumbbell-loaded single-leg calf raise \u2014 the HSR calf option for dumbbell-only athletes",
+    "equipment_needed": [
+      "dumbbells"
+    ],
+    "equipment_needed_raw": "Dumbbell",
+    "equipment_all": [],
+    "space_requirements": "Confined Space Friendly",
+    "cue": "Hold a dumbbell in the same-side hand, balance on one foot, rise slowly onto the toes and lower for a 3-count. No bouncing.",
+    "regression": "IS-011",
+    "progression": "IS-038",
+    "training_age": "novice",
+    "season_tag": "Year-round",
+    "injury_considerations": [
+      "achilles_calf"
+    ],
+    "contrast_pairing_tendon_specific": null,
+    "notes": "Calf chain: isos (active) \u2192 IS-011 single-leg calf raise (minimal equipment) \u2192 IS-052 dumbbell \u2192 IS-038 barbell HSR calf raise.",
     "is_active": true
   }
 ]

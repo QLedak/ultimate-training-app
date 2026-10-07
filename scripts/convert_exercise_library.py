@@ -42,7 +42,10 @@ EQUIPMENT_MAP = [
      r"leg extension machine|adductor machine", "barbell_rack"),
     # A flat/incline bench is its own tag, matching the intake form's "Bench" option.
     (r"incline bench|\bbench\b", "bench"),
-    (r"trap bar|safety squat bar|barbell|\brack\b|landmine|weight plate", "barbell_rack"),
+    # Trap bar is its own equipment option (checked BEFORE the generic barbell
+    # entry so "Trap Bar" never counts as a barbell + rack).
+    (r"trap bar|hex bar", "trap_bar"),
+    (r"safety squat bar|barbell|\brack\b|landmine|weight plate", "barbell_rack"),
 ]
 
 BODYWEIGHT_MARKERS = [

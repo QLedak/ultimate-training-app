@@ -1,24 +1,83 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
-type ActiveInjury = { location: string; character?: string; since?: string; note?: string };
+type ActiveInjury = {
+  location: string;
+  character?: string;
+  since?: string;
+  note?: string;
+  // Set when the athlete reports the area is no longer bothering them while a
+  // phase is active: the area stays on the isometric stage until that phase
+  // finishes, then moves to heavy slow resistance in the NEXT phase.
+  pending_resolution?: { resolved_at: string; after_phase_id: string };
+  // Last time the athlete answered "is this still bothering you?" (drives the Home check-in prompt).
+  last_check_in?: string;
+};
 type ResilienceRegion = { location: string; current_stage: string };
 
-// Maps the phase the athlete is in right now onto the matching column of the
-// coaching-philosophy phase-by-phase resilience progression table (Section 5)
-// — the same vocabulary the Phase Builder prompt already reads that table
-// with, so "current_stage: hypertrophy" means exactly what it means for every
-// other standing resilience region, no separate stage-name table needed here.
-// injury_return and testing_block aren't columns in that table — both start
-// an injury conservatively/hold rather than guessing a stage.
-const PHASE_GOAL_TO_STAGE: Record<string, string> = {
-  gpp_reacclimation: "gpp_reacclimation",
-  hypertrophy: "hypertrophy",
-  max_strength: "max_strength",
-  power_conversion: "power_conversion",
-  peak_taper: "peak_taper",
-  injury_return: "gpp_reacclimation",
-  testing_block: "gpp_reacclimation",
+// A cleared injury always restarts at the FIRST step of its region's heavy slow
+// resistance (HSR) chain — the same stage vocabulary the Phase Builder reads the
+// Coaching Philosophy's phase-by-phase resilience table with, where the first
+// ("gpp_reacclimation") column is the start of the chain — regardless of which
+// phase the athlete happens to be in when they move over (coach decision,
+// 2026-10-06). From there the standing progression advances it phase to phase.
+export const FIRST_HSR_STAGE = "gpp_reacclimation";
+
+type InjuryState = {
+  current_active_injuries: ActiveInjury[];
+  standing_resilience_regions: ResilienceRegion[];
 };
+
+/**
+ * Pure function: applies every pending (deferred) injury resolution that is due
+ * for the phase being built. An injury marked resolved during phase P stays
+ * active (isometric stage) for the rest of P; any phase other than P — i.e. the
+ * next one — sees it as moved into standing resilience work at the first HSR
+ * step. Used both when building a phase context in memory and when persisting at
+ * the phase boundary.
+ */
+export function applyPendingResolutionsForPhase(state: InjuryState, targetPhaseId: string): InjuryState {
+  let active = state.current_active_injuries ?? [];
+  let regions = state.standing_resilience_regions ?? [];
+  for (const inj of active) {
+    if (!inj.pending_resolution || inj.pending_resolution.after_phase_id === targetPhaseId) continue;
+    regions = regions.some((r) => r.location === inj.location)
+      ? regions.map((r) => (r.location === inj.location ? { ...r, current_stage: FIRST_HSR_STAGE } : r))
+      : [...regions, { location: inj.location, current_stage: FIRST_HSR_STAGE }];
+    active = active.filter((i) => i.location !== inj.location);
+  }
+  return { current_active_injuries: active, standing_resilience_regions: regions };
+}
+
+/**
+ * Persists any deferred resolutions once the phase they were waiting on has
+ * finished and `newActivePhaseId` is the athlete's new current phase. Called at
+ * the phase transition (lib/pps/compile.ts normal transition).
+ */
+export async function finalizePendingInjuryResolutions(
+  supabase: SupabaseClient,
+  params: { athleteId: string; newActivePhaseId: string }
+) {
+  const { athleteId, newActivePhaseId } = params;
+  const { data: state } = await supabase
+    .from("current_athlete_state")
+    .select("current_active_injuries, standing_resilience_regions")
+    .eq("athlete_id", athleteId)
+    .maybeSingle();
+  if (!state) return;
+  const before = (state.current_active_injuries as ActiveInjury[]) ?? [];
+  if (!before.some((i) => i.pending_resolution)) return;
+  const next = applyPendingResolutionsForPhase(
+    {
+      current_active_injuries: before,
+      standing_resilience_regions: (state.standing_resilience_regions as ResilienceRegion[]) ?? [],
+    },
+    newActivePhaseId
+  );
+  await supabase
+    .from("current_athlete_state")
+    .update(next)
+    .eq("athlete_id", athleteId);
+}
 
 /**
  * Applies an athlete's own injury check-in (POST /api/athletes/[id]/injury-status)
@@ -52,10 +111,11 @@ export async function applyInjuryStatusUpdate(
     location: string;
     status: "resolved" | "still_active";
     note?: string;
-    currentPhaseGoal?: string | null;
+    /** The athlete's active phase right now, if any (a resolution is deferred until it finishes). */
+    currentPhaseId?: string | null;
   }
 ) {
-  const { athleteId, location, status, note, currentPhaseGoal } = params;
+  const { athleteId, location, status, note, currentPhaseId } = params;
 
   const { data: state, error: stateError } = await supabase
     .from("current_athlete_state")
@@ -76,19 +136,36 @@ export async function applyInjuryStatusUpdate(
   let newResilienceRegions = (state.standing_resilience_regions as ResilienceRegion[]) ?? [];
 
   if (status === "resolved") {
-    newActiveInjuries = activeInjuries.filter((_, i) => i !== idx);
-
-    const stage = PHASE_GOAL_TO_STAGE[currentPhaseGoal ?? ""] ?? "gpp_reacclimation";
-    const existingRegionIdx = newResilienceRegions.findIndex((r) => r.location === location);
-    if (existingRegionIdx === -1) {
-      newResilienceRegions = [...newResilienceRegions, { location, current_stage: stage }];
-    } else {
-      newResilienceRegions = newResilienceRegions.map((r, i) =>
-        i === existingRegionIdx ? { ...r, current_stage: stage } : r
+    if (currentPhaseId) {
+      // Finish out the current phase as planned; the move to heavy slow
+      // resistance happens when the next phase is built (see
+      // applyPendingResolutionsForPhase). No mid-phase change to approved sessions.
+      newActiveInjuries = activeInjuries.map((inj, i) =>
+        i === idx
+          ? {
+              ...inj,
+              note: note ?? inj.note,
+              last_check_in: new Date().toISOString(),
+              pending_resolution: { resolved_at: new Date().toISOString(), after_phase_id: currentPhaseId },
+            }
+          : inj
       );
+    } else {
+      // No active phase to finish: nothing to wait for, move over right away.
+      newActiveInjuries = activeInjuries.filter((_, i) => i !== idx);
+      newResilienceRegions = newResilienceRegions.some((r) => r.location === location)
+        ? newResilienceRegions.map((r) => (r.location === location ? { ...r, current_stage: FIRST_HSR_STAGE } : r))
+        : [...newResilienceRegions, { location, current_stage: FIRST_HSR_STAGE }];
     }
   } else {
-    newActiveInjuries = activeInjuries.map((inj, i) => (i === idx ? { ...inj, note: note ?? inj.note } : inj));
+    // Still bothering them: also cancels any earlier "it's better" report that
+    // was waiting for the phase to finish.
+    newActiveInjuries = activeInjuries.map((inj, i) => {
+      if (i !== idx) return inj;
+      const { pending_resolution: _cleared, ...rest } = inj;
+      void _cleared;
+      return { ...rest, note: note ?? inj.note, last_check_in: new Date().toISOString() };
+    });
   }
 
   const { error: updateError } = await supabase

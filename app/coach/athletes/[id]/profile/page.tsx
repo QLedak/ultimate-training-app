@@ -25,8 +25,10 @@ type Intake = {
   back_squat_reps: number | null;
   bench_press_weight: number | null;
   bench_press_reps: number | null;
-  deadlift_or_clean_weight: number | null;
-  deadlift_or_clean_reps: number | null;
+  deadlift_weight: number | null;
+  deadlift_reps: number | null;
+  power_clean_weight: number | null;
+  power_clean_reps: number | null;
   pullup_max_reps: number | null;
   vertical_jump_in: number | null;
   goals: string | null;
@@ -37,7 +39,8 @@ type CurrentState = {
   bodyweight_lb: number | null;
   back_squat_1rm: number | null;
   bench_press_1rm: number | null;
-  deadlift_or_clean_1rm: number | null;
+  deadlift_1rm: number | null;
+  power_clean_1rm: number | null;
   pullup_max_reps: number | null;
   vertical_jump_in: number | null;
   maxes_source: string;
@@ -78,6 +81,7 @@ const LOCATION_LABELS: Record<string, string> = {
   acl_knee: "ACL / knee",
   hamstring: "Hamstring",
   groin_adductor: "Groin / adductor",
+  abdominal: "Abdominal",
   shoulder: "Shoulder",
   lower_back: "Lower back",
   ankle: "Ankle",
@@ -153,7 +157,7 @@ export default function CoachAthleteProfilePage({ params }: { params: { id: stri
     <>
       <NavBar role="coach" name={coach?.name ?? null} links={NAV_LINKS} />
       <main className="mx-auto max-w-3xl px-6 pb-16">
-        <Link href="/coach" className="text-sm text-brand-text underline">
+        <Link href="/coach" className="text-sm text-brand underline">
           ← Coach dashboard
         </Link>
 
@@ -168,7 +172,7 @@ export default function CoachAthleteProfilePage({ params }: { params: { id: stri
               </h1>
               <Link
                 href={`/coach/athletes/${data.athlete.id}/program`}
-                className="text-sm text-brand-text underline"
+                className="text-sm text-brand underline"
               >
                 View current program →
               </Link>
@@ -215,6 +219,11 @@ export default function CoachAthleteProfilePage({ params }: { params: { id: stri
                           {eq.replace(/_/g, " ")}
                         </span>
                       ))}
+                      {data.current_state?.updated_at && (
+                        <span className="self-center text-xs text-slate-400">
+                          (state updated {new Date(data.current_state.updated_at).toLocaleDateString()})
+                        </span>
+                      )}
                     </div>
                   )}
                 </Section>
@@ -225,7 +234,7 @@ export default function CoachAthleteProfilePage({ params }: { params: { id: stri
                     {data.current_state?.updated_at &&
                       ` · updated ${new Date(data.current_state.updated_at).toLocaleDateString()}`}
                   </p>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-6">
                     <Stat
                       label="Back squat"
                       value={fmt(data.current_state?.back_squat_1rm ?? data.intake.back_squat_weight, " lb")}
@@ -235,11 +244,12 @@ export default function CoachAthleteProfilePage({ params }: { params: { id: stri
                       value={fmt(data.current_state?.bench_press_1rm ?? data.intake.bench_press_weight, " lb")}
                     />
                     <Stat
-                      label="Deadlift/clean"
-                      value={fmt(
-                        data.current_state?.deadlift_or_clean_1rm ?? data.intake.deadlift_or_clean_weight,
-                        " lb"
-                      )}
+                      label="Deadlift"
+                      value={fmt(data.current_state?.deadlift_1rm ?? data.intake.deadlift_weight, " lb")}
+                    />
+                    <Stat
+                      label="Power clean"
+                      value={fmt(data.current_state?.power_clean_1rm ?? data.intake.power_clean_weight, " lb")}
                     />
                     <Stat
                       label="Pull-up max"

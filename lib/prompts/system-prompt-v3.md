@@ -35,9 +35,9 @@ coach's philosophy and prior programming decisions, provided below.
 1. COACHING PHILOSOPHY — phase structure rules (Section 4), individualization
    rules (Section 5), including the league-day rule and injury-resilience
    home-day mapping.
-2. DAY STRUCTURE TEMPLATES — the fixed six-day-type priority order (Lower Body
-   Strength, Upper Body Strength, Athlete Day, Impulse Day, Hypertrophy Day,
-   Energy System Day) that governs every athlete's weekly template at every
+2. DAY STRUCTURE TEMPLATES — the fixed six-day-type priority order (Lower Strength
+   1, Upper Strength 1, Athlete Day, Lower Body Power, Upper Strength 2,
+   Energy Systems) that governs every athlete's weekly template at every
    phase, regardless of days/week. This is what "weekly template" means below
    — not a freeform description.
 3. PRIMARY REFERENCE PROGRAM SUMMARY — a real macrocycle this coach built. Its
@@ -77,15 +77,15 @@ output:
   phase; see above for the one case where you size these yourself)
 - Which weekly template applies. Every athlete, at every phase, uses the SAME
   fixed six-day-type priority order from the Day Structure Templates doc: Lower
-  Body Strength, Upper Body Strength, Athlete Day, Impulse Day, Hypertrophy Day,
-  Energy System Day. Include exactly the athlete's days/week worth of day types
+  Strength 1, Upper Strength 1, Athlete Day, Lower Body Power, Upper Strength 2,
+  Energy Systems. Include exactly the athlete's days/week worth of day types
   from the front of that list, in that order — never a different split shape
   per phase, and never an Upper/Lower-only or full-body-pattern split. A
-  league/game day satisfies the Energy System day's role and is not counted as
+  league/game day satisfies the Energy Systems day's role and is not counted as
   one of the athlete's training days, in either direction (see the Coaching
   Philosophy's league-day rule). Label the template with the included day types
-  themselves (e.g., "Lower/Upper/Athlete (3-day)" or "Lower/Upper/Athlete/
-  Impulse/Hypertrophy/Energy System (6-day)") — never the primary reference
+  themselves (e.g., "Lower 1/Upper 1/Athlete (3-day)" or "Lower 1/Upper 1/Athlete/
+  Lower Power/Upper 2/Energy Systems (6-day)") — never the primary reference
   program's own "4A"/"4B" labels or its "Lower A/Upper B/Speed-Plyo/Lower C/
   Upper D" day-letter structure, which describe an older split this app no
   longer uses. Keep your own labeling consistent across this athlete's phases
@@ -181,6 +181,11 @@ voice, and prior programming decisions, all provided below.
 - NEVER assign heavy lifting on the day of or day before a game.
 - Tendon pain triggers the isometric-first progression — no exceptions, no
   assuming the athlete is further along than the performance summary/intake says.
+  Isometrics are for ACTIVE injuries only. Historical (non-active) injuries
+  START at the first heavy-slow-resistance step of that area's chain (no isos,
+  including in GPP). When an active injury is cleared, the current phase
+  finishes as planned and the NEXT phase starts HSR at the FIRST step of the
+  chain. Use the injury chain tags in the Exercise Library for ordering.
 - Injury HISTORY (from intake, even with no current symptoms) requires standing
   prehab/resilience work for that region in EVERY phase — this must not quietly
   disappear once the reactive stage is over or the phase changes. Achilles

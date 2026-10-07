@@ -4,13 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { NavBar } from "@/components/nav/NavBar";
 import { useAthleteSession } from "../_components/useAthleteSession";
+import { ATHLETE_NAV_LINKS } from "../_components/nav-links";
 
-const NAV_LINKS = [
-  { href: "/app", label: "Home" },
-  { href: "/app/log", label: "Schedule" },
-  { href: "/app/log/program", label: "Overview" },
-  { href: "/app/injuries", label: "Injuries" },
-];
+const NAV_LINKS = ATHLETE_NAV_LINKS;
 
 type SessionSummary = {
   id: string;
@@ -86,21 +82,24 @@ function statusLabel(status: SessionSummary["status"], date: string) {
 // whether it had been logged. day_label is the one per-day descriptive field
 // scheduled_sessions has (see workout-logging-schema-spec.md); it's free
 // text written by the Phase Builder, following a fixed six-day-type naming
-// convention in the common case ("Lower Body Strength", "Hypertrophy Day",
-// etc.) but with real variation — legacy "Lower A"/"Upper B" day-letter
+// convention in the common case ("Lower Strength", "Upper Strength 2",
+// etc. — older sessions may still say "Lower Body Strength"/"Hypertrophy Day") but with real variation — legacy "Lower A"/"Upper B" day-letter
 // labels, late-phase sport-specific renames ("Speed", "Reactive/Plyo"), and
 // "GAME"/"Rest" days. Matching on keywords rather than an exact enum covers
 // all of those without needing a new schema field. Order matters: first
-// match wins, most-specific first (so e.g. "Lower Body Strength" doesn't
+// match wins, most-specific first (so e.g. "Lower Strength" doesn't
 // fall through to a generic default before "lower" is checked).
 // ---------------------------------------------------------------------------
 const WORKOUT_ICON_RULES: { match: RegExp; icon: string; title: string }[] = [
+  // "Lower Body Power" (formerly "Impulse Day") must match before the generic
+  // /lower/ rule below, or it would show the plain lower-body icon.
+  { match: /lower body power|impulse/i, icon: "💥", title: "Lower body power" },
+  // Legacy label (renamed "Upper Strength 2") — old sessions still carry it.
   { match: /hypertrophy/i, icon: "🏋️", title: "Hypertrophy" },
   { match: /game|tournament/i, icon: "🥏", title: "Game" },
   { match: /\brest\b/i, icon: "😴", title: "Rest" },
   { match: /upper/i, icon: "💪", title: "Upper body" },
   { match: /lower/i, icon: "🦵", title: "Lower body" },
-  { match: /impulse/i, icon: "💥", title: "Impulse" },
   { match: /speed|plyo|reactive/i, icon: "🏃", title: "Speed / plyo" },
   { match: /energy/i, icon: "🔥", title: "Energy system" },
   { match: /athlete/i, icon: "⚡", title: "Athlete day" },

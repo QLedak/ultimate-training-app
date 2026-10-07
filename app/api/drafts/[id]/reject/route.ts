@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/db/supabase-admin";
-import { generateMacrocycleDraft } from "@/lib/generation/macrocycle";
+import { generateMacrocycleDraft, generateNextSeasonDraft } from "@/lib/generation/macrocycle";
 import { generatePhaseDraft } from "@/lib/generation/phase";
 import { getSessionCoachId, unauthorized } from "@/lib/auth/session";
 import { dbError } from "@/lib/api/error-response";
@@ -59,12 +59,21 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   let newDraft;
   try {
     if (draft.call_type === "macrocycle_planner") {
-      const inputSnapshot = draft.input_snapshot as { is_rebuild: boolean; rebuild_reason: string | null };
-      newDraft = await generateMacrocycleDraft(supabase, {
-        athleteId: draft.athlete_id,
-        isRebuild: inputSnapshot.is_rebuild,
-        rebuildReason: inputSnapshot.rebuild_reason ?? undefined,
-      });
+      const inputSnapshot = draft.input_snapshot as {
+        is_rebuild: boolean;
+        rebuild_reason: string | null;
+        next_season_id?: string;
+      };
+      newDraft = inputSnapshot.next_season_id
+        ? await generateNextSeasonDraft(supabase, {
+            athleteId: draft.athlete_id,
+            seasonId: inputSnapshot.next_season_id,
+          })
+        : await generateMacrocycleDraft(supabase, {
+            athleteId: draft.athlete_id,
+            isRebuild: inputSnapshot.is_rebuild,
+            rebuildReason: inputSnapshot.rebuild_reason ?? undefined,
+          });
     } else {
       newDraft = await generatePhaseDraft(supabase, {
         athleteId: draft.athlete_id,

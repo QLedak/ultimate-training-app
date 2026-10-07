@@ -177,10 +177,10 @@ export async function runPhaseBuilder(
     "# DAY STRUCTURE TEMPLATES (six fixed day types, by phase)",
     daysPerWeek
       ? `This athlete trains ${daysPerWeek} days/week — per the priority-order table below, include exactly the ` +
-        `first ${daysPerWeek} day types from the list (Lower Body Strength, Upper Body Strength, Athlete Day, ` +
-        `Impulse Day, Hypertrophy Day, Energy System Day, in that order), in that same weekly sequence. Use each ` +
+        `first ${daysPerWeek} day types from the list (Lower Strength, Upper Strength 1, Athlete Day, ` +
+        `Lower Body Power, Upper Strength 2, Energy Systems, in that order), in that same weekly sequence. Use each ` +
         `included day's fixed slot order and this phase's row in that day's dosing table. If the athlete has a ` +
-        `league/game day on their schedule, it satisfies the Energy System day's role — do not also fold in or ` +
+        `league/game day on their schedule, it satisfies the Energy Systems day's role — do not also fold in or ` +
         `dedicate a Conditioning slot elsewhere; if there is no league day, apply this document's fold-in rule for ` +
         `whichever day types are included. Fill each generic slot with a real exercise from the filtered library ` +
         `below that matches the slot's intent, and apply the injury-resilience home-day table from the coaching ` +

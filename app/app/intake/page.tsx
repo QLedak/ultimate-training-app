@@ -3,24 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { EQUIPMENT_OPTIONS, toggleEquipmentValue } from "@/lib/training/equipment-options";
 
 // ---- Controlled vocabularies (must match the DB check constraints / Exercise Library tags exactly) ----
-
-const EQUIPMENT_OPTIONS = [
-  { value: "barbell_rack", label: "Barbell + Rack" },
-  { value: "bench", label: "Bench" },
-  { value: "dumbbells", label: "Dumbbells" },
-  { value: "kettlebell", label: "Kettlebell" },
-  { value: "pullup_bar", label: "Pull-Up Bar" },
-  { value: "cable_machine", label: "Cable Machine" },
-  { value: "bands", label: "Resistance Bands" },
-  { value: "med_ball", label: "Medicine Ball" },
-  { value: "boxes", label: "Boxes/Plyo Boxes" },
-  { value: "sled", label: "Sled" },
-  { value: "turf_track", label: "Turf/Track/Running Room" },
-  { value: "cardio_machine", label: "Treadmill/Bike/Rower" },
-  { value: "bodyweight_only", label: "Bodyweight Only" },
-];
 
 const INJURY_LOCATIONS = [
   { value: "achilles_calf", label: "Achilles/calf" },
@@ -148,7 +133,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-text focus:outline-none";
+const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none";
 
 function MaxLiftInput({
   label,
@@ -166,7 +151,7 @@ function MaxLiftInput({
         <button
           type="button"
           onClick={() => onChange({ ...value, skip: false })}
-          className="text-sm text-brand-text underline"
+          className="text-sm text-brand underline"
         >
           Actually, let me enter a number
         </button>
@@ -212,17 +197,7 @@ export default function IntakePage() {
     setState((s) => ({ ...s, [key]: value }));
 
   function toggleEquipment(value: string) {
-    if (value === "bodyweight_only") {
-      update("equipment", state.equipment.includes("bodyweight_only") ? [] : ["bodyweight_only"]);
-      return;
-    }
-    const withoutBodyweightOnly = state.equipment.filter((e) => e !== "bodyweight_only");
-    update(
-      "equipment",
-      withoutBodyweightOnly.includes(value)
-        ? withoutBodyweightOnly.filter((e) => e !== value)
-        : [...withoutBodyweightOnly, value]
-    );
+    update("equipment", toggleEquipmentValue(state.equipment, value));
   }
 
   function toggleInjuryHistory(value: string) {
@@ -396,7 +371,7 @@ export default function IntakePage() {
           Your answers are in. Your coach builds and reviews your season plan next, so check back soon — you&apos;ll
           see it on your dashboard once it&apos;s ready.
         </p>
-        <Link href="/app" className="mt-6 text-sm text-brand-text underline">
+        <Link href="/app" className="mt-6 text-sm text-brand underline">
           Go to your dashboard
         </Link>
       </main>
@@ -631,7 +606,7 @@ export default function IntakePage() {
                     { dayOfWeek: "", time: "", label: "", startDate: "", endDate: "" },
                   ])
                 }
-                className="text-sm text-brand-text underline"
+                className="text-sm text-brand underline"
               >
                 + Add a recurring commitment
               </button>
@@ -717,7 +692,7 @@ export default function IntakePage() {
                     { startDate: "", endDate: "", label: "", isPriority: false },
                   ])
                 }
-                className="text-sm text-brand-text underline"
+                className="text-sm text-brand underline"
               >
                 + Add a tournament weekend
               </button>
@@ -776,7 +751,7 @@ export default function IntakePage() {
               <label
                 key={opt.value}
                 className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm ${
-                  state.equipment.includes(opt.value) ? "border-brand bg-brand-tint" : "border-slate-200"
+                  state.equipment.includes(opt.value) ? "border-brand bg-blue-50" : "border-slate-200"
                 }`}
               >
                 <input
@@ -798,7 +773,7 @@ export default function IntakePage() {
         <Screen title="Current stats & known maxes" subtitle="Everything here is optional — skip anything you don't know.">
           <Field label="Bodyweight (lb)">
             {state.bodyweightSkip ? (
-              <button type="button" onClick={() => update("bodyweightSkip", false)} className="text-sm text-brand-text underline">
+              <button type="button" onClick={() => update("bodyweightSkip", false)} className="text-sm text-brand underline">
                 Actually, let me enter a number
               </button>
             ) : (
@@ -831,7 +806,7 @@ export default function IntakePage() {
 
           <Field label="Pull-up max reps">
             {state.pullupSkip ? (
-              <button type="button" onClick={() => update("pullupSkip", false)} className="text-sm text-brand-text underline">
+              <button type="button" onClick={() => update("pullupSkip", false)} className="text-sm text-brand underline">
                 Actually, let me enter a number
               </button>
             ) : (
@@ -872,7 +847,7 @@ export default function IntakePage() {
                 <label
                   key={loc.value}
                   className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm ${
-                    state.currentInjuries.includes(loc.value) ? "border-brand bg-brand-tint" : "border-slate-200"
+                    state.currentInjuries.includes(loc.value) ? "border-brand bg-blue-50" : "border-slate-200"
                   }`}
                 >
                   <input
@@ -924,7 +899,7 @@ export default function IntakePage() {
                 key={chip}
                 type="button"
                 onClick={() => update("goals", state.goals ? `${state.goals}. ${chip}` : chip)}
-                className="rounded-full border border-slate-300 px-3 py-1 text-xs text-slate-600 hover:border-brand hover:text-brand-text"
+                className="rounded-full border border-slate-300 px-3 py-1 text-xs text-slate-600 hover:border-brand hover:text-brand"
               >
                 {chip}
               </button>
@@ -994,11 +969,11 @@ export default function IntakePage() {
             />
             <span>
               I&apos;ve read and agree to the{" "}
-              <Link href="/terms" target="_blank" className="text-brand-text underline">
+              <Link href="/terms" target="_blank" className="text-brand underline">
                 Terms of Service
               </Link>{" "}
               and{" "}
-              <Link href="/privacy" target="_blank" className="text-brand-text underline">
+              <Link href="/privacy" target="_blank" className="text-brand underline">
                 Privacy Policy
               </Link>
               , including how my training and injury information is used.
@@ -1022,7 +997,7 @@ export default function IntakePage() {
           <button
             type="button"
             onClick={handleNext}
-            className="rounded-md bg-brand px-5 py-2 text-sm font-medium text-brand-on hover:bg-brand-hover"
+            className="rounded-md bg-brand px-5 py-2 text-sm font-medium text-white hover:bg-blue-700"
           >
             Next
           </button>
@@ -1031,7 +1006,7 @@ export default function IntakePage() {
             type="button"
             onClick={handleSubmit}
             disabled={submitting || !state.agreedToTerms}
-            className="rounded-md bg-brand px-5 py-2 text-sm font-medium text-brand-on hover:bg-brand-hover disabled:opacity-50"
+            className="rounded-md bg-brand px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
             {submitting ? "Building your plan…" : "Confirm & build my plan"}
           </button>
@@ -1054,7 +1029,7 @@ function SummarySection({
     <div className="rounded-md border border-slate-200 p-3">
       <div className="mb-1 flex items-center justify-between">
         <span className="font-medium text-brand-dark">{title}</span>
-        <button type="button" onClick={onEdit} className="text-xs text-brand-text underline">
+        <button type="button" onClick={onEdit} className="text-xs text-brand underline">
           Edit
         </button>
       </div>

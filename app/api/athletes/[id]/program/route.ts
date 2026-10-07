@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/db/supabase-admin";
 import { getSessionAthleteId, getSessionCoachId, unauthorized, forbidden } from "@/lib/auth/session";
+import { getSeasonState } from "@/lib/seasons/state";
 import { dbError } from "@/lib/api/error-response";
 
 /**
@@ -30,7 +31,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 
   const { data: skeleton, error: skeletonError } = await supabase
     .from("macrocycle_skeletons")
-    .select("id, created_at, source_draft_id")
+    .select("id, created_at, source_draft_id, is_bridge")
     .eq("athlete_id", athleteId)
     .eq("is_active", true)
     .maybeSingle();
@@ -39,6 +40,9 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   if (!skeleton) {
     return NextResponse.json({
       skeleton: null,
+      is_bridge: false,
+      planned_season: null,
+      past_seasons: [],
       phases: [],
       tournament_weekends: [],
       season: null,
@@ -52,6 +56,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       .from("macrocycle_phases")
       .select("*")
       .eq("skeleton_id", skeleton.id)
+      .neq("status", "superseded") // replaced bridge blocks were never delivered; keep them out of the plan view
       .order("phase_number", { ascending: true }),
     supabase
       .from("athlete_intake")
@@ -80,8 +85,27 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
     activePhaseDraftId = latestApprovedPhaseDraft?.id ?? null;
   }
 
+  const seasonState = await getSeasonState(supabase, athleteId);
+
   return NextResponse.json({
     skeleton,
+    is_bridge: !!skeleton.is_bridge,
+    planned_season: seasonState.planned_season
+      ? {
+          label: seasonState.planned_season.label,
+          season_start: seasonState.planned_season.season_start,
+          season_end: seasonState.planned_season.season_end,
+          draft_status: seasonState.planned_season.draft_status,
+          approved: !!seasonState.planned_season.skeleton_id,
+        }
+      : null,
+    past_seasons: seasonState.past_seasons.map((s) => ({
+      id: s.id,
+      label: s.label,
+      season_start: s.season_start,
+      season_end: s.season_end,
+      review: s.review,
+    })),
     phases: phases ?? [],
     tournament_weekends: intake?.tournament_weekends ?? [],
     season: intake

@@ -2,7 +2,7 @@
 
 *Uploaded by the coach as their own real program (built for themselves as the athlete), spanning Sept 28, 2026 -> late May 2027. Per the coach's instruction, this is the PRIMARY resource for future AI-generated programs — Example Programs 1-4 (in `/programs/`) are secondary context only, useful for structural variety but subordinate to this one whenever they conflict. This document extracts the reusable structure and conventions from the full 780-row workbook; the original file (`primary-program-offseason-tracker.xlsx`) was returned to the coach and is not duplicated here in full — this summary is what should actually be fed to the model as a few-shot reference, since the full sheet is far larger than a useful prompt payload.*
 
-**SUPERSEDED SPLIT — READ BEFORE USING:** this program predates the current methodology (see `day-structure-templates.md` and `coaching-philosophy.md` Section 5). Its weekly template shapes and day labels below — the "4A"/"4B" names, and the "Lower A / Upper B / Speed-Plyo / Lower C / Upper D" day-letter structure — describe the OLD split and must never be reproduced, named, or used to shape a `weekly_template_label` or a phase's day structure. Every current program (regardless of days/week) uses the fixed six-day-type priority order instead: Lower Body Strength, Upper Body Strength, Athlete Day, Impulse Day, Hypertrophy Day, Energy System Day.
+**SUPERSEDED SPLIT — READ BEFORE USING:** this program predates the current methodology (see `day-structure-templates.md` and `coaching-philosophy.md` Section 5). Its weekly template shapes and day labels below — the "4A"/"4B" names, and the "Lower A / Upper B / Speed-Plyo / Lower C / Upper D" day-letter structure — describe the OLD split and must never be reproduced, named, or used to shape a `weekly_template_label` or a phase's day structure. Every current program (regardless of days/week) uses the fixed six-day-type priority order instead: Lower Strength, Upper Strength 1, Athlete Day, Lower Body Power, Upper Strength 2, Energy Systems.
 
 **What still applies from this program** — its non-split structural conventions remain valid and should keep informing generated programs:
 - Deload/test placement anchored to phase boundaries (see the box below)
@@ -10,7 +10,7 @@
 - Wave loading notation (`5x5 -> 3x3 @ 80-90%`) for build-week prescriptions
 - Alternating an exercise week-to-week (e.g. Front Squat alternating with Deadlift) for variety/fatigue management across a long block
 - Sport-specific day-renaming during taper (handled today via the fixed day types' own names — no separate renaming needed)
-- Games getting their own day-type once the season starts (this is now the league-day rule: a league/game day satisfies the Energy System day's role — see `coaching-philosophy.md` Section 5)
+- Games getting their own day-type once the season starts (this is now the league-day rule: a league/game day satisfies the Energy Systems day's role — see `coaching-philosophy.md` Section 5)
 
 ---
 
@@ -125,5 +125,5 @@ Same Lower A/Upper B/Speed-Plyo/Lower C/Upper D skeleton as week 4, PLUS a "GAME
 2. **Contrast/complex training terminology**: this coach uses "Contrast:" and "French Contrast:" as explicit labels in the exercise name/notation itself — future generated programs should use this same labeling convention when prescribing a contrast pairing, so it's unambiguous to the athlete what's happening.
 3. **Wave loading notation** (`5x5 -> 3x3 @ 80-90%`) is a real prescription pattern this coach uses in a max-strength phase — distinct from the straight rep-max testing protocol used in Example Program 2. Both are valid; which one applies depends on phase (wave for build weeks, true rep-max only on dedicated test days).
 4. **Alternating exercises week-to-week** (e.g., "Front Squat (alt weeks w/ Barbell Deadlift)") is a real pattern for managing variety/fatigue across a long block — worth the system prompt explicitly allowing this rather than assuming one fixed exercise per slot for an entire phase.
-5. **Games get their own day-type in the split** once the season starts, not just an intensity adjustment — *(superseded: this is now the league-day rule — a league/game day satisfies the Energy System day's role directly; don't reshape the template around it the way 4A → 4B did.)*
+5. **Games get their own day-type in the split** once the season starts, not just an intensity adjustment — *(superseded: this is now the league-day rule — a league/game day satisfies the Energy Systems day's role directly; don't reshape the template around it the way 4A → 4B did.)*
 6. **Late-phase day labels shift to sport-specific naming** — *(superseded: the fixed day types already carry their own names at every phase; no separate late-phase renaming is needed.)*

@@ -4,13 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { NavBar } from "@/components/nav/NavBar";
 import { useAthleteSession } from "../../_components/useAthleteSession";
+import { ATHLETE_NAV_LINKS } from "../../_components/nav-links";
 
-const NAV_LINKS = [
-  { href: "/app", label: "Home" },
-  { href: "/app/log", label: "Schedule" },
-  { href: "/app/log/program", label: "Overview" },
-  { href: "/app/injuries", label: "Injuries" },
-];
+const NAV_LINKS = ATHLETE_NAV_LINKS;
 
 type Phase = {
   id: string;
@@ -22,7 +18,22 @@ type Phase = {
   week_count: number;
   weekly_template_label: string;
   status: "upcoming" | "active" | "completed" | "superseded";
+  is_bridge?: boolean;
 };
+type PastSeason = {
+  id: string;
+  label: string;
+  season_start: string | null;
+  season_end: string | null;
+  review: {
+    phases_completed?: number;
+    sessions_logged?: number;
+    sessions_scheduled?: number;
+    adherence_pct?: number | null;
+    maxes?: Record<string, { start: number; end: number; change: number }>;
+  } | null;
+};
+type PlannedSeason = { label: string; season_start: string | null; season_end: string | null; draft_status: string; approved: boolean };
 type Tournament = { start_date: string; end_date: string; label?: string; is_priority?: boolean };
 
 const GOAL_LABELS: Record<string, string> = {
@@ -38,7 +49,7 @@ const GOAL_LABELS: Record<string, string> = {
 function statusStyle(status: Phase["status"]) {
   switch (status) {
     case "active":
-      return "border-brand bg-brand-tint";
+      return "border-brand bg-blue-50";
     case "completed":
       return "border-slate-200 bg-slate-50 opacity-70";
     case "superseded":
@@ -51,7 +62,7 @@ function statusStyle(status: Phase["status"]) {
 function statusLabel(status: Phase["status"]) {
   switch (status) {
     case "active":
-      return <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-medium text-brand-on">Current</span>;
+      return <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-medium text-white">Current</span>;
     case "completed":
       return <span className="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-600">Done</span>;
     case "superseded":
@@ -67,6 +78,9 @@ export default function ProgramOverviewPage() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [season, setSeason] = useState<{ start: string; end: string; confirmed: boolean } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isBridge, setIsBridge] = useState(false);
+  const [planned, setPlanned] = useState<PlannedSeason | null>(null);
+  const [pastSeasons, setPastSeasons] = useState<PastSeason[]>([]);
 
   useEffect(() => {
     if (!athlete) return;
@@ -77,6 +91,9 @@ export default function ProgramOverviewPage() {
         setPhases(data.phases);
         setTournaments(data.tournament_weekends ?? []);
         setSeason(data.season);
+        setIsBridge(!!data.is_bridge);
+        setPlanned(data.planned_season ?? null);
+        setPastSeasons(data.past_seasons ?? []);
       })
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }, [athlete]);
@@ -86,7 +103,7 @@ export default function ProgramOverviewPage() {
       <main className="mx-auto max-w-xl px-6 py-10">
         <p className="text-sm text-slate-600">
           You&apos;re logged in, but there&apos;s no athlete profile for this account yet.{" "}
-          <Link href="/app/intake" className="text-brand-text underline">Complete intake</Link>.
+          <Link href="/app/intake" className="text-brand underline">Complete intake</Link>.
         </p>
       </main>
     );
@@ -117,6 +134,28 @@ export default function ProgramOverviewPage() {
         </p>
       )}
 
+      {isBridge && (
+        <p className="mt-1 text-sm text-slate-500">
+          Off-season training — blocks keep rolling until you enter next season&apos;s dates.
+        </p>
+      )}
+
+      {!planned && phases !== null && phases.length > 0 && (
+        <Link
+          href="/app/next-season"
+          className="mt-4 block rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-900 hover:border-brand"
+        >
+          Plan next season →
+        </Link>
+      )}
+      {planned && (
+        <div className="mt-4 rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
+          Next season ({planned.label}, {planned.season_start} → {planned.season_end}):{" "}
+          {planned.approved ? "plan approved — starts when your current block ends." : "your coach is building your plan."}{" "}
+          <Link href="/app/next-season" className="underline">View</Link>
+        </div>
+      )}
+
       {error && <p className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-600">{error}</p>}
 
       {phases === null && !error && <p className="mt-4 text-sm text-slate-500">Loading…</p>}
@@ -133,7 +172,7 @@ export default function ProgramOverviewPage() {
             <div key={p.id} className={`rounded-md border p-3 ${statusStyle(p.status)}`}>
               <div className="flex items-center justify-between">
                 <span className="font-medium text-slate-800">
-                  Phase {p.phase_number}: {p.phase_name}
+                  {p.is_bridge ? p.phase_name : `Phase ${p.phase_number}: ${p.phase_name}`}
                 </span>
                 {statusLabel(p.status)}
               </div>
@@ -169,16 +208,47 @@ export default function ProgramOverviewPage() {
         </div>
       )}
 
+      {pastSeasons.length > 0 && (
+        <div className="mt-8">
+          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-400">Past seasons</h2>
+          <div className="space-y-2">
+            {pastSeasons.map((ps) => (
+              <details key={ps.id} className="rounded-md border border-slate-200 px-3 py-2 text-sm">
+                <summary className="cursor-pointer font-medium text-slate-700">
+                  {ps.label} <span className="font-normal text-slate-400">{ps.season_start} → {ps.season_end}</span>
+                </summary>
+                {ps.review ? (
+                  <div className="mt-2 space-y-1 text-slate-600">
+                    <p>
+                      {ps.review.phases_completed ?? 0} phases completed
+                      {ps.review.adherence_pct != null && ` · ${ps.review.adherence_pct}% of sessions logged`}
+                    </p>
+                    {Object.entries(ps.review.maxes ?? {}).map(([lift, m]) => (
+                      <p key={lift} className="text-xs">
+                        {lift.replace(/_/g, " ")}: {m.start} → {m.end} ({m.change >= 0 ? "+" : ""}
+                        {Math.round(m.change * 10) / 10})
+                      </p>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-2 text-slate-500">No summary recorded.</p>
+                )}
+              </details>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Link
           href="/app/schedule"
-          className="block rounded-md border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700 hover:border-brand hover:text-brand-text"
+          className="block rounded-md border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700 hover:border-brand hover:text-brand"
         >
           Edit schedule / add a tournament
         </Link>
         <Link
           href="/app/injuries"
-          className="block rounded-md border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700 hover:border-brand hover:text-brand-text"
+          className="block rounded-md border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700 hover:border-brand hover:text-brand"
         >
           Update injury status
         </Link>

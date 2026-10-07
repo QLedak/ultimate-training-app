@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/db/supabase-admin";
 import { getSessionCoachId, unauthorized } from "@/lib/auth/session";
+import { getSeasonState } from "@/lib/seasons/state";
 import { dbError } from "@/lib/api/error-response";
 
 /**
@@ -102,6 +103,7 @@ export async function GET() {
         .limit(1)
         .maybeSingle();
 
+      const seasonState = await getSeasonState(supabase, athlete.id);
       const lastLoggedAt = lastLog?.logged_at ?? null;
       const activeInjuries = (state?.current_active_injuries as unknown[] | null) ?? [];
 
@@ -114,6 +116,15 @@ export async function GET() {
         last_logged_at: lastLoggedAt,
         has_intake: Boolean(intake),
         has_skeleton: Boolean(skeleton),
+        season_stage: seasonState.stage,
+        next_season: seasonState.planned_season
+          ? {
+              label: seasonState.planned_season.label,
+              season_start: seasonState.planned_season.season_start,
+              draft_status: seasonState.planned_season.draft_status,
+              approved: !!seasonState.planned_season.skeleton_id,
+            }
+          : null,
         active_injuries_count: activeInjuries.length,
       };
     })

@@ -36,7 +36,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   const { data: intake, error: intakeError } = await supabase
     .from("athlete_intake")
     .select(
-      "id, age, benchmark_set, years_playing_ultimate, years_structured_training, lifting_experience_selfdescribe, season_start, season_end, recurring_commitments, tournament_weekends, season_calendar_confirmed, training_days_per_week, equipment, bodyweight_lb, back_squat_weight, back_squat_reps, bench_press_weight, bench_press_reps, deadlift_or_clean_weight, deadlift_or_clean_reps, pullup_max_reps, vertical_jump_in, goals, submitted_at"
+      "id, age, benchmark_set, years_playing_ultimate, years_structured_training, lifting_experience_selfdescribe, season_start, season_end, recurring_commitments, tournament_weekends, season_calendar_confirmed, training_days_per_week, equipment, bodyweight_lb, back_squat_weight, back_squat_reps, bench_press_weight, bench_press_reps, deadlift_weight, deadlift_reps, power_clean_weight, power_clean_reps, pullup_max_reps, vertical_jump_in, goals, submitted_at"
     )
     .eq("athlete_id", athleteId)
     .order("submitted_at", { ascending: false })
@@ -47,7 +47,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   const { data: state, error: stateError } = await supabase
     .from("current_athlete_state")
     .select(
-      "bodyweight_lb, back_squat_1rm, bench_press_1rm, deadlift_or_clean_1rm, pullup_max_reps, vertical_jump_in, maxes_source, equipment, training_days_per_week, current_active_injuries, standing_resilience_regions, updated_at"
+      "bodyweight_lb, back_squat_1rm, bench_press_1rm, deadlift_1rm, power_clean_1rm, pullup_max_reps, vertical_jump_in, maxes_source, equipment, training_days_per_week, current_active_injuries, standing_resilience_regions, updated_at"
     )
     .eq("athlete_id", athleteId)
     .maybeSingle();

@@ -4,13 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { NavBar } from "@/components/nav/NavBar";
 import { useAthleteSession } from "../_components/useAthleteSession";
+import { ATHLETE_NAV_LINKS } from "../_components/nav-links";
 
-const NAV_LINKS = [
-  { href: "/app", label: "Home" },
-  { href: "/app/log", label: "Schedule" },
-  { href: "/app/log/program", label: "Overview" },
-  { href: "/app/injuries", label: "Injuries" },
-];
+const NAV_LINKS = ATHLETE_NAV_LINKS;
 
 type Tournament = { start_date: string; end_date: string; label: string; is_priority?: boolean };
 
@@ -23,7 +19,7 @@ type DaysChangeRequest = {
   requested_at: string;
 };
 
-const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-text focus:outline-none";
+const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none";
 const DAYS_OPTIONS = [2, 3, 4, 5, 6];
 
 /**
@@ -37,6 +33,7 @@ export default function EditSchedulePage() {
   const [seasonStart, setSeasonStart] = useState("");
   const [seasonEnd, setSeasonEnd] = useState("");
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [seasonOver, setSeasonOver] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -59,6 +56,7 @@ export default function EditSchedulePage() {
         setSeasonStart(data.season_start ?? "");
         setSeasonEnd(data.season_end ?? "");
         setTournaments(data.tournament_weekends ?? []);
+        setSeasonOver(Boolean(data.season_over));
         setLoaded(true);
       })
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
@@ -170,7 +168,7 @@ export default function EditSchedulePage() {
       <main className="mx-auto max-w-xl px-6 py-10">
         <p className="text-sm text-slate-600">
           You&apos;re logged in, but there&apos;s no athlete profile for this account yet.{" "}
-          <Link href="/app/intake" className="text-brand-text underline">Complete intake</Link>.
+          <Link href="/app/intake" className="text-brand underline">Complete intake</Link>.
         </p>
       </main>
     );
@@ -194,6 +192,13 @@ export default function EditSchedulePage() {
           Add tournaments as they&apos;re announced, and mark your most important one so your program peaks for it.
         </p>
 
+        {seasonOver && (
+          <div className="mt-4 rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
+            Your last season has ended. To add new dates,{" "}
+            <Link href="/app/next-season" className="font-medium underline">plan your next season</Link> — your coach
+            will build your next plan from it.
+          </div>
+        )}
         {error && <p className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-600">{error}</p>}
         {saveMessage && <p className="mt-4 rounded-md bg-green-50 p-3 text-sm text-green-700">{saveMessage}</p>}
 
@@ -236,7 +241,7 @@ export default function EditSchedulePage() {
                     onClick={() => setRequestedDays(d)}
                     disabled={d === currentDays}
                     className={`h-10 w-10 rounded-md border text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40 ${
-                      requestedDays === d ? "border-brand bg-brand-tint text-brand-dark" : "border-slate-300 text-slate-700"
+                      requestedDays === d ? "border-brand bg-blue-50 text-brand-dark" : "border-slate-300 text-slate-700"
                     }`}
                   >
                     {d}
@@ -253,7 +258,7 @@ export default function EditSchedulePage() {
                 type="button"
                 onClick={handleRequestDaysChange}
                 disabled={requestedDays === "" || daysSaving}
-                className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-on hover:bg-brand-hover disabled:opacity-50"
+                className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 {daysSaving ? "Sending…" : "Request change"}
               </button>
@@ -263,7 +268,7 @@ export default function EditSchedulePage() {
 
         <Link
           href="/app/injuries"
-          className="mt-6 block rounded-md border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700 hover:border-brand hover:text-brand-text"
+          className="mt-6 block rounded-md border border-slate-300 px-4 py-3 text-center text-sm font-medium text-slate-700 hover:border-brand hover:text-brand"
         >
           Update injury status →
         </Link>
@@ -291,7 +296,7 @@ export default function EditSchedulePage() {
             {tournaments.map((t, i) => (
               <div
                 key={i}
-                className={`space-y-2 rounded-md border p-3 ${t.is_priority ? "border-brand bg-brand-tint" : "border-slate-200"}`}
+                className={`space-y-2 rounded-md border p-3 ${t.is_priority ? "border-brand bg-blue-50" : "border-slate-200"}`}
               >
                 <div className="flex gap-2">
                   <input
@@ -322,7 +327,7 @@ export default function EditSchedulePage() {
                 </label>
               </div>
             ))}
-            <button type="button" onClick={addTournament} className="text-sm text-brand-text underline">
+            <button type="button" onClick={addTournament} className="text-sm text-brand underline">
               + Add a tournament or league weekend
             </button>
           </div>
@@ -332,7 +337,7 @@ export default function EditSchedulePage() {
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="mt-8 w-full rounded-md bg-brand px-4 py-3.5 text-base font-medium text-brand-on hover:bg-brand-hover disabled:opacity-50"
+          className="mt-8 w-full rounded-md bg-brand px-4 py-3.5 text-base font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {saving ? "Saving…" : "Save schedule"}
         </button>

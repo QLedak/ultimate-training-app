@@ -4,15 +4,17 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { NavBar } from "@/components/nav/NavBar";
 import { useAthleteSession } from "../_components/useAthleteSession";
+import { ATHLETE_NAV_LINKS } from "../_components/nav-links";
 
-const NAV_LINKS = [
-  { href: "/app", label: "Home" },
-  { href: "/app/log", label: "Schedule" },
-  { href: "/app/log/program", label: "Overview" },
-  { href: "/app/injuries", label: "Injuries" },
-];
+const NAV_LINKS = ATHLETE_NAV_LINKS;
 
-type ActiveInjury = { location: string; character?: string; since?: string; note?: string };
+type ActiveInjury = {
+  location: string;
+  character?: string;
+  since?: string;
+  note?: string;
+  pending_resolution?: { resolved_at: string; after_phase_id: string };
+};
 
 // Matches app/app/intake/page.tsx's INJURY_LOCATIONS value->label mapping.
 const LOCATION_LABELS: Record<string, string> = {
@@ -35,7 +37,7 @@ const CHARACTER_OPTIONS = [
   { value: "tight_sore_gradual", label: "Tight/sore, gradual or after activity" },
 ];
 
-const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-text focus:outline-none";
+const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none";
 
 /**
  * Its own page, on its own nav tab — this used to be buried inside
@@ -134,7 +136,7 @@ export default function InjuryStatusPage() {
       <main className="mx-auto max-w-xl px-6 py-10">
         <p className="text-sm text-slate-600">
           You&apos;re logged in, but there&apos;s no athlete profile for this account yet.{" "}
-          <Link href="/app/intake" className="text-brand-text underline">Complete intake</Link>.
+          <Link href="/app/intake" className="text-brand underline">Complete intake</Link>.
         </p>
       </main>
     );
@@ -172,6 +174,12 @@ export default function InjuryStatusPage() {
                 <div key={inj.location} className="rounded-md border border-slate-200 p-3">
                   <p className="font-medium text-brand-dark">{locationLabel(inj.location)}</p>
                   {inj.note && <p className="mt-0.5 text-xs italic text-slate-500">Last note: &ldquo;{inj.note}&rdquo;</p>}
+                  {inj.pending_resolution && (
+                    <p className="mt-1 rounded-md bg-green-50 px-2 py-1 text-xs text-green-700">
+                      Marked as better — we&apos;ll finish this phase as planned, then move you to strengthening work in
+                      your next phase. Tap &ldquo;Still bothering me&rdquo; if that changes.
+                    </p>
+                  )}
                   <input
                     placeholder="Optional note (e.g. how it's feeling)"
                     className={`${inputClass} mt-2`}
@@ -179,14 +187,16 @@ export default function InjuryStatusPage() {
                     onChange={(e) => setInjuryNotes((n) => ({ ...n, [inj.location]: e.target.value }))}
                   />
                   <div className="mt-2 flex gap-3">
+                    {!inj.pending_resolution && (
                     <button
                       type="button"
                       onClick={() => handleInjuryCheckIn(inj.location, "resolved")}
                       disabled={injurySavingLocation === inj.location}
-                      className="rounded-md bg-brand px-3 py-1.5 text-sm font-medium text-brand-on hover:bg-brand-hover disabled:opacity-50"
+                      className="rounded-md bg-brand px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                     >
-                      {injurySavingLocation === inj.location ? "Saving…" : "Resolved"}
+                      {injurySavingLocation === inj.location ? "Saving…" : "It's better — not bothering me"}
                     </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => handleInjuryCheckIn(inj.location, "still_active")}
@@ -239,7 +249,7 @@ export default function InjuryStatusPage() {
               type="button"
               onClick={handleReportNewInjury}
               disabled={!newInjuryLocation || reportingInjury}
-              className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-on hover:bg-brand-hover disabled:opacity-50"
+              className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             >
               {reportingInjury ? "Logging…" : "Report injury"}
             </button>

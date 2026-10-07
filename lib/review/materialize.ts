@@ -1,6 +1,8 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { deriveTrainingAge } from "../training/training-age";
 import { bucketEquipment } from "../training/equipment";
+import { addDays } from "../generation/phase-sequencing";
+import { supersedeUnstartedBridgePhases } from "../generation/season-bridge";
 
 /**
  * On approval with publish_to_athlete=true for a macrocycle_planner draft:
@@ -14,9 +16,13 @@ export async function materializeMacrocycleSkeleton(
 ) {
   const athleteId = draft.athlete_id as string;
 
+  if ((draft.input_snapshot as { next_season_id?: string } | null)?.next_season_id) {
+    return materializeNextSeason(supabase, draft);
+  }
+
   const { error: deactivateError } = await supabase
     .from("macrocycle_skeletons")
-    .update({ is_active: false })
+    .update({ is_active: false, status: "superseded" })
     .eq("athlete_id", athleteId)
     .eq("is_active", true);
   if (deactivateError) throw new Error(deactivateError.message);
@@ -62,6 +68,88 @@ export async function materializeMacrocycleSkeleton(
     .insert(phaseRows)
     .select();
   if (phasesError) throw new Error(phasesError.message);
+
+  return { skeleton, phases };
+}
+
+/**
+ * Next-season plan (year-over-year): the approved phases are APPENDED to the
+ * athlete's active skeleton after the last block that already started — the
+ * running block (often a bridge block) keeps going untouched, unstarted bridge
+ * blocks are superseded. The season itself flips planned -> active when its
+ * first phase starts (see activatePlannedSeasonIfStarting).
+ */
+async function materializeNextSeason(supabase: SupabaseClient, draft: Record<string, unknown>) {
+  const athleteId = draft.athlete_id as string;
+  const snapshot = draft.input_snapshot as { next_season_id: string; first_phase_number: number };
+
+  const { data: skeleton, error: skeletonError } = await supabase
+    .from("macrocycle_skeletons")
+    .select("*")
+    .eq("athlete_id", athleteId)
+    .eq("is_active", true)
+    .maybeSingle();
+  if (skeletonError) throw new Error(skeletonError.message);
+  if (!skeleton) throw new Error("The athlete has no active plan to continue from.");
+
+  const output = draft.output as {
+    phases: Array<{
+      phase_number: number;
+      phase_name: string;
+      goal: string;
+      start_date: string;
+      end_date: string;
+      week_count: number;
+      weekly_template_label: string;
+      deload_test_note?: string;
+    }>;
+  };
+  const sortedPhases = [...output.phases].sort((a, b) => a.phase_number - b.phase_number);
+
+  // Stale-draft guard (checked BEFORE changing anything): a bridge block may have started since
+  // this draft was generated, in which case its phase numbers/dates no longer line up.
+  const { data: existing } = await supabase
+    .from("macrocycle_phases")
+    .select("phase_number, end_date, status, is_bridge")
+    .eq("skeleton_id", skeleton.id)
+    .neq("status", "superseded")
+    .order("phase_number", { ascending: true });
+  const kept = (existing ?? []).filter((p) => !(p.is_bridge && p.status === "upcoming"));
+  const lastKept = kept[kept.length - 1];
+  if (
+    !lastKept ||
+    (lastKept.phase_number as number) + 1 !== sortedPhases[0].phase_number ||
+    addDays(lastKept.end_date as string, 1) > sortedPhases[0].start_date
+  ) {
+    throw new Error(
+      "This next-season draft is out of date — the athlete's current training blocks changed since it was " +
+        "generated. Reject it and use \"Build next season plan\" to generate a fresh one."
+    );
+  }
+
+  await supersedeUnstartedBridgePhases(supabase, skeleton.id as string);
+
+  const rows = sortedPhases.map((phase) => ({
+    skeleton_id: skeleton.id,
+    phase_number: phase.phase_number,
+    phase_name: phase.phase_name,
+    goal: phase.goal,
+    start_date: phase.start_date,
+    end_date: phase.end_date,
+    week_count: phase.week_count,
+    weekly_template_label: phase.weekly_template_label,
+    deload_test_note: phase.deload_test_note ?? null,
+    is_bridge: false,
+    status: "upcoming",
+  }));
+  const { data: phases, error: phasesError } = await supabase.from("macrocycle_phases").insert(rows).select();
+  if (phasesError) throw new Error(phasesError.message);
+
+  const { error: seasonError } = await supabase
+    .from("seasons")
+    .update({ skeleton_id: skeleton.id, first_phase_number: sortedPhases[0].phase_number })
+    .eq("id", snapshot.next_season_id);
+  if (seasonError) throw new Error(seasonError.message);
 
   return { skeleton, phases };
 }
@@ -310,7 +398,11 @@ export async function buildCorpusSituationTags(
   return {
     phase_goal: null,
     training_age: intake
-      ? deriveTrainingAge(intake.years_structured_training, intake.lifting_experience_selfdescribe)
+      ? deriveTrainingAge(
+          intake.years_structured_training,
+          intake.lifting_experience_selfdescribe,
+          intake.submitted_at
+        )
       : null,
     injury_individualization: [],
     days_per_week: intake?.training_days_per_week ?? null,

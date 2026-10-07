@@ -1,6 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { runMacrocyclePlanner, MacrocyclePlannerOutput } from "../prompts/macrocycle-planner";
 import { addDays, computeMacrocyclePhaseSequence, ComputedPhase } from "./phase-sequencing";
+import { suggestSeasonLabel } from "../seasons/calendar";
 
 /**
  * Tomorrow's date (server UTC), as YYYY-MM-DD — training always starts the
@@ -215,7 +216,12 @@ export async function reviseMacrocyclePlannerDraft(
   draft: Record<string, unknown>,
   editRequest: string
 ) {
-  const inputSnapshot = draft.input_snapshot as { is_rebuild: boolean; rebuild_reason: string | null };
+  const inputSnapshot = draft.input_snapshot as {
+    is_rebuild: boolean;
+    rebuild_reason: string | null;
+    next_season_id?: string;
+  };
+  if (inputSnapshot.next_season_id) return reviseNextSeasonDraft(supabase, draft, editRequest);
   const { intake, priorSkeletonPhases } = await buildMacrocycleContext(supabase, {
     athleteId: draft.athlete_id as string,
     isRebuild: inputSnapshot.is_rebuild,
@@ -261,5 +267,204 @@ export async function reviseMacrocyclePlannerDraft(
     .single();
 
   if (draftError) throw new Error(draftError.message);
+  return newDraft;
+}
+
+
+// ---------------------------------------------------------------------------
+// NEXT-SEASON PLANS (year-over-year) — see lib/generation/season-bridge.ts
+// ---------------------------------------------------------------------------
+
+export type NextSeasonContext = {
+  season_id: string;
+  season_label: string;
+  first_phase_number: number;
+  resume_date: string;
+  include_gpp: boolean;
+  bridge_gpp_already_done: boolean;
+  previous_season_review: Record<string, unknown> | null;
+  kept_phases: Array<{ phase_number: number; goal: string; start_date: string; end_date: string; status: string }>;
+};
+
+/**
+ * Everything the Planner needs for the athlete's NEXT season: the intake with
+ * the planned season's calendar (and any days/goals changes the athlete asked
+ * for) overlaid, the deterministic phase boundaries, and the context block.
+ *
+ * The new phases are appended to the athlete's active skeleton AFTER the last
+ * block that has started (or is a non-bridge, still-upcoming block). Unstarted
+ * bridge blocks are the ones being replaced. GPP is included only if no bridge
+ * GPP block has already run since the last season ended.
+ */
+export async function buildNextSeasonInputs(supabase: SupabaseClient, params: { athleteId: string; seasonId: string }) {
+  const { athleteId, seasonId } = params;
+  const { intake } = await buildMacrocycleContext(supabase, { athleteId });
+
+  const { data: season, error: seasonError } = await supabase.from("seasons").select("*").eq("id", seasonId).single();
+  if (seasonError || !season) throw new Error("Season not found.");
+  if (season.athlete_id !== athleteId) throw new Error("Season belongs to a different athlete.");
+  if (!season.season_start || !season.season_end) throw new Error("This season has no dates yet.");
+
+  const changes = (season.intake_changes as { training_days_per_week?: number; goals?: string } | null) ?? {};
+  const overlaidIntake: Record<string, unknown> = {
+    ...intake,
+    season_start: season.season_start,
+    season_end: season.season_end,
+    recurring_commitments: season.recurring_commitments,
+    tournament_weekends: season.tournament_weekends,
+    season_calendar_confirmed: season.calendar_confirmed,
+    ...(changes.training_days_per_week != null ? { training_days_per_week: changes.training_days_per_week } : {}),
+    ...(changes.goals != null ? { goals: changes.goals } : {}),
+  };
+
+  const { data: skeleton } = await supabase
+    .from("macrocycle_skeletons")
+    .select("id")
+    .eq("athlete_id", athleteId)
+    .eq("is_active", true)
+    .maybeSingle();
+  if (!skeleton) throw new Error("No active plan to continue from — build a season plan the normal way first.");
+
+  const { data: allPhases } = await supabase
+    .from("macrocycle_phases")
+    .select("phase_number, goal, start_date, end_date, status, is_bridge")
+    .eq("skeleton_id", skeleton.id)
+    .neq("status", "superseded")
+    .order("phase_number", { ascending: true });
+  const kept = (allPhases ?? []).filter((p) => !(p.is_bridge && p.status === "upcoming"));
+  if (kept.length === 0) throw new Error("No existing phases to continue from.");
+  const lastKept = kept[kept.length - 1];
+
+  const tomorrow = tomorrowDateString();
+  const afterLast = addDays(lastKept.end_date as string, 1);
+  const resumeDate = afterLast > tomorrow ? afterLast : tomorrow;
+  const bridgeGppDone = kept.some((p) => p.is_bridge && p.goal === "gpp_reacclimation");
+  const includeGpp = !bridgeGppDone;
+
+  const priorityTournament = ((season.tournament_weekends as TournamentWeekend[] | null) ?? []).find(
+    (t) => t.is_priority && t.start_date
+  );
+  const { phases, flags } = computeMacrocyclePhaseSequence({
+    resumeDate,
+    seasonStart: season.season_start as string,
+    seasonEnd: season.season_end as string,
+    priorityTournamentDate: priorityTournament?.start_date ?? null,
+    includeGpp,
+  });
+  if (phases.length === 0) {
+    throw new Error(
+      "Nothing left to plan: the current training blocks already run past this season's start/end dates. " +
+        "Check the dates, or wait until the current block finishes."
+    );
+  }
+  const firstPhaseNumber = (lastKept.phase_number as number) + 1;
+  const computedPhases = phases.map((p, i) => ({ phase_number: firstPhaseNumber + i, ...p }));
+
+  const { data: review } = await supabase
+    .from("season_reviews")
+    .select("summary")
+    .eq("athlete_id", athleteId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const ctx: NextSeasonContext = {
+    season_id: seasonId,
+    season_label: (season.label as string) || suggestSeasonLabel(season.season_start as string),
+    first_phase_number: firstPhaseNumber,
+    resume_date: resumeDate,
+    include_gpp: includeGpp,
+    bridge_gpp_already_done: bridgeGppDone,
+    previous_season_review: (review?.summary as Record<string, unknown>) ?? null,
+    kept_phases: kept.map((p) => ({
+      phase_number: p.phase_number as number,
+      goal: p.goal as string,
+      start_date: p.start_date as string,
+      end_date: p.end_date as string,
+      status: p.status as string,
+    })),
+  };
+
+  return { intake: overlaidIntake, intakeId: intake.id as string, computedPhases, computedPhaseFlags: flags, ctx };
+}
+
+/** Planner draft for a planned season; goes to the coach review queue like any other. */
+export async function generateNextSeasonDraft(
+  supabase: SupabaseClient,
+  params: { athleteId: string; seasonId: string }
+) {
+  const { athleteId, seasonId } = params;
+  const inputs = await buildNextSeasonInputs(supabase, { athleteId, seasonId });
+  const output = await runMacrocyclePlanner({
+    intake: inputs.intake,
+    trainingStartDate: inputs.ctx.resume_date,
+    computedPhases: inputs.computedPhases,
+    computedPhaseFlags: inputs.computedPhaseFlags,
+    nextSeason: inputs.ctx,
+  });
+  assertPhasesMatchComputedSkeleton(output, inputs.computedPhases);
+
+  const { data: draft, error } = await supabase
+    .from("program_drafts")
+    .insert({
+      athlete_id: athleteId,
+      call_type: "macrocycle_planner",
+      version: 1,
+      status: "pending_review",
+      input_snapshot: {
+        intake_id: inputs.intakeId,
+        is_rebuild: false,
+        rebuild_reason: null,
+        next_season_id: seasonId,
+        first_phase_number: inputs.ctx.first_phase_number,
+        resume_date: inputs.ctx.resume_date,
+      },
+      output,
+    })
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+  return draft;
+}
+
+/** Chat-edit path for a next-season draft (phase boundaries stay fixed, same as a fresh plan). */
+export async function reviseNextSeasonDraft(
+  supabase: SupabaseClient,
+  draft: Record<string, unknown>,
+  editRequest: string
+) {
+  const snapshot = draft.input_snapshot as { next_season_id: string };
+  const inputs = await buildNextSeasonInputs(supabase, {
+    athleteId: draft.athlete_id as string,
+    seasonId: snapshot.next_season_id,
+  });
+  const output = await runMacrocyclePlanner({
+    intake: inputs.intake,
+    trainingStartDate: inputs.ctx.resume_date,
+    computedPhases: inputs.computedPhases,
+    computedPhaseFlags: inputs.computedPhaseFlags,
+    nextSeason: inputs.ctx,
+    currentDraftOutput: draft.output as MacrocyclePlannerOutput,
+    editRequest,
+  });
+  assertPhasesMatchComputedSkeleton(output, inputs.computedPhases);
+
+  const { data: newDraft, error } = await supabase
+    .from("program_drafts")
+    .insert({
+      lineage_id: draft.lineage_id,
+      athlete_id: draft.athlete_id,
+      call_type: "macrocycle_planner",
+      version: (draft.version as number) + 1,
+      parent_version: draft.version,
+      status: "pending_review",
+      input_snapshot: { ...(draft.input_snapshot as object), first_phase_number: inputs.ctx.first_phase_number, resume_date: inputs.ctx.resume_date },
+      output,
+      edit_source: "chat",
+      edit_request: editRequest,
+    })
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
   return newDraft;
 }

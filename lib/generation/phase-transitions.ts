@@ -2,6 +2,13 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { compilePhasePerformanceSummary } from "../pps/compile";
 import { generatePhaseDraft, generateNextPhaseDraft, lastGeneratedWeek } from "./phase";
 import { checkAiGenerationLimit } from "../api/ai-generation-limit";
+import {
+  startBridge,
+  extendBridgeIfNeeded,
+  activatePlannedSeasonIfStarting,
+  applySeasonIntakeChanges,
+} from "./season-bridge";
+import { generateNextSeasonDraft } from "./macrocycle";
 
 // How many days of lead time to keep in front of an athlete at all times.
 // Chosen to comfortably cover a coach not checking the review queue every
@@ -56,9 +63,120 @@ type ActionLog = { athleteId: string; phaseId: string; action: string; detail?: 
  * Approval is still manual (coach review stays in place for now) -- this
  * only automates the TRIGGER to generate, not the publish step.
  */
+
+/**
+ * Skeletons that are still flagged active but have no ACTIVE phase: either the
+ * season simply ran out (e.g. it finished before season transitions existed) —
+ * roll into the bridge — or a next-season plan was appended and its first block
+ * is due to start today — activate it.
+ */
+async function resolveSkeletonsWithoutActivePhase(supabase: SupabaseClient, today: string, actions: ActionLog[]) {
+  const { data: skeletons, error } = await supabase
+    .from("macrocycle_skeletons")
+    .select("id, athlete_id")
+    .eq("is_active", true);
+  if (error) throw new Error(error.message);
+
+  for (const sk of skeletons ?? []) {
+    try {
+      const { data: phases } = await supabase
+        .from("macrocycle_phases")
+        .select("id, phase_number, start_date, status")
+        .eq("skeleton_id", sk.id)
+        .neq("status", "superseded")
+        .order("phase_number", { ascending: true });
+      if (!phases || phases.length === 0 || phases.some((p) => p.status === "active")) continue;
+
+      const upcoming = phases.filter((p) => p.status === "upcoming");
+      if (upcoming.length > 0) {
+        const next = upcoming[0];
+        if ((next.start_date as string) > today) continue; // gap day(s) — wait for the start date
+        await supabase.from("macrocycle_phases").update({ status: "active" }).eq("id", next.id);
+        await activatePlannedSeasonIfStarting(supabase, {
+          athleteId: sk.athlete_id as string,
+          skeletonId: sk.id as string,
+          phaseNumber: next.phase_number as number,
+        });
+        actions.push({
+          athleteId: sk.athlete_id as string,
+          phaseId: next.id as string,
+          action: "next_phase_started",
+          detail: "no active phase; started the next upcoming phase",
+        });
+        continue;
+      }
+
+      const started = await startBridge(supabase, { athleteId: sk.athlete_id as string, endedSkeletonId: sk.id as string });
+      if (started) {
+        actions.push({
+          athleteId: sk.athlete_id as string,
+          phaseId: started.id as string,
+          action: "season_complete_bridge_started",
+          detail: "season plan ran out with no next season planned; opened the off-season bridge (GPP first)",
+        });
+      }
+    } catch (err) {
+      actions.push({
+        athleteId: sk.athlete_id as string,
+        phaseId: "",
+        action: "error",
+        detail: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+}
+
+/**
+ * Planned seasons (athlete entered next-season dates) that have no Macrocycle
+ * Planner draft yet — e.g. the generation failed or was rate-limited when they
+ * submitted. Only seasons with NO draft at all are retried: a rejected draft is
+ * the coach's call to redo (the "Build next season plan" button).
+ */
+async function generateMissingNextSeasonDrafts(supabase: SupabaseClient, actions: ActionLog[]) {
+  const { data: planned, error } = await supabase
+    .from("seasons")
+    .select("id, athlete_id")
+    .eq("status", "planned")
+    .eq("calendar_confirmed", true)
+    .is("skeleton_id", null)
+    .not("season_start", "is", null);
+  if (error) throw new Error(error.message);
+
+  for (const season of planned ?? []) {
+    const athleteId = season.athlete_id as string;
+    try {
+      const { data: drafts } = await supabase
+        .from("program_drafts")
+        .select("id")
+        .eq("athlete_id", athleteId)
+        .eq("call_type", "macrocycle_planner")
+        .eq("input_snapshot->>next_season_id", season.id as string)
+        .limit(1);
+      if (drafts && drafts.length > 0) continue;
+      if (await checkAiGenerationLimit(athleteId)) {
+        actions.push({ athleteId, phaseId: "", action: "skipped_rate_limited", detail: "next-season draft deferred" });
+        continue;
+      }
+      const draft = await generateNextSeasonDraft(supabase, { athleteId, seasonId: season.id as string });
+      actions.push({ athleteId, phaseId: "", action: "generated_next_season_draft", detail: `draft ${draft.id}` });
+    } catch (err) {
+      actions.push({
+        athleteId,
+        phaseId: "",
+        action: "error",
+        detail: `next-season draft: ${err instanceof Error ? err.message : String(err)}`,
+      });
+    }
+  }
+}
+
 export async function runDailyPhaseTransitionCheck(supabase: SupabaseClient): Promise<ActionLog[]> {
   const today = todayISO();
   const actions: ActionLog[] = [];
+
+  // Season-level housekeeping first, so a skeleton that just ran out has an active
+  // (bridge or next-season) phase by the time the per-phase loop below runs.
+  await resolveSkeletonsWithoutActivePhase(supabase, today, actions);
 
   const { data: activePhases, error } = await supabase
     .from("macrocycle_phases")
@@ -85,10 +203,13 @@ export async function runDailyPhaseTransitionCheck(supabase: SupabaseClient): Pr
       // exist until the day the athlete needs it -- this closes that gap.
       // Approval is still manual, same as every other generation trigger
       // here: this only creates the draft, never publishes it.
+      // Open-ended bridge: keep the next cycle (Hyp -> Max -> Power) queued up.
+      await extendBridgeIfNeeded(supabase, { skeletonId: phase.skeleton_id as string, leadDays: LEAD_DAYS });
+
       if (currentEndDate && currentEndDate >= today && daysBetween(today, currentEndDate) <= LEAD_DAYS) {
         const { data: nextPhaseRow } = await supabase
           .from("macrocycle_phases")
-          .select("id")
+          .select("id, phase_number")
           .eq("skeleton_id", phase.skeleton_id as string)
           .eq("phase_number", (phase.phase_number as number) + 1)
           .maybeSingle();
@@ -112,6 +233,17 @@ export async function runDailyPhaseTransitionCheck(supabase: SupabaseClient): Pr
                 detail: "next-phase generation skipped: athlete's daily AI generation limit already reached today",
               });
             } else {
+              // First phase of a planned next season: switch the athlete's days/week + goals over
+              // BEFORE generating it, so its sessions match the new schedule.
+              const { data: seasonStarting } = await supabase
+                .from("seasons")
+                .select("*")
+                .eq("athlete_id", athleteId)
+                .eq("status", "planned")
+                .eq("skeleton_id", phase.skeleton_id as string)
+                .eq("first_phase_number", nextPhaseRow.phase_number as number)
+                .maybeSingle();
+              if (seasonStarting) await applySeasonIntakeChanges(supabase, { athleteId, season: seasonStarting });
               const draft = await generateNextPhaseDraft(supabase, {
                 athleteId,
                 activePhaseId: currentPhaseId,
@@ -140,11 +272,25 @@ export async function runDailyPhaseTransitionCheck(supabase: SupabaseClient): Pr
           detail: nextPhase ? `advanced to phase ${nextPhase.phase_number}` : "season complete, no next phase",
         });
 
-        if (!nextPhase) continue; // season's over -- nothing left to generate
-
+        if (!nextPhase) {
+          // Season's over. If a next-season plan was appended, resolveSkeletonsWithoutActivePhase
+          // handles starting it; otherwise open the bridge now so there's never a gap.
+          const started = await startBridge(supabase, { athleteId, endedSkeletonId: phase.skeleton_id as string });
+          if (!started) continue;
+          actions.push({
+            athleteId,
+            phaseId: started.id as string,
+            action: "season_complete_bridge_started",
+            detail: "season complete, no next season planned — opened the off-season bridge (GPP first)",
+          });
+          currentPhaseId = started.id as string;
+          currentWeekCount = started.week_count as number;
+          currentEndDate = started.end_date as string;
+        } else {
         currentPhaseId = nextPhase.id as string;
         currentWeekCount = nextPhase.week_count as number;
         currentEndDate = nextPhase.end_date as string;
+        }
       }
 
       // ---- Step 2: does the now-active phase need its next chunk generated? ----
@@ -198,6 +344,12 @@ export async function runDailyPhaseTransitionCheck(supabase: SupabaseClient): Pr
         detail: err instanceof Error ? err.message : String(err),
       });
     }
+  }
+
+  try {
+    await generateMissingNextSeasonDrafts(supabase, actions);
+  } catch (err) {
+    actions.push({ athleteId: "", phaseId: "", action: "error", detail: err instanceof Error ? err.message : String(err) });
   }
 
   return actions;
