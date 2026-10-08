@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import { EQUIPMENT_OPTIONS, toggleEquipmentValue } from "@/lib/training/equipment-options";
+import { EQUIPMENT_OPTIONS, SPACE_OPTIONS, MODALITY_OPTIONS, toggleEquipmentValue } from "@/lib/training/equipment-options";
 
 // ---- Controlled vocabularies (must match the DB check constraints / Exercise Library tags exactly) ----
 
@@ -13,7 +13,10 @@ const INJURY_LOCATIONS = [
   { value: "acl_knee", label: "ACL/knee (post-surgical or otherwise)" },
   { value: "hamstring", label: "Hamstring" },
   { value: "groin_adductor", label: "Groin/adductor" },
-  { value: "abdominal", label: "Abdominal" },
+  { value: "abdominal", label: "Core/abdominal" },
+  { value: "hip_flexor", label: "Hip flexor" },
+  { value: "elbow", label: "Elbow" },
+  { value: "wrist", label: "Wrist" },
   { value: "shoulder", label: "Shoulder" },
   { value: "lower_back", label: "Lower back" },
   { value: "ankle", label: "Ankle" },
@@ -56,6 +59,8 @@ type IntakeState = {
   calendarConfirmed: "yes" | "not_yet" | "";
   trainingDaysPerWeek: string;
   equipment: string[];
+  availableSpace: string;
+  conditioningModality: string;
   bodyweightLb: string;
   bodyweightSkip: boolean;
   backSquat: MaxEntry;
@@ -88,6 +93,8 @@ const initialState: IntakeState = {
   calendarConfirmed: "",
   trainingDaysPerWeek: "",
   equipment: [],
+  availableSpace: "",
+  conditioningModality: "running",
   bodyweightLb: "",
   bodyweightSkip: false,
   backSquat: { weight: "", reps: "", skip: false },
@@ -247,6 +254,7 @@ export default function IntakePage() {
         return null;
       case 4:
         if (state.equipment.length === 0) return "Select at least one piece of equipment.";
+        if (!state.availableSpace) return "Choose how much space you have to move.";
         return null;
       case 8:
         if (!state.agreedToTerms) return "Please agree to the Terms and Privacy Policy to continue.";
@@ -326,6 +334,8 @@ export default function IntakePage() {
         season_calendar_confirmed: state.calendarConfirmed === "yes",
         training_days_per_week: num(state.trainingDaysPerWeek),
         equipment: state.equipment,
+        available_space: state.availableSpace,
+        conditioning_modality: state.conditioningModality,
         bodyweight_lb: state.bodyweightSkip ? null : num(state.bodyweightLb),
         back_squat_weight: state.backSquat.skip ? null : num(state.backSquat.weight),
         back_squat_reps: state.backSquat.skip ? null : num(state.backSquat.reps),
@@ -766,6 +776,34 @@ export default function IntakePage() {
               </label>
             ))}
           </div>
+          <div className="mt-6 space-y-2">
+            <p className="text-sm font-medium">How much space do you have for running and jumping drills?</p>
+            {SPACE_OPTIONS.map((opt) => (
+              <label key={opt.value} className="flex items-center gap-2 text-sm">
+                <input
+                  type="radio"
+                  name="space"
+                  checked={state.availableSpace === opt.value}
+                  onChange={() => update("availableSpace", opt.value)}
+                />
+                {opt.label}
+              </label>
+            ))}
+          </div>
+          <div className="mt-6 space-y-2">
+            <p className="text-sm font-medium">Preferred conditioning style</p>
+            <select
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              value={state.conditioningModality}
+              onChange={(e) => update("conditioningModality", e.target.value)}
+            >
+              {MODALITY_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </Screen>
       )}
 
@@ -939,6 +977,7 @@ export default function IntakePage() {
             </SummarySection>
             <SummarySection title="Equipment" onEdit={() => setStep(4)}>
               <p>{state.equipment.join(", ") || "—"}</p>
+              <p>Space: {state.availableSpace || "—"} · Conditioning: {state.conditioningModality}</p>
             </SummarySection>
             <SummarySection title="Stats & maxes" onEdit={() => setStep(5)}>
               <p>Bodyweight: {state.bodyweightSkip ? "skipped" : state.bodyweightLb || "—"}</p>

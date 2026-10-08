@@ -212,7 +212,10 @@ async function buildFullPhaseOutput(
     assertCompleteWeeks(result.weeks, range.start, range.end);
 
     merged.weeks.push(...result.weeks);
-    merged.coach_review_flags = [...(merged.coach_review_flags ?? []), ...(result.coach_review_flags ?? [])];
+    // De-duplicated: the slot plan's own notes repeat in every chunk's flags.
+    merged.coach_review_flags = Array.from(
+      new Set([...(merged.coach_review_flags ?? []), ...(result.coach_review_flags ?? [])])
+    );
     // The FIRST call in this sequence carries the rationale/athlete_intro —
     // true whether that's week 1 of a fresh phase, the first regenerated
     // week of a mid-phase rebuild, or (per the prompt's own instruction to

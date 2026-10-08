@@ -70,7 +70,7 @@ export async function compilePhasePerformanceSummary(
         .order("submitted_at", { ascending: false })
         .limit(1)
         .single(),
-      supabase.from("exercise_library").select("exercise_id, exercise_name, movement_pattern, injury_considerations"),
+      supabase.from("exercise_library").select("exercise_id, exercise_name, movement_pattern, injury_considerations, logging_tier, chain_memberships"),
       supabase
         .from("macrocycle_phases")
         .select("*")
@@ -240,10 +240,15 @@ export async function compilePhasePerformanceSummary(
   const exerciseNameByExercise = new Map<string, string>(
     (exerciseLibrary ?? []).map((row) => [row.exercise_id, (row.exercise_name as string) ?? row.exercise_id])
   );
+  const loggingTierByExercise = new Map<string, number | null>(
+    (exerciseLibrary ?? []).map((row) => [row.exercise_id, (row.logging_tier as number | null) ?? null])
+  );
   const tier1ExerciseIds = new Set(
     (loggedExercises ?? [])
       .map((e) => e.exercise_id as string)
       .filter((id) => {
+        const explicit = loggingTierByExercise.get(id);
+        if (explicit != null) return explicit === 1;
         const pattern = movementPatternByExercise.get(id);
         return pattern != null && TIER_1_MOVEMENT_PATTERNS.has(pattern);
       })
@@ -322,12 +327,33 @@ export async function compilePhasePerformanceSummary(
   const injuryConsiderationsByExercise = new Map<string, string[]>(
     (exerciseLibrary ?? []).map((row) => [row.exercise_id, (row.injury_considerations as string[]) ?? []])
   );
-  const standingRegions = (currentState.standing_resilience_regions as { location: string; current_stage: string }[]) ?? [];
+  // v2: an exercise counts toward a region if it is a member of that region's
+  // injury chain (chain_memberships) or lists it in injury_considerations.
+  const chainLocationsByExercise = new Map<string, string[]>(
+    (exerciseLibrary ?? []).map((row) => [
+      row.exercise_id,
+      ((row.chain_memberships as Array<{ location: string }> | null) ?? []).map((m) => m.location),
+    ])
+  );
+  const KNEE = ["patellar_knee", "acl_knee"];
+  const regionMatches = (exerciseId: string, location: string) => {
+    const locs = [
+      ...(injuryConsiderationsByExercise.get(exerciseId) ?? []),
+      ...(chainLocationsByExercise.get(exerciseId) ?? []),
+    ];
+    return locs.includes(location) || (KNEE.includes(location) && locs.some((l) => KNEE.includes(l)));
+  };
+  const standingRegions = [
+    ...((currentState.standing_resilience_regions as { location: string; current_stage: string }[]) ?? []),
+    // Active injuries run the isometric rungs of the same chain, so they need progression state too.
+    ...(((currentState.current_active_injuries as { location: string }[]) ?? [])
+      .filter((a) => a?.location)
+      .map((a) => ({ location: a.location, current_stage: "active_isometric" }))),
+  ];
   const resilienceProgressionState: Record<string, unknown> = {};
   for (const region of standingRegions) {
-    const entries = (loggedExercises ?? []).filter((e) =>
-      (injuryConsiderationsByExercise.get(e.exercise_id) ?? []).includes(region.location)
-    );
+    if (resilienceProgressionState[region.location]) continue;
+    const entries = (loggedExercises ?? []).filter((e) => regionMatches(e.exercise_id as string, region.location));
     if (entries.length === 0) {
       resilienceProgressionState[region.location] = {
         current_stage: region.current_stage,

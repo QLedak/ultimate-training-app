@@ -163,7 +163,7 @@ function ReviewList() {
                       type="button"
                       onClick={() => handleApproveDaysRequest(r.id)}
                       disabled={daysActionBusyId === r.id}
-                      className="rounded-md bg-brand px-3 py-1.5 text-sm font-medium text-brand-on hover:bg-brand-hover disabled:opacity-50"
+                      className="rounded-md bg-brand px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                     >
                       {daysActionBusyId === r.id ? "Approving…" : "Approve"}
                     </button>

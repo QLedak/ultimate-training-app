@@ -17,7 +17,19 @@ export const EQUIPMENT_OPTIONS = [
   { value: "boxes", label: "Boxes/Plyo Boxes" },
   { value: "sled", label: "Sled" },
   { value: "turf_track", label: "Turf/Track/Running Room" },
-  { value: "cardio_machine", label: "Treadmill/Bike/Rower" },
+  { value: "treadmill", label: "Treadmill" },
+  { value: "bike", label: "Bike" },
+  { value: "rower", label: "Rower" },
+  { value: "ski_erg", label: "Ski Erg" },
+  { value: "weight_plates", label: "Weight Plates" },
+  { value: "landmine", label: "Landmine" },
+  { value: "stability_ball", label: "Stability Ball" },
+  { value: "sliders", label: "Sliders/Gliders" },
+  { value: "ab_wheel", label: "Ab Wheel" },
+  { value: "hurdles", label: "Hurdles" },
+  { value: "jump_rope", label: "Jump Rope" },
+  { value: "back_extension_bench", label: "Back Extension Bench" },
+  { value: "dip_bars", label: "Dip Bars" },
   { value: "bodyweight_only", label: "Bodyweight Only" },
 ] as const;
 
@@ -48,3 +60,20 @@ export function validateEquipment(input: unknown): { ok: true; value: string[] }
   }
   return { ok: true, value: unique };
 }
+
+export const SPACE_OPTIONS = [
+  { value: "minimal", label: "Minimal (about 5 yards or less, e.g. a small room)" },
+  { value: "standard", label: "Standard (about 5-20 yards, e.g. a garage or yard)" },
+  { value: "large", label: "Large (20+ yards, e.g. a field or track)" },
+] as const;
+export const SPACE_VALUES: string[] = SPACE_OPTIONS.map((o) => o.value);
+
+export const MODALITY_OPTIONS = [
+  { value: "running", label: "Running (default)" },
+  { value: "bike", label: "Bike" },
+  { value: "rower", label: "Rower" },
+  { value: "ski_erg", label: "Ski Erg" },
+  { value: "jump_rope", label: "Jump rope" },
+  { value: "incline_walk", label: "Incline walk" },
+] as const;
+export const MODALITY_VALUES: string[] = MODALITY_OPTIONS.map((o) => o.value);

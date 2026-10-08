@@ -5,7 +5,7 @@ import Link from "next/link";
 import { NavBar } from "@/components/nav/NavBar";
 import { useAthleteSession } from "../_components/useAthleteSession";
 import { ATHLETE_NAV_LINKS } from "../_components/nav-links";
-import { EQUIPMENT_OPTIONS, toggleEquipmentValue } from "@/lib/training/equipment-options";
+import { EQUIPMENT_OPTIONS, SPACE_OPTIONS, MODALITY_OPTIONS, toggleEquipmentValue } from "@/lib/training/equipment-options";
 
 /**
  * Post-intake equipment editor. Saves to current_athlete_state.equipment
@@ -17,6 +17,9 @@ export default function EquipmentPage() {
   const { athlete, authError, loadError: sessionLoadError } = useAthleteSession("/app/equipment");
   const [equipment, setEquipment] = useState<string[]>([]);
   const [saved, setSaved] = useState<string[]>([]);
+  const [space, setSpace] = useState("standard");
+  const [modality, setModality] = useState("running");
+  const [savedExtra, setSavedExtra] = useState("standard|running");
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,12 +35,17 @@ export default function EquipmentPage() {
         if (data.error) throw new Error(data.error);
         setEquipment(data.equipment);
         setSaved(data.equipment);
+        setSpace(data.available_space ?? "standard");
+        setModality(data.conditioning_modality ?? "running");
+        setSavedExtra(`${data.available_space ?? "standard"}|${data.conditioning_modality ?? "running"}`);
         setLoaded(true);
       })
       .catch((e) => setError(e instanceof Error ? e.message : String(e)));
   }, [athlete]);
 
-  const changed = JSON.stringify([...equipment].sort()) !== JSON.stringify([...saved].sort());
+  const changed =
+    JSON.stringify([...equipment].sort()) !== JSON.stringify([...saved].sort()) ||
+    `${space}|${modality}` !== savedExtra;
 
   async function save() {
     if (!athlete) return;
@@ -48,11 +56,12 @@ export default function EquipmentPage() {
       const res = await fetch(`/api/athletes/${athlete.id}/equipment`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ equipment }),
+        body: JSON.stringify({ equipment, available_space: space, conditioning_modality: modality }),
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setSaved(data.equipment);
+      setSavedExtra(`${space}|${modality}`);
       setMessage(data.message);
       setCanRebuild(!!data.has_active_phase);
     } catch (e) {
@@ -136,13 +145,34 @@ export default function EquipmentPage() {
                 </label>
               ))}
             </div>
+            <div className="mt-6 space-y-2">
+              <p className="text-sm font-medium">Space for running and jumping drills</p>
+              {SPACE_OPTIONS.map((opt) => (
+                <label key={opt.value} className="flex items-center gap-2 text-sm">
+                  <input type="radio" name="space" checked={space === opt.value} onChange={() => setSpace(opt.value)} />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+            <div className="mt-6 space-y-2">
+              <p className="text-sm font-medium">Preferred conditioning style</p>
+              <select
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                value={modality}
+                onChange={(e) => setModality(e.target.value)}
+              >
+                {MODALITY_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </div>
             <button
               type="button"
               onClick={save}
               disabled={saving || !changed || equipment.length === 0}
               className="mt-6 w-full rounded-md bg-brand px-4 py-3 text-base font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             >
-              {saving ? "Saving…" : "Save equipment"}
+              {saving ? "Saving…" : "Save changes"}
             </button>
             {canRebuild && (
               <div className="mt-4 rounded-md border border-slate-200 p-3">

@@ -316,7 +316,7 @@ export default function ReviewDetailPage({ params }: { params: { id: string } })
         <NavBar role="coach" name={coach?.name ?? null} links={NAV_LINKS} />
         <main className="mx-auto max-w-3xl px-6 pb-16">
           <p className="text-red-600">{error}</p>
-          <Link href="/review" className="text-brand-text underline">
+          <Link href="/review" className="text-brand underline">
             Back to review queue
           </Link>
         </main>
@@ -341,7 +341,7 @@ export default function ReviewDetailPage({ params }: { params: { id: string } })
     <>
       <NavBar role="coach" name={coach?.name ?? null} links={NAV_LINKS} />
       <main className="mx-auto max-w-4xl px-6 pb-16">
-      <Link href="/review" className="text-sm text-brand-text underline">
+      <Link href="/review" className="text-sm text-brand underline">
         ← Review queue
       </Link>
 
@@ -369,7 +369,7 @@ export default function ReviewDetailPage({ params }: { params: { id: string } })
         <div className="mt-8 border-t border-slate-200 pt-4">
           <button
             onClick={() => setShowHistory((s) => !s)}
-            className="text-sm font-medium text-brand-text underline"
+            className="text-sm font-medium text-brand underline"
           >
             {showHistory ? "Hide" : "Show"} version history ({versions.length} versions)
           </button>
@@ -380,7 +380,7 @@ export default function ReviewDetailPage({ params }: { params: { id: string } })
                   <span>
                     v{v.version} {v.edit_source ? `(${v.edit_source})` : "(original)"} — {v.status}
                   </span>
-                  <Link href={`/review/${v.id}`} className="text-brand-text underline">
+                  <Link href={`/review/${v.id}`} className="text-brand underline">
                     view
                   </Link>
                 </li>
@@ -438,7 +438,7 @@ export default function ReviewDetailPage({ params }: { params: { id: string } })
             <button
               onClick={submitChatEdit}
               disabled={busy || !chatMessage.trim()}
-              className="mt-2 rounded-md bg-brand px-4 py-1.5 text-sm font-medium text-brand-on disabled:opacity-50"
+              className="mt-2 rounded-md bg-brand px-4 py-1.5 text-sm font-medium text-white disabled:opacity-50"
             >
               Send edit
             </button>

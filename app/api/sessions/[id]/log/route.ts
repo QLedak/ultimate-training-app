@@ -130,7 +130,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const { data: libraryRows, error: libraryError } = lookupIds.length
     ? await supabase
         .from("exercise_library")
-        .select("exercise_id, movement_pattern, injury_considerations")
+        .select("exercise_id, movement_pattern, injury_considerations, logging_tier")
         .in("exercise_id", lookupIds)
     : { data: [], error: null };
   if (libraryError) {
@@ -150,6 +150,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const tier = deriveLoggingTier({
       movement_pattern: libraryRow?.movement_pattern ?? null,
       injury_considerations: (libraryRow?.injury_considerations as string[] | undefined) ?? null,
+      logging_tier: (libraryRow?.logging_tier as number | null | undefined) ?? null,
     });
 
     if (ex.substituted_exercise_id && !ex.substitution_reason) {

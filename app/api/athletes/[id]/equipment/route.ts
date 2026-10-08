@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/db/supabase-admin";
 import { getSessionAthleteId, unauthorized, forbidden } from "@/lib/auth/session";
 import { dbError } from "@/lib/api/error-response";
-import { validateEquipment } from "@/lib/training/equipment-options";
+import { validateEquipment, SPACE_VALUES, MODALITY_VALUES } from "@/lib/training/equipment-options";
 
 /**
  * GET/PATCH /api/athletes/[id]/equipment
@@ -25,13 +25,18 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   const supabase = getSupabaseAdmin();
   const { data: state, error } = await supabase
     .from("current_athlete_state")
-    .select("equipment, updated_at")
+    .select("equipment, available_space, conditioning_modality, updated_at")
     .eq("athlete_id", params.id)
     .maybeSingle();
   if (error) return dbError("athletes/[id]/equipment", error);
   if (!state) return NextResponse.json({ error: "Complete intake first." }, { status: 404 });
 
-  return NextResponse.json({ equipment: (state.equipment as string[]) ?? [], updated_at: state.updated_at });
+  return NextResponse.json({
+    equipment: (state.equipment as string[]) ?? [],
+    available_space: state.available_space,
+    conditioning_modality: state.conditioning_modality,
+    updated_at: state.updated_at,
+  });
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
@@ -43,10 +48,26 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const checked = validateEquipment((body as { equipment?: unknown }).equipment);
   if (!checked.ok) return NextResponse.json({ error: checked.error }, { status: 400 });
 
+  const { available_space, conditioning_modality } = body as {
+    available_space?: string;
+    conditioning_modality?: string;
+  };
+  if (available_space !== undefined && !SPACE_VALUES.includes(available_space)) {
+    return NextResponse.json({ error: "Unknown space option." }, { status: 400 });
+  }
+  if (conditioning_modality !== undefined && !MODALITY_VALUES.includes(conditioning_modality)) {
+    return NextResponse.json({ error: "Unknown conditioning option." }, { status: 400 });
+  }
+
   const supabase = getSupabaseAdmin();
   const { data: updated, error } = await supabase
     .from("current_athlete_state")
-    .update({ equipment: checked.value, updated_at: new Date().toISOString() })
+    .update({
+      equipment: checked.value,
+      ...(available_space !== undefined ? { available_space } : {}),
+      ...(conditioning_modality !== undefined ? { conditioning_modality } : {}),
+      updated_at: new Date().toISOString(),
+    })
     .eq("athlete_id", params.id)
     .select("equipment, updated_at")
     .maybeSingle();

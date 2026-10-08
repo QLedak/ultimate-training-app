@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
-const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-text focus:outline-none";
+const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none";
 
 /**
  * The single login screen for both athletes and coaches. There's no role
@@ -97,16 +97,16 @@ function LoginForm() {
           type="button"
           onClick={handleSubmit}
           disabled={submitting || !email || !password}
-          className="w-full rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-on hover:bg-brand-hover disabled:opacity-50"
+          className="w-full rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {submitting ? "Logging in…" : "Log in"}
         </button>
       </div>
 
       <p className="mt-6 text-xs text-slate-500">
-        Athlete, new here? <Link href="/app/intake" className="text-brand-text underline">Start your intake</Link>.
+        Athlete, new here? <Link href="/app/intake" className="text-brand underline">Start your intake</Link>.
         <br />
-        Coach, setting up for the first time? <Link href="/coach/signup" className="text-brand-text underline">Create the coach account</Link>.
+        Coach, setting up for the first time? <Link href="/coach/signup" className="text-brand underline">Create the coach account</Link>.
       </p>
 
       <p className="mt-4 text-xs text-slate-400">

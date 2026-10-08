@@ -82,6 +82,8 @@ export async function POST(req: NextRequest) {
     vertical_jump_in: intakeFields.vertical_jump_in ?? null,
     maxes_source: "intake_estimate",
     equipment: intakeFields.equipment ?? [],
+    available_space: intakeFields.available_space ?? "standard",
+    conditioning_modality: intakeFields.conditioning_modality ?? "running",
     training_days_per_week: intakeFields.training_days_per_week,
     current_active_injuries: currentActiveInjuries,
     standing_resilience_regions: standingResilienceRegions,

@@ -1,7 +1,9 @@
 /**
- * Derives the workout-logging-schema-spec.md logging tier (1/2/3) for an
- * exercise from the Exercise Library's own tagging, since the library has no
- * single explicit "tier" field of its own:
+ * Logging tier (1/2/3) per workout-logging-schema-spec.md. v2 library rows
+ * carry an explicit `logging_tier` (loaded Technical coordination, Absolute
+ * strength and compound Hypertrophy = 1; Injury resilience = 2; everything else
+ * = 3). Legacy v1 rows had no such field, so for them the tier is still derived
+ * from the row's own tagging as described here:
  *
  *   - Tier 1 (primary/load-bearing, %-based prescriptions): main compound
  *     patterns — squat, hinge, upper push/pull, lunge/single-leg, Olympic
@@ -43,7 +45,10 @@ export type LoggingTier = 1 | 2 | 3;
 export function deriveLoggingTier(exercise: {
   movement_pattern?: string | null;
   injury_considerations?: string[] | null;
+  /** v2 library rows carry their tier explicitly (set by scripts/convert_exercise_library.py). */
+  logging_tier?: number | null;
 }): LoggingTier {
+  if (exercise.logging_tier === 1 || exercise.logging_tier === 2 || exercise.logging_tier === 3) return exercise.logging_tier;
   if (exercise.injury_considerations && exercise.injury_considerations.length > 0) return 2;
   if (exercise.movement_pattern && TIER_1_MOVEMENT_PATTERNS.has(exercise.movement_pattern)) return 1;
   return 3;

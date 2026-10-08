@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
-const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-text focus:outline-none";
+const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none";
 
 /**
  * The page the reset-link email points at. Supabase's browser client
@@ -69,7 +69,7 @@ export default function ResetPasswordPage() {
         <button
           type="button"
           onClick={() => router.push("/login")}
-          className="mt-6 rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-on hover:bg-brand-hover"
+          className="mt-6 rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
         >
           Continue
         </button>
@@ -113,7 +113,7 @@ export default function ResetPasswordPage() {
           type="button"
           onClick={handleSubmit}
           disabled={submitting || !password || !confirm}
-          className="w-full rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-on hover:bg-brand-hover disabled:opacity-50"
+          className="w-full rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {submitting ? "Saving…" : "Update password"}
         </button>

@@ -1,190 +1,254 @@
 """
-One-time conversion: exercise-library.xlsx -> exercise-library.json
+Conversion: exercise-library.xlsx (v2 workbook) -> exercise-library.json
 
-Run this any time the source spreadsheet changes:
+Run any time the source workbook changes:
     python3 scripts/convert_exercise_library.py
 
-It normalizes the free-text "Equipment Needed" and "Injury Considerations"
-columns into the controlled vocabularies used by intake-funnel-spec.md and
-athlete_injury_reports, while keeping the raw text alongside for reference.
-Equipment Needed is an ANY-OF list; the "Required Together (All)" column lists
-items that must ALSO be present (e.g. Dumbbells + Bench). The "Status" column
-(Active/Retired) controls whether a row is ever prescribed or offered as a swap.
-The equipment mapping is a best-effort dictionary, not a guarantee — rows
-using specialty gym machines (leg curl machine, reverse hyper, etc.) get
-mapped to "barbell_rack" as a full-gym proxy, since the app's equipment
-options don't yet have a dedicated "machines" tag. The script prints any
-phrase it couldn't confidently map so those rows can be spot-checked.
+The workbook has four sheets: Exercises (one row per exercise), Injury chains
+(ordered isometric -> HSR rungs per injury area), Equipment (the controlled
+vocabulary) and Rules (human-readable notes; not read here).
+
+Equipment text in the workbook ("dumbbell, bench", "cable or band",
+"dumbbell or kettlebell, weight plates") is parsed into conjunctive normal
+form: `equipment_groups` is a list of ANY-OF groups, and the athlete needs at
+least one tag from EVERY group. Tokens that name something every athlete is
+assumed to have (bodyweight, wall, step, cones, partner, household items, band
+anchor) never create a requirement. `equipment_needed` / `equipment_all` are
+kept as a compatibility projection of the same data for older readers.
+
+The v2 library replaces the v1 library entirely (library_version = 2). Retired
+v1 rows stay in the table, inactive, so old sessions and logs still resolve.
 """
 
 import json
 import re
+import sys
 import openpyxl
 
 SRC = "content/exercise-library/exercise-library.xlsx"
 OUT = "content/exercise-library/exercise-library.json"
 
-# Ordered so more specific phrases are checked before generic fallbacks.
-EQUIPMENT_MAP = [
-    (r"pull-?up bar", "pullup_bar"),
-    (r"cable", "cable_machine"),
-    (r"band", "bands"),
-    (r"kettlebell", "kettlebell"),
-    (r"dumbbell", "dumbbells"),
-    (r"medicine ball", "med_ball"),
-    (r"\bbox\b|\bboxes\b|\bstep\b|\bplatform\b", "boxes"),
-    (r"sled|harness", "sled"),
-    (r"field space|turf|track", "turf_track"),
-    (r"assault bike|rower|rowing machine|ski erg|stationary bike|bike", "cardio_machine"),
-    # Machine-style benches are a full-gym proxy (no dedicated tag); checked
-    # BEFORE the generic bench entry so "hyper bench"/"nordic bench" stay proxied.
-    (r"hyper bench|nordic bench|hyper machine|calf raise machine|leg curl machine|"
-     r"leg extension machine|adductor machine", "barbell_rack"),
-    # A flat/incline bench is its own tag, matching the intake form's "Bench" option.
-    (r"incline bench|\bbench\b", "bench"),
-    # Trap bar is its own equipment option (checked BEFORE the generic barbell
-    # entry so "Trap Bar" never counts as a barbell + rack).
-    (r"trap bar|hex bar", "trap_bar"),
-    (r"safety squat bar|barbell|\brack\b|landmine|weight plate", "barbell_rack"),
+# token (lowercase, as it appears in the workbook) -> intake equipment tag
+TOKEN_TAG = [
+    (r"^barbell$", "barbell_rack"),
+    (r"^trap bar$", "trap_bar"),
+    (r"^dumbbell$", "dumbbells"),
+    (r"^kettlebell$", "kettlebell"),
+    (r"^band$", "bands"),
+    (r"^cable$", "cable_machine"),
+    (r"^(plyo )?box$", "boxes"),
+    (r"^bench$", "bench"),
+    (r"^pull-up bar$", "pullup_bar"),
+    (r"^med ball$", "med_ball"),
+    (r"^sled$", "sled"),
+    (r"^weight plates$", "weight_plates"),
+    (r"^landmine$", "landmine"),
+    (r"^stability ball$", "stability_ball"),
+    (r"^sliders$", "sliders"),
+    (r"^ab wheel$", "ab_wheel"),
+    (r"^hurdles$", "hurdles"),
+    (r"^jump rope$", "jump_rope"),
+    (r"^back extension bench$", "back_extension_bench"),
+    (r"^dip bars$", "dip_bars"),
+    (r"^ski erg$", "ski_erg"),
+    (r"^treadmill$", "treadmill"),
+    (r"^bike$", "bike"),
+    (r"^rower$", "rower"),
+    (r"^(field|track|road|hill)$", "turf_track"),
+    (r"^rings$", "rings"),  # not an intake option: effectively unavailable
 ]
+# tokens that every athlete is assumed to have / that add no requirement
+ALWAYS = {"bodyweight", "wall", "step", "cones", "partner", "anchor", "ball",
+          "pillow", "floor", "chair", "backpack", "towel", "sturdy door", "household"}
 
-BODYWEIGHT_MARKERS = [
-    "none", "bodyweight", "wall", "doorway", "doorframe", "partner", "cones",
-    "agility ladder", "jump rope", "stability ball", "trx", "suspension trainer",
-    "dip bars", "rings", "ankle weight", "light load", 
-    "light weight", "battle ropes", "mini hurdles",
-]
+# One-off readings of ambiguous workbook text.
+EQUIPMENT_OVERRIDES = {
+    "AS-037": [],  # "bodyweight, bench or box": feet-elevated push-up, any raised surface works
+    "CR-013": [["dumbbells", "kettlebell", "trap_bar"]],  # "dumbbell, kettlebell or trap bar" = any of three
+}
 
-INJURY_MAP = [
-    (r"achilles|calf", "achilles_calf"),
-    (r"patell|knee.*tendon", "patellar_knee"),
-    (r"\bacl\b", "acl_knee"),
-    (r"hamstring", "hamstring"),
-    (r"groin|adductor", "groin_adductor"),
-    (r"shoulder", "shoulder"),
-    (r"lower back|\blumbar\b|\bcore\b", "lower_back"),  # core + lower back are one resilience series
-    (r"ankle", "ankle"),
-]
+EXPERIENCE = {"N": "N", "C": "C", "VE": "VE"}
+PHASE_KEY = {"GPP": "gpp_reacclimation", "Hypertrophy": "hypertrophy", "Max": "max_strength",
+             "Power": "power_conversion", "Peak": "peak_taper"}
 
+# Injury-chain area (workbook) -> injury location keys used by the app
+AREA_LOCATIONS = {
+    "Achilles / calf": ["achilles_calf"],
+    "Knee (patellar / quad)": ["patellar_knee", "acl_knee"],
+    "Hamstring": ["hamstring"],
+    "Groin / adductor": ["groin_adductor"],
+    "Ankle": ["ankle"],
+    "Shoulder": ["shoulder"],
+    "Low back": ["lower_back"],
+    "Hip flexor": ["hip_flexor"],
+    "Core": ["abdominal"],
+    "Elbow": ["elbow"],
+    "Wrist": ["wrist"],
+}
+CHAIN_TYPE = {"Isometric": "isometric", "HSR (historical start)": "hsr_start", "HSR": "hsr"}
 
-def normalize_equipment(raw: str):
-    if not raw:
-        return ["bodyweight_only"], []
-    raw_lower = raw.lower()
-    tags = set()
-    unmatched = []
-    always_available = any(marker in raw_lower for marker in BODYWEIGHT_MARKERS)
-    for part in re.split(r",| or ", raw):
-        part_clean = part.strip().lower()
-        if not part_clean:
-            continue
-        matched = False
-        for pattern, tag in EQUIPMENT_MAP:
-            if re.search(pattern, part_clean):
-                tags.add(tag)
-                matched = True
-                break
-        if not matched and not any(marker in part_clean for marker in BODYWEIGHT_MARKERS):
-            unmatched.append(part_clean)
-    if always_available:
-        tags.add("bodyweight_only")
-    if not tags:
-        tags.add("bodyweight_only")
-    return sorted(tags), unmatched
+TIME_FRAMES = ["<10 s", "10-30 s", "30 s-2 min", "2-10 min", ">10 min"]
 
 
-def clean(v):
-    """Spreadsheet cells sometimes hold the literal text 'None'/'N/A' for 'empty'."""
-    if v is None:
-        return None
-    if isinstance(v, str) and v.strip().lower() in ("", "none", "n/a"):
-        return None
-    return v
+def slug(s):
+    return re.sub(r"[^a-z0-9]+", "_", (s or "").lower()).strip("_")
 
 
-def normalize_required_together(raw: str):
-    """'Required Together (All)' column: every item listed must be present."""
-    tags = set()
-    for part in re.split(r",| and ", clean(raw) or ""):
-        part_clean = part.strip().lower()
-        for pattern, tag in EQUIPMENT_MAP:
-            if re.search(pattern, part_clean):
-                tags.add(tag)
-                break
-    return sorted(tags)
+def parse_equipment(raw, exercise_id):
+    """-> (equipment_groups, unmapped_tokens)"""
+    if exercise_id in EQUIPMENT_OVERRIDES:
+        return EQUIPMENT_OVERRIDES[exercise_id], []
+    groups, unmapped = [], []
+    for clause in [c.strip().lower() for c in (raw or "").split(",") if c.strip()]:
+        alts = [a.strip() for a in re.split(r"\s+or\s+", clause) if a.strip()]
+        tags, free = [], False
+        for alt in alts:
+            if alt in ALWAYS:
+                free = True
+                continue
+            for pat, tag in TOKEN_TAG:
+                if re.match(pat, alt):
+                    tags.append(tag)
+                    break
+            else:
+                unmapped.append(alt)
+        if free:
+            continue  # an always-available alternative satisfies the clause
+        if tags:
+            groups.append(sorted(set(tags)))
+    return groups, unmapped
 
 
-def normalize_injuries(raw: str):
-    if not raw:
+def split_ids(cell):
+    if not cell or str(cell).strip() in ("-", ""):
         return []
-    raw_lower = raw.lower()
-    tags = set()
-    for pattern, tag in INJURY_MAP:
-        if re.search(pattern, raw_lower):
-            tags.add(tag)
-    return sorted(tags)
+    return re.findall(r"[A-Z]{2}-\d{3}", str(cell))
+
+
+def parse_also(cell):
+    """'Hypertrophy: Lower compound; Speed: Acceleration' -> [{category, subcategory}]
+    Injury-chain tags in this column are ignored: the Injury chains sheet is authoritative."""
+    out = []
+    for part in [p.strip() for p in (cell or "").split(";") if p.strip()]:
+        if part.lower().startswith("injury resilience"):
+            continue
+        cat, _, sub = part.partition(":")
+        out.append({"category": cat.strip(), "subcategory": sub.strip() or None})
+    return out
 
 
 def main():
     wb = openpyxl.load_workbook(SRC, data_only=True)
-    ws = wb["Exercise Library"]
 
-    rows = []
-    all_unmatched = set()
-
-    for row in ws.iter_rows(min_row=2, values_only=True):
-        exercise_id = row[0]
-        if not exercise_id:
+    # --- injury chains ---
+    chains = {}  # exercise_id -> [{location, area, step, type}]
+    for r in list(wb["Injury chains"].iter_rows(values_only=True))[1:]:
+        area, step, typ, ex_id = r[0], r[1], r[2], r[3]
+        if not ex_id:
             continue
+        for loc in AREA_LOCATIONS[area]:
+            chains.setdefault(ex_id, []).append(
+                {"location": loc, "area": area, "step": int(step), "type": CHAIN_TYPE[typ]}
+            )
 
-        row = list(row) + [None] * (17 - len(row))
-        (
-            _id, name, tier, pattern, purpose, equipment_raw, space,
-            cue, regression, progression, training_age, season_tag,
-            injury_raw, contrast_pairing, notes, required_together, status,
-        ) = row[:17]
-        equipment_raw, space, regression, progression, season_tag, notes, contrast_pairing = (
-            clean(equipment_raw), clean(space), clean(regression), clean(progression),
-            clean(season_tag), clean(notes), clean(contrast_pairing),
-        )
+    rows, unmapped_all = [], {}
+    for r in list(wb["Exercises"].iter_rows(values_only=True))[1:]:
+        if not r[0]:
+            continue
+        (ex_id, name, category, sub, also, equip_raw, min_exp, phases, space, lat, plane,
+         region, joints, regress, progress, fill, cue) = (list(r) + [None] * 17)[:17]
 
-        equipment_tags, unmatched = normalize_equipment(equipment_raw or "")
-        all_unmatched.update(unmatched)
+        groups, unmapped = parse_equipment(equip_raw, ex_id)
+        for u in unmapped:
+            unmapped_all.setdefault(u, []).append(ex_id)
+
+        chain = chains.get(ex_id, [])
+        sub_clean = (sub or "").strip()
+        time_frames = []
+        if category == "Conditioning":
+            time_frames = [t.strip() for t in sub_clean.split(",") if t.strip() in TIME_FRAMES]
+
+        phase_list = []
+        if phases and phases.strip().lower() not in ("all", "see fill rule"):
+            phase_list = [PHASE_KEY[p.strip()] for p in phases.split(",") if p.strip()]
+
+        impact = None
+        m = re.search(r"Impact:\s*([a-z\-]+)", cue or "")
+        if m:
+            impact = m.group(1)
+
+        if category == "Injury resilience":
+            logging_tier = 2
+        elif category in ("Absolute strength",) or (category == "Hypertrophy" and sub_clean == "Lower compound") \
+                or (category == "Hypertrophy" and sub_clean == "Upper compound") \
+                or (category == "Technical coordination"
+                    and any(t in (equip_raw or "") for t in ("barbell", "trap bar", "dumbbell", "kettlebell"))):
+            logging_tier = 1
+        else:
+            logging_tier = 3
 
         rows.append({
-            "exercise_id": exercise_id,
+            "exercise_id": ex_id,
             "exercise_name": name,
-            "priority_tier": "core_50" if tier == "Core 50" else "extended",
-            "movement_pattern": pattern,
-            "primary_purpose": purpose,
-            "equipment_needed": equipment_tags,
-            "equipment_needed_raw": equipment_raw,
-            # equipment_needed = ANY-OF list; equipment_all = must ALSO have all of these.
-            "equipment_all": normalize_required_together(required_together),
+            "priority_tier": "extended",
+            "movement_pattern": f"{category} / {sub_clean}" if sub_clean else category,
+            "primary_purpose": category,
+            "category": category,
+            "subcategory": sub_clean or None,
+            "also_tagged": parse_also(also),
+            "equipment_needed_raw": equip_raw,
+            "equipment_groups": groups,
+            # compatibility projection of equipment_groups (older readers); finalized below
+            "equipment_needed": [],
+            "equipment_all": [g[0] for g in groups if len(g) == 1],
+            "min_experience": EXPERIENCE.get((min_exp or "").strip()),
+            "phases": phase_list,
+            "space_tier": (space or "").strip().lower() if (space or "").strip().lower() in ("minimal", "standard", "large") else "minimal",
             "space_requirements": space,
+            "laterality": lat,
+            "plane": plane,
+            "region": region,
+            "joints_loaded": [j.strip() for j in (joints or "").split(",") if j.strip()],
+            "regress_from": split_ids(regress),
+            "progress_to": split_ids(progress),
+            "fill_mode": "R" if (fill or "").startswith("R") else "S",
+            "chain_memberships": chain,
+            "injury_considerations": sorted({c["location"] for c in chain}),
+            "time_frames": time_frames,
+            "impact": impact,
+            "logging_tier": logging_tier,
             "cue": cue,
-            "regression": regression,
-            "progression": progression,
-            "training_age": (training_age or "Both").lower(),
-            "season_tag": season_tag,
-            "injury_considerations": normalize_injuries(injury_raw or ""),
-            "contrast_pairing_tendon_specific": contrast_pairing,
-            "notes": notes,
-            # Retired rows stay in the table (old sessions/logs still resolve) but are
-            # never offered to the Phase Builder or in the swap dropdown.
-            "is_active": (status or "Active").strip().lower() != "retired",
+            "regression": None,
+            "progression": None,
+            "training_age": "both",
+            "season_tag": None,
+            "contrast_pairing_tendon_specific": None,
+            "notes": None,
+            "is_active": True,
+            "library_version": 2,
         })
+
+    # compatibility projection fix: any-of list = the single multi-option group when there is exactly one
+    for row in rows:
+        multi = [g for g in row["equipment_groups"] if len(g) > 1]
+        row["equipment_needed"] = multi[0] if len(multi) == 1 else []
+        if row["equipment_groups"] == []:
+            row["equipment_needed"] = ["bodyweight_only"]
+
+    ids = [r["exercise_id"] for r in rows]
+    assert len(ids) == len(set(ids)), "duplicate exercise ids"
+    for r in rows:
+        for ref in r["regress_from"] + r["progress_to"]:
+            assert ref in ids, f"{r['exercise_id']} references unknown {ref}"
 
     with open(OUT, "w") as f:
         json.dump(rows, f, indent=2)
-
     print(f"Converted {len(rows)} exercises -> {OUT}")
-    if all_unmatched:
-        print(f"\n{len(all_unmatched)} equipment phrases fell back to no specific tag match")
-        print("(still functional — these rows just didn't add anything beyond the")
-        print("bodyweight/full-gym defaults already applied). Worth a spot-check:")
-        for phrase in sorted(all_unmatched):
-            print(" -", phrase)
+    if unmapped_all:
+        print("\nUNMAPPED equipment tokens (treated as no requirement):")
+        for k, v in sorted(unmapped_all.items()):
+            print(f" - {k}: {', '.join(v)}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

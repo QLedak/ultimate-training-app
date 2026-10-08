@@ -8,7 +8,13 @@ import {
 } from "./static-content";
 import { getFallbackExample, getPrimaryReferenceProgramSummary } from "../corpus/fallback-examples";
 import { retrieveCorpusEntries, Situation } from "../corpus/retrieve";
-import { getFilteredExerciseLibrary } from "../db/exercise-filter";
+import { buildPhasePlan } from "../generation/slots/engine";
+import {
+  buildSlotProfile, loadActiveLibrary, loadPins, loadPriorContinuity,
+} from "../generation/slots/context";
+import { reconcileWeeksWithPlan } from "../generation/slots/reconcile";
+import { renderEligibleIndex, renderSlotPlan } from "../generation/slots/render";
+import { isEquipmentAvailable, fitsLevel, fitsSpace } from "../library/exercise-row";
 
 const PHASE_PROGRAM_TOOL = {
   name: "submit_phase_program",
@@ -41,7 +47,19 @@ const PHASE_PROGRAM_TOOL = {
                       properties: {
                         exercise_id: {
                           type: "string",
-                          description: "Must be an exercise_id from the provided filtered library.",
+                          description:
+                            "Must be an exercise_id from the slot plan (the RULE slot's exercise, or one of the SHORTLIST options).",
+                        },
+                        slot_key: {
+                          type: "string",
+                          description: "The slot_key from the slot plan that this entry fills (e.g. 'D1.tc'). Required.",
+                        },
+                        override_reason: {
+                          type: "string",
+                          description:
+                            "ONLY when deliberately breaking the slot plan (a different exercise than the RULE pick, or one " +
+                            "outside the SHORTLIST): one concrete sentence (injury/pain flag, game-week constraint, equipment, " +
+                            "safety). Shown to the coach as a review flag. Omit otherwise.",
                         },
                         circuit_label: { type: "string" },
                         sets_reps: { type: "string" },
@@ -81,7 +99,7 @@ const PHASE_PROGRAM_TOOL = {
                           },
                         },
                       },
-                      required: ["exercise_id", "sets_reps"],
+                      required: ["exercise_id", "slot_key", "sets_reps"],
                     },
                   },
                 },
@@ -134,6 +152,8 @@ export type PhaseWeek = {
     date: string;
     exercises: Array<{
       exercise_id: string;
+      slot_key?: string;
+      override_reason?: string;
       circuit_label?: string;
       sets_reps: string;
       tempo?: string;
@@ -159,8 +179,32 @@ export async function runPhaseBuilder(
   const coachingPhilosophy = getCoachingPhilosophy();
   const primaryReferenceProgram = getPrimaryReferenceProgramSummary();
 
-  const athleteEquipment = (input.currentAthleteState.equipment as string[]) ?? [];
-  const filteredLibrary = await getFilteredExerciseLibrary(supabase, athleteEquipment);
+  // ---- Slot plan: which exercise fills which slot, decided by the app (see lib/generation/slots) ----
+  const library = await loadActiveLibrary(supabase);
+  if (library.length === 0) {
+    throw new Error(
+      "The v2 exercise library is empty — apply migration 0017 and run `npm run seed` before generating programs."
+    );
+  }
+  const athleteId = input.currentAthleteState.athlete_id as string;
+  const pins = await loadPins(supabase, athleteId);
+  const profile = buildSlotProfile({
+    intake: input.athleteIntake,
+    state: input.currentAthleteState,
+    phase: input.phase,
+    pins,
+  });
+  const prior = await loadPriorContinuity(supabase, {
+    athleteId,
+    currentPhaseId: input.phase.id as string,
+    library,
+    latestSummary: input.phasePerformanceSummary,
+    beforeDate: input.phase.start_date as string | undefined,
+  });
+  const plan = buildPhasePlan({ library, goal: String(input.phase.goal), profile, prior });
+  const eligibleForIndex = library.filter(
+    (r) => isEquipmentAvailable(r, profile.equipment) && fitsSpace(r, profile.space) && fitsLevel(r, profile.level)
+  );
 
   const corpusMatches = await retrieveCorpusEntries(supabase, "phase_builder", input.situation);
   const fallbackExample = corpusMatches.length === 0
@@ -176,18 +220,18 @@ export async function runPhaseBuilder(
     "",
     "# DAY STRUCTURE TEMPLATES (six fixed day types, by phase)",
     daysPerWeek
-      ? `This athlete trains ${daysPerWeek} days/week — per the priority-order table below, include exactly the ` +
-        `first ${daysPerWeek} day types from the list (Lower Strength, Upper Strength 1, Athlete Day, ` +
-        `Lower Body Power, Upper Strength 2, Energy Systems, in that order), in that same weekly sequence. Use each ` +
-        `included day's fixed slot order and this phase's row in that day's dosing table. If the athlete has a ` +
-        `league/game day on their schedule, it satisfies the Energy Systems day's role — do not also fold in or ` +
-        `dedicate a Conditioning slot elsewhere; if there is no league day, apply this document's fold-in rule for ` +
-        `whichever day types are included. Fill each generic slot with a real exercise from the filtered library ` +
-        `below that matches the slot's intent, and apply the injury-resilience home-day table from the coaching ` +
-        `philosophy above as mandatory, not optional.`
-      : "Include day types from the priority-order table below up to this athlete's days/week, in that same " +
-        "weekly sequence, using each included day's fixed slot order and this phase's dosing table.",
+      ? `This athlete trains ${daysPerWeek} days/week. The SLOT PLAN below already contains exactly the day types ` +
+        `and slots that apply; use this document for each slot's intent and for the phase's dosing table.`
+      : "Use this document for each slot's intent and for the phase's dosing table.",
     dayStructureTemplates,
+    "",
+    "# SLOT PLAN — THIS ATHLETE, THIS PHASE (built by the app; follow it)",
+    "Every day below must appear in every week (deload and test weeks keep the full structure at reduced " +
+      "volume/intensity). For each slot, write exactly one exercise entry with that slot's `slot_key`. RULE " +
+      "slots: use the named exercise. SHORTLIST slots: choose one option. See the hard rules in the system prompt " +
+      "for the only allowed reason to deviate (`override_reason`). Use each day's `day_label` exactly as written.",
+    "",
+    renderSlotPlan(plan, library, profile),
     "",
     "# WARMUP SETS",
     "For every Tier 1 main-lift entry whose sets_reps prescribes a specific working weight " +
@@ -247,8 +291,8 @@ export async function runPhaseBuilder(
         ]
       : []),
     "",
-    `# EXERCISE LIBRARY (pre-filtered to this athlete's equipment — ${filteredLibrary.length} exercises)`,
-    JSON.stringify(filteredLibrary, null, 2),
+    `# EXERCISE INDEX (everything this athlete is eligible for by equipment, space and experience — ${eligibleForIndex.length} exercises; use only for a justified override)`,
+    renderEligibleIndex(eligibleForIndex),
     "",
     "# PRIMARY REFERENCE PROGRAM SUMMARY",
     primaryReferenceProgram,
@@ -363,6 +407,15 @@ export async function runPhaseBuilder(
         "keeps happening, this phase's date range may need a shorter program or a higher max_tokens."
     );
   }
+
+  // ---- Enforce the slot plan: restore rule picks, repair out-of-pool picks, de-duplicate the week ----
+  const { flags } = reconcileWeeksWithPlan(
+    output.weeks as never,
+    plan,
+    library,
+    { mode: input.editRequest ? "edit" : "generate" }
+  );
+  if (flags.length > 0) output.coach_review_flags = [...(output.coach_review_flags ?? []), ...flags];
 
   return output;
 }

@@ -11,7 +11,7 @@ import Link from "next/link";
 export default function TermsPage() {
   return (
     <main className="mx-auto max-w-2xl px-6 py-16">
-      <Link href="/login" className="text-sm text-brand-text underline">
+      <Link href="/login" className="text-sm text-brand underline">
         ← Back
       </Link>
 
@@ -124,7 +124,7 @@ export default function TermsPage() {
           <h2 className="text-base font-semibold text-brand-dark">11. Governing law &amp; contact</h2>
           <p>
             These Terms are governed by the laws of the State of Vermont. Questions? Contact us at{" "}
-            <a href="mailto:qledak@gmail.com" className="text-brand-text underline">
+            <a href="mailto:qledak@gmail.com" className="text-brand underline">
               qledak@gmail.com
             </a>
             .

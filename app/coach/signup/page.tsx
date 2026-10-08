@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
-const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-text focus:outline-none";
+const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none";
 
 export default function CoachSignupPage() {
   const router = useRouter();
@@ -82,14 +82,14 @@ export default function CoachSignupPage() {
           type="button"
           onClick={handleSubmit}
           disabled={submitting || !email || !password || !setupCode}
-          className="w-full rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-on hover:bg-brand-hover disabled:opacity-50"
+          className="w-full rounded-md bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
         >
           {submitting ? "Creating…" : "Create account"}
         </button>
       </div>
 
       <p className="mt-6 text-xs text-slate-500">
-        Already have an account? <Link href="/login" className="text-brand-text underline">Log in</Link>.
+        Already have an account? <Link href="/login" className="text-brand underline">Log in</Link>.
       </p>
     </main>
   );

@@ -46,7 +46,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       exerciseIds.length
         ? supabase
             .from("exercise_library")
-            .select("exercise_id, exercise_name, cue, movement_pattern, injury_considerations, equipment_needed, equipment_all")
+            .select("exercise_id, exercise_name, cue, movement_pattern, injury_considerations, equipment_needed, equipment_all, equipment_groups, logging_tier, region, laterality, library_version, chain_memberships")
             .in("exercise_id", exerciseIds)
         : Promise.resolve({ data: [], error: null }),
       supabase
@@ -95,6 +95,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
         .select("exercise_id, exercise_name, movement_pattern, equipment_needed, equipment_all")
         .in("movement_pattern", patterns)
         .eq("is_active", true) // retired exercises are never offered as a swap
+        .eq("library_version", 2)
     : { data: [], error: null };
   if (alternativesError) return dbError("sessions/[id]", alternativesError);
 
@@ -153,6 +154,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
     const tier = deriveLoggingTier({
       movement_pattern: libraryRow?.movement_pattern ?? null,
       injury_considerations: (libraryRow?.injury_considerations as string[] | undefined) ?? null,
+      logging_tier: (libraryRow?.logging_tier as number | null | undefined) ?? null,
     });
     // Ramping warmup sets for this lift, if the Phase Builder attached any —
     // attached metadata on THIS SAME prescribed-exercise entry, never a
