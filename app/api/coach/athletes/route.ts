@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isNewerDraft } from "@/lib/review/versions";
 import { getSupabaseAdmin } from "@/lib/db/supabase-admin";
 import { getSessionCoachId, unauthorized } from "@/lib/auth/session";
 import { getSeasonState } from "@/lib/seasons/state";
@@ -52,7 +53,7 @@ export async function GET() {
           // whose true latest version is still pending_review.
           supabase
             .from("program_drafts")
-            .select("id, lineage_id, version, status")
+            .select("id, lineage_id, version, status, created_at")
             .eq("athlete_id", athlete.id),
           supabase
             .from("athlete_intake")
@@ -67,11 +68,11 @@ export async function GET() {
             .maybeSingle(),
         ]);
 
-      const latestByLineage = new Map<string, { version: number; status: string }>();
+      const latestByLineage = new Map<string, { id: string; version: number; created_at: string; status: string }>();
       for (const row of draftRows ?? []) {
         const existing = latestByLineage.get(row.lineage_id);
-        if (!existing || row.version > existing.version) {
-          latestByLineage.set(row.lineage_id, { version: row.version, status: row.status });
+        if (!existing || isNewerDraft(row, existing)) {
+          latestByLineage.set(row.lineage_id, { id: row.id, version: row.version, created_at: row.created_at, status: row.status });
         }
       }
       const pendingDraftsCount = [...latestByLineage.values()].filter(

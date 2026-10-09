@@ -12,12 +12,18 @@ export default function MarketingHome() {
         and your needs, and adapted with you as you progress or as things come up
         throughout the training year.
       </p>
-      <div className="flex gap-3">
+      <div className="flex flex-wrap justify-center gap-3">
         <Link
           href="/app/intake"
           className="rounded-md bg-brand px-6 py-3 font-medium text-white hover:bg-blue-700"
         >
           Start your intake
+        </Link>
+        <Link
+          href="/programs"
+          className="rounded-md border border-slate-300 px-6 py-3 font-medium text-slate-700 hover:border-brand hover:text-brand"
+        >
+          Stand-alone programs
         </Link>
         <Link
           href="/login"

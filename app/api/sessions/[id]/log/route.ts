@@ -203,7 +203,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     // Test weeks: a Tier 1 lift flagged as a true max/PR attempt also feeds
     // testing_day_results, which the Phase Performance Summary compile job
     // prefers over an Epley estimate whenever both exist.
-    if (session.week_type === "test" && tier === 1 && ex.is_true_max && weightUsed != null) {
+    if (session.phase_id && session.week_type === "test" && tier === 1 && ex.is_true_max && weightUsed != null) {
       testingResultRows.push({
         athlete_id: null, // filled in below once we have it
         phase_id: session.phase_id,

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isNewerDraft } from "@/lib/review/versions";
 import { getSupabaseAdmin } from "@/lib/db/supabase-admin";
 import { getSessionCoachId, unauthorized } from "@/lib/auth/session";
 import { dbError } from "@/lib/api/error-response";
@@ -55,7 +56,7 @@ export async function GET(req: NextRequest) {
   const latestByLineage = new Map<string, (typeof data)[number]>();
   for (const row of data ?? []) {
     const existing = latestByLineage.get(row.lineage_id);
-    if (!existing || row.version > existing.version) {
+    if (!existing || isNewerDraft(row, existing)) {
       latestByLineage.set(row.lineage_id, row);
     }
   }

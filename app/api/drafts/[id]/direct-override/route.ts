@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { nextVersionInLineage } from "@/lib/review/versions";
 import { getSupabaseAdmin } from "@/lib/db/supabase-admin";
 import { getAtPath, setAtPath } from "@/lib/review/object-path";
 import { getSessionCoachId, unauthorized } from "@/lib/auth/session";
@@ -76,7 +77,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       athlete_id: draft.athlete_id,
       call_type: draft.call_type,
       phase_id: draft.phase_id,
-      version: draft.version + 1,
+      version: await nextVersionInLineage(supabase, draft.lineage_id),
       parent_version: draft.version,
       status: "pending_review",
       input_snapshot: draft.input_snapshot,

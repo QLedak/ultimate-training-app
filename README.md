@@ -186,3 +186,18 @@ Roughly in order of what unlocks the most:
 3. **Phase Performance Summary auto-compile** — currently there's no job that turns logged
    sessions into a summary; Phase Builder calls after the first one need this to exist.
 4. **Workout logging UI** — the athlete-facing side, per `workout-logging-schema-spec.md`.
+
+
+## One-off programs (stand-alone purchases)
+
+Fixed programs (e.g. `content/programs/accelerate-12wk/`) can be bought once and followed in the app with the same
+logging as a coached season.
+
+- Author a program: edit `content/programs/<id>/generate.py`, run `python3 content/programs/<id>/generate.py`
+  (validates against the exercise library and writes `program.json` + `program-design.md`).
+- Load it: apply `supabase/migrations/0018_one_off_programs.sql`, then `npm run seed:products`.
+- Pre-launch: set `PURCHASES_MODE=free`. Prices live in `scripts/seed-products.ts` (`PRICE_CENTS`).
+- Buying copies the program's sessions into the buyer's `scheduled_sessions` (tagged with `purchase_id`, no phase/draft);
+  `lib/purchases/fulfill.ts` is the only code that grants access. Adding Stripe means: create a pending purchase +
+  Checkout session in `POST /api/purchases`, and call `fulfillPurchase()` from a verified webhook.
+- Pages: `/programs` (public catalog), `/programs/[id]` (details + signup + schedule), `/app/programs` (progress + tests).

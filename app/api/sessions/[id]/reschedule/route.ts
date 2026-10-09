@@ -69,11 +69,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     );
   }
 
-  const { data: phase } = await supabase
-    .from("macrocycle_phases")
-    .select("start_date, end_date")
-    .eq("id", session.phase_id)
-    .maybeSingle();
+  // Purchased one-off sessions have no phase (and so no phase window).
+  const { data: phase } = session.phase_id
+    ? await supabase.from("macrocycle_phases").select("start_date, end_date").eq("id", session.phase_id).maybeSingle()
+    : { data: null };
   if (phase && (date < phase.start_date || date > phase.end_date)) {
     return NextResponse.json(
       { error: "That date falls outside this workout's phase — ask your coach about moving it that far." },

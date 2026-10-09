@@ -1,4 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
+import { nextVersionInLineage } from "../review/versions";
 import { runPhaseBuilder, PhaseBuilderInput, PhaseBuilderOutput, PhaseWeek } from "../prompts/phase-builder";
 import { Situation } from "../corpus/retrieve";
 import { deriveTrainingAge } from "../training/training-age";
@@ -506,7 +507,7 @@ export async function generatePhaseRebuildDraft(
       athlete_id: athleteId,
       call_type: "phase_builder",
       phase_id: phaseId,
-      version: (approvedDraft.version as number) + 1,
+      version: await nextVersionInLineage(supabase, approvedDraft.lineage_id as string),
       parent_version: approvedDraft.version,
       status: "pending_review",
       input_snapshot: {
@@ -570,7 +571,7 @@ export async function revisePhaseBuilderDraft(
       athlete_id: draft.athlete_id,
       call_type: "phase_builder",
       phase_id: draft.phase_id,
-      version: (draft.version as number) + 1,
+      version: await nextVersionInLineage(supabase, draft.lineage_id as string),
       parent_version: draft.version,
       status: "pending_review",
       input_snapshot: draft.input_snapshot,

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { latestDraft } from "@/lib/review/versions";
 import { getSupabaseAdmin } from "@/lib/db/supabase-admin";
 import { materializeMacrocycleSkeleton, materializeScheduledSessions, buildCorpusSituationTags } from "@/lib/review/materialize";
 import { getSessionCoachId, unauthorized } from "@/lib/auth/session";
@@ -36,18 +37,20 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     );
   }
 
-  const { data: latestInLineage } = await supabase
+  const { data: lineageRows } = await supabase
     .from("program_drafts")
-    .select("id, version")
-    .eq("lineage_id", draft.lineage_id)
-    .order("version", { ascending: false })
-    .limit(1)
-    .single();
+    .select("id, version, created_at")
+    .eq("lineage_id", draft.lineage_id);
+  const latestInLineage = latestDraft(lineageRows ?? []);
 
   if (latestInLineage && latestInLineage.id !== draft.id) {
+    const sameNumber = latestInLineage.version === draft.version;
     return NextResponse.json(
       {
-        error: `This is v${draft.version}, but v${latestInLineage.version} is the latest version in this lineage — approve that one instead.`,
+        error: sameNumber
+          ? `A newer copy of v${draft.version} exists in this lineage (created ${latestInLineage.created_at}) — open the newest version from the Review list and approve that one instead.`
+          : `This is v${draft.version}, but v${latestInLineage.version} is the latest version in this lineage — approve that one instead.`,
+        latest_draft_id: latestInLineage.id,
       },
       { status: 409 }
     );

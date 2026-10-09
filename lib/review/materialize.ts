@@ -261,6 +261,7 @@ export async function materializeScheduledSessions(
     .from("scheduled_sessions")
     .select("id, date, phase_id")
     .eq("athlete_id", draft.athlete_id)
+    .is("purchase_id", null) // never touch one-off purchased program sessions
     .gte("date", minDate)
     .lte("date", maxDate);
   if (existingError) throw new Error(existingError.message);

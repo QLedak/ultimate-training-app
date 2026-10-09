@@ -1,0 +1,2742 @@
+{
+ "product_id": "accelerate-12wk",
+ "title": "Accelerate: 12-Week Off-Season Speed Program",
+ "days_per_week": 4,
+ "weeks": 12,
+ "level": "comfortable",
+ "suggested_schedule": "Mon / Tue / Thu / Sat (or any layout with Athlete Day well away from Lower Strength)",
+ "equipment": [
+  "bands",
+  "barbell_rack",
+  "bench",
+  "boxes",
+  "cable_machine",
+  "dumbbells",
+  "hurdles",
+  "med_ball",
+  "pullup_bar",
+  "sliders",
+  "turf_track"
+ ],
+ "space": "large",
+ "tests": [
+  {
+   "key": "sprint_10yd",
+   "label": "10-yard sprint",
+   "unit": "seconds",
+   "weeks": [
+    1,
+    12
+   ]
+  },
+  {
+   "key": "sprint_20yd",
+   "label": "20-yard sprint",
+   "unit": "seconds",
+   "weeks": [
+    1,
+    12
+   ]
+  },
+  {
+   "key": "broad_jump",
+   "label": "Standing broad jump",
+   "unit": "inches",
+   "weeks": [
+    1,
+    12
+   ]
+  },
+  {
+   "key": "vertical_jump",
+   "label": "Vertical jump",
+   "unit": "inches",
+   "weeks": [
+    1,
+    12
+   ]
+  }
+ ],
+ "weeks_data": [
+  {
+   "week_number": 1,
+   "week_type": "build",
+   "days": [
+    {
+     "day_index": 1,
+     "day_label": "Lower Strength",
+     "exercises": [
+      {
+       "exercise_id": "TC-003",
+       "slot_key": "D1.tc_lower",
+       "sets_reps": "4x3",
+       "rest": "90s",
+       "notes": "Light dumbbells, jump for height. Land quiet and stiff."
+      },
+      {
+       "exercise_id": "AS-003",
+       "slot_key": "D1.strength_lower",
+       "sets_reps": "4x8, RIR 3",
+       "rest": "2-3 min",
+       "notes": "Controlled lowering, drive up hard."
+      },
+      {
+       "exercise_id": "AS-012",
+       "slot_key": "D1.hyp_lower",
+       "sets_reps": "3x10, RIR 3",
+       "rest": "90s",
+       "circuit_label": "A1",
+       "notes": "Hips back, long hamstrings, flat back."
+      },
+      {
+       "exercise_id": "CR-003",
+       "slot_key": "D1.core_sagittal",
+       "sets_reps": "3x10",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "Slow and tight; ribs down."
+      },
+      {
+       "exercise_id": "IR-011",
+       "slot_key": "D1.iso_adductor",
+       "sets_reps": "3x20s/side",
+       "rest": "60s",
+       "notes": "Straight-leg Copenhagen side plank: top leg on the bench, hips stacked, hold."
+      },
+      {
+       "exercise_id": "HY-035",
+       "slot_key": "D1.iso_posterior",
+       "sets_reps": "3x4",
+       "rest": "90s",
+       "notes": "Lower as slowly as you can; catch yourself with your hands."
+      }
+     ]
+    },
+    {
+     "day_index": 2,
+     "day_label": "Upper Strength 1",
+     "exercises": [
+      {
+       "exercise_id": "TC-015",
+       "slot_key": "D2.tc_upper",
+       "sets_reps": "4x5",
+       "rest": "90s",
+       "notes": "Dip, drive, finish with arms locked overhead."
+      },
+      {
+       "exercise_id": "AS-019",
+       "slot_key": "D2.abs_push",
+       "sets_reps": "3x8, RIR 3",
+       "rest": "90s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "AS-028",
+       "slot_key": "D2.abs_pull",
+       "sets_reps": "3x8, RIR 3",
+       "rest": "90s",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "AS-024",
+       "slot_key": "D2.hyp_push",
+       "sets_reps": "3x10, RIR 3",
+       "rest": "75s",
+       "circuit_label": "B1"
+      },
+      {
+       "exercise_id": "HY-016",
+       "slot_key": "D2.hyp_pull",
+       "sets_reps": "3x10, RIR 3",
+       "rest": "75s",
+       "circuit_label": "B2"
+      },
+      {
+       "exercise_id": "HY-026",
+       "slot_key": "D2.shoulder_health",
+       "sets_reps": "3x15",
+       "rest": "45s",
+       "circuit_label": "C1"
+      },
+      {
+       "exercise_id": "CR-017",
+       "slot_key": "D2.core_transverse",
+       "sets_reps": "3x10/side",
+       "rest": "45s",
+       "circuit_label": "C2",
+       "notes": "Resist the rotation."
+      }
+     ]
+    },
+    {
+     "day_index": 3,
+     "day_label": "Athlete Day",
+     "exercises": [
+      {
+       "exercise_id": "SP-001",
+       "slot_key": "D3.accel_drill",
+       "sets_reps": "3x6/side",
+       "rest": "45s",
+       "notes": "Tall posture, drive the knee down hard into the ground. TEST DAY: after warm-up, run the baseline tests first (10-yard sprint, 20-yard sprint, broad jump, vertical jump) and record them under Programs > My programs > Test results."
+      },
+      {
+       "exercise_id": "SP-003",
+       "slot_key": "D3.accel_drill_2",
+       "sets_reps": "2x20 yd",
+       "rest": "walk back"
+      },
+      {
+       "exercise_id": "SP-006",
+       "slot_key": "D3.accel_sprint",
+       "sets_reps": "4x10 yd",
+       "rest": "90s",
+       "notes": "Fall forward at about 45 degrees, push the ground away behind you. Full effort every rep."
+      },
+      {
+       "exercise_id": "SP-007",
+       "slot_key": "D3.accel_sprint_2",
+       "sets_reps": "4x10 yd",
+       "rest": "90s",
+       "notes": "Shin angle forward, long push, no reaching."
+      },
+      {
+       "exercise_id": "SP-026",
+       "slot_key": "D3.cod",
+       "sets_reps": "3x4/side",
+       "rest": "60s",
+       "notes": "Stick every landing for 2 seconds."
+      },
+      {
+       "exercise_id": "PL-006",
+       "slot_key": "D3.jump_bilateral",
+       "sets_reps": "3x3",
+       "rest": "75s",
+       "circuit_label": "A1",
+       "notes": "Stick the landing."
+      },
+      {
+       "exercise_id": "PL-019",
+       "slot_key": "D3.jump_unilateral",
+       "sets_reps": "3x3/side",
+       "rest": "75s",
+       "circuit_label": "A2",
+       "notes": "Stick the landing."
+      },
+      {
+       "exercise_id": "RS-012",
+       "slot_key": "D3.reflexive",
+       "sets_reps": "3x6/side",
+       "rest": "60s",
+       "notes": "Snap the hips through."
+      },
+      {
+       "exercise_id": "HY-033",
+       "slot_key": "D3.calf",
+       "sets_reps": "3x12/side",
+       "rest": "45s",
+       "notes": "Pause at the bottom, full range."
+      }
+     ]
+    },
+    {
+     "day_index": 4,
+     "day_label": "Lower Body Power",
+     "exercises": [
+      {
+       "exercise_id": "SP-031",
+       "slot_key": "D4.accel_sprint",
+       "sets_reps": "4x4 yd",
+       "rest": "75s",
+       "notes": "Explosive first three steps."
+      },
+      {
+       "exercise_id": "TC-019",
+       "slot_key": "D4.tc_lower",
+       "sets_reps": "4x4",
+       "rest": "90s",
+       "notes": "Light dumbbells, fast and springy."
+      },
+      {
+       "exercise_id": "AS-006",
+       "slot_key": "D4.strength_uni",
+       "sets_reps": "3x8/side, RIR 3",
+       "rest": "60s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "PL-015",
+       "slot_key": "D4.jump_uni",
+       "sets_reps": "3x6/side",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "Fast alternation, stay light on the ground."
+      },
+      {
+       "exercise_id": "HY-004",
+       "slot_key": "D4.hyp_lower",
+       "sets_reps": "3x8/side",
+       "rest": "75s"
+      },
+      {
+       "exercise_id": "HY-036",
+       "slot_key": "D4.hamstring",
+       "sets_reps": "3x8/side",
+       "rest": "75s"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "week_number": 2,
+   "week_type": "build",
+   "days": [
+    {
+     "day_index": 1,
+     "day_label": "Lower Strength",
+     "exercises": [
+      {
+       "exercise_id": "TC-003",
+       "slot_key": "D1.tc_lower",
+       "sets_reps": "4x3",
+       "rest": "90s",
+       "notes": "Light dumbbells, jump for height. Land quiet and stiff."
+      },
+      {
+       "exercise_id": "AS-003",
+       "slot_key": "D1.strength_lower",
+       "sets_reps": "4x8, RIR 2",
+       "rest": "2-3 min",
+       "notes": "Controlled lowering, drive up hard."
+      },
+      {
+       "exercise_id": "AS-012",
+       "slot_key": "D1.hyp_lower",
+       "sets_reps": "3x10, RIR 3",
+       "rest": "90s",
+       "circuit_label": "A1",
+       "notes": "Hips back, long hamstrings, flat back."
+      },
+      {
+       "exercise_id": "CR-003",
+       "slot_key": "D1.core_sagittal",
+       "sets_reps": "3x10",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "Slow and tight; ribs down."
+      },
+      {
+       "exercise_id": "IR-011",
+       "slot_key": "D1.iso_adductor",
+       "sets_reps": "3x25s/side",
+       "rest": "60s",
+       "notes": "Straight-leg Copenhagen side plank: top leg on the bench, hips stacked, hold."
+      },
+      {
+       "exercise_id": "HY-035",
+       "slot_key": "D1.iso_posterior",
+       "sets_reps": "3x5",
+       "rest": "90s",
+       "notes": "Lower as slowly as you can; catch yourself with your hands."
+      }
+     ]
+    },
+    {
+     "day_index": 2,
+     "day_label": "Upper Strength 1",
+     "exercises": [
+      {
+       "exercise_id": "TC-015",
+       "slot_key": "D2.tc_upper",
+       "sets_reps": "4x5",
+       "rest": "90s",
+       "notes": "Dip, drive, finish with arms locked overhead."
+      },
+      {
+       "exercise_id": "AS-019",
+       "slot_key": "D2.abs_push",
+       "sets_reps": "3x8, RIR 2",
+       "rest": "90s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "AS-028",
+       "slot_key": "D2.abs_pull",
+       "sets_reps": "3x8, RIR 2",
+       "rest": "90s",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "AS-024",
+       "slot_key": "D2.hyp_push",
+       "sets_reps": "3x10, RIR 2",
+       "rest": "75s",
+       "circuit_label": "B1"
+      },
+      {
+       "exercise_id": "HY-016",
+       "slot_key": "D2.hyp_pull",
+       "sets_reps": "3x10, RIR 2",
+       "rest": "75s",
+       "circuit_label": "B2"
+      },
+      {
+       "exercise_id": "HY-026",
+       "slot_key": "D2.shoulder_health",
+       "sets_reps": "3x15",
+       "rest": "45s",
+       "circuit_label": "C1"
+      },
+      {
+       "exercise_id": "CR-017",
+       "slot_key": "D2.core_transverse",
+       "sets_reps": "3x10/side",
+       "rest": "45s",
+       "circuit_label": "C2",
+       "notes": "Resist the rotation."
+      }
+     ]
+    },
+    {
+     "day_index": 3,
+     "day_label": "Athlete Day",
+     "exercises": [
+      {
+       "exercise_id": "SP-001",
+       "slot_key": "D3.accel_drill",
+       "sets_reps": "3x6/side",
+       "rest": "45s",
+       "notes": "Tall posture, drive the knee down hard into the ground."
+      },
+      {
+       "exercise_id": "SP-003",
+       "slot_key": "D3.accel_drill_2",
+       "sets_reps": "2x20 yd",
+       "rest": "walk back"
+      },
+      {
+       "exercise_id": "SP-006",
+       "slot_key": "D3.accel_sprint",
+       "sets_reps": "5x10 yd",
+       "rest": "90s",
+       "notes": "Fall forward at about 45 degrees, push the ground away behind you. Full effort every rep."
+      },
+      {
+       "exercise_id": "SP-007",
+       "slot_key": "D3.accel_sprint_2",
+       "sets_reps": "5x10 yd",
+       "rest": "90s",
+       "notes": "Shin angle forward, long push, no reaching."
+      },
+      {
+       "exercise_id": "SP-026",
+       "slot_key": "D3.cod",
+       "sets_reps": "3x4/side",
+       "rest": "60s",
+       "notes": "Stick every landing for 2 seconds."
+      },
+      {
+       "exercise_id": "PL-006",
+       "slot_key": "D3.jump_bilateral",
+       "sets_reps": "3x3",
+       "rest": "75s",
+       "circuit_label": "A1",
+       "notes": "Stick the landing."
+      },
+      {
+       "exercise_id": "PL-019",
+       "slot_key": "D3.jump_unilateral",
+       "sets_reps": "3x3/side",
+       "rest": "75s",
+       "circuit_label": "A2",
+       "notes": "Stick the landing."
+      },
+      {
+       "exercise_id": "RS-012",
+       "slot_key": "D3.reflexive",
+       "sets_reps": "3x6/side",
+       "rest": "60s",
+       "notes": "Snap the hips through."
+      },
+      {
+       "exercise_id": "HY-033",
+       "slot_key": "D3.calf",
+       "sets_reps": "3x12/side",
+       "rest": "45s",
+       "notes": "Pause at the bottom, full range."
+      }
+     ]
+    },
+    {
+     "day_index": 4,
+     "day_label": "Lower Body Power",
+     "exercises": [
+      {
+       "exercise_id": "SP-031",
+       "slot_key": "D4.accel_sprint",
+       "sets_reps": "4x4 yd",
+       "rest": "75s",
+       "notes": "Explosive first three steps."
+      },
+      {
+       "exercise_id": "TC-019",
+       "slot_key": "D4.tc_lower",
+       "sets_reps": "4x4",
+       "rest": "90s",
+       "notes": "Light dumbbells, fast and springy."
+      },
+      {
+       "exercise_id": "AS-006",
+       "slot_key": "D4.strength_uni",
+       "sets_reps": "3x8/side, RIR 2",
+       "rest": "60s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "PL-015",
+       "slot_key": "D4.jump_uni",
+       "sets_reps": "3x6/side",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "Fast alternation, stay light on the ground."
+      },
+      {
+       "exercise_id": "HY-004",
+       "slot_key": "D4.hyp_lower",
+       "sets_reps": "3x8/side",
+       "rest": "75s"
+      },
+      {
+       "exercise_id": "HY-036",
+       "slot_key": "D4.hamstring",
+       "sets_reps": "3x8/side",
+       "rest": "75s"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "week_number": 3,
+   "week_type": "build",
+   "days": [
+    {
+     "day_index": 1,
+     "day_label": "Lower Strength",
+     "exercises": [
+      {
+       "exercise_id": "TC-003",
+       "slot_key": "D1.tc_lower",
+       "sets_reps": "5x3",
+       "rest": "90s",
+       "notes": "Light dumbbells, jump for height. Land quiet and stiff."
+      },
+      {
+       "exercise_id": "AS-003",
+       "slot_key": "D1.strength_lower",
+       "sets_reps": "4x6, RIR 2",
+       "rest": "2-3 min",
+       "notes": "Controlled lowering, drive up hard."
+      },
+      {
+       "exercise_id": "AS-012",
+       "slot_key": "D1.hyp_lower",
+       "sets_reps": "3x8, RIR 2",
+       "rest": "90s",
+       "circuit_label": "A1",
+       "notes": "Hips back, long hamstrings, flat back."
+      },
+      {
+       "exercise_id": "CR-003",
+       "slot_key": "D1.core_sagittal",
+       "sets_reps": "3x12",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "Slow and tight; ribs down."
+      },
+      {
+       "exercise_id": "IR-011",
+       "slot_key": "D1.iso_adductor",
+       "sets_reps": "3x30s/side",
+       "rest": "60s",
+       "notes": "Straight-leg Copenhagen side plank: top leg on the bench, hips stacked, hold."
+      },
+      {
+       "exercise_id": "HY-035",
+       "slot_key": "D1.iso_posterior",
+       "sets_reps": "3x6",
+       "rest": "90s",
+       "notes": "Lower as slowly as you can; catch yourself with your hands."
+      }
+     ]
+    },
+    {
+     "day_index": 2,
+     "day_label": "Upper Strength 1",
+     "exercises": [
+      {
+       "exercise_id": "TC-015",
+       "slot_key": "D2.tc_upper",
+       "sets_reps": "4x4",
+       "rest": "90s",
+       "notes": "Dip, drive, finish with arms locked overhead."
+      },
+      {
+       "exercise_id": "AS-019",
+       "slot_key": "D2.abs_push",
+       "sets_reps": "3x6, RIR 2",
+       "rest": "90s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "AS-028",
+       "slot_key": "D2.abs_pull",
+       "sets_reps": "3x6, RIR 2",
+       "rest": "90s",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "AS-024",
+       "slot_key": "D2.hyp_push",
+       "sets_reps": "3x8, RIR 2",
+       "rest": "75s",
+       "circuit_label": "B1"
+      },
+      {
+       "exercise_id": "HY-016",
+       "slot_key": "D2.hyp_pull",
+       "sets_reps": "3x8, RIR 2",
+       "rest": "75s",
+       "circuit_label": "B2"
+      },
+      {
+       "exercise_id": "HY-026",
+       "slot_key": "D2.shoulder_health",
+       "sets_reps": "3x15",
+       "rest": "45s",
+       "circuit_label": "C1"
+      },
+      {
+       "exercise_id": "CR-017",
+       "slot_key": "D2.core_transverse",
+       "sets_reps": "3x12/side",
+       "rest": "45s",
+       "circuit_label": "C2",
+       "notes": "Resist the rotation."
+      }
+     ]
+    },
+    {
+     "day_index": 3,
+     "day_label": "Athlete Day",
+     "exercises": [
+      {
+       "exercise_id": "SP-001",
+       "slot_key": "D3.accel_drill",
+       "sets_reps": "3x8/side",
+       "rest": "45s",
+       "notes": "Tall posture, drive the knee down hard into the ground."
+      },
+      {
+       "exercise_id": "SP-003",
+       "slot_key": "D3.accel_drill_2",
+       "sets_reps": "3x20 yd",
+       "rest": "walk back"
+      },
+      {
+       "exercise_id": "SP-006",
+       "slot_key": "D3.accel_sprint",
+       "sets_reps": "6x10 yd",
+       "rest": "90s",
+       "notes": "Fall forward at about 45 degrees, push the ground away behind you. Full effort every rep."
+      },
+      {
+       "exercise_id": "SP-007",
+       "slot_key": "D3.accel_sprint_2",
+       "sets_reps": "6x10 yd",
+       "rest": "90s",
+       "notes": "Shin angle forward, long push, no reaching."
+      },
+      {
+       "exercise_id": "SP-026",
+       "slot_key": "D3.cod",
+       "sets_reps": "3x5/side",
+       "rest": "60s",
+       "notes": "Stick every landing for 2 seconds."
+      },
+      {
+       "exercise_id": "PL-006",
+       "slot_key": "D3.jump_bilateral",
+       "sets_reps": "3x4",
+       "rest": "75s",
+       "circuit_label": "A1",
+       "notes": "Stick the landing."
+      },
+      {
+       "exercise_id": "PL-019",
+       "slot_key": "D3.jump_unilateral",
+       "sets_reps": "3x4/side",
+       "rest": "75s",
+       "circuit_label": "A2",
+       "notes": "Stick the landing."
+      },
+      {
+       "exercise_id": "RS-012",
+       "slot_key": "D3.reflexive",
+       "sets_reps": "3x8/side",
+       "rest": "60s",
+       "notes": "Snap the hips through."
+      },
+      {
+       "exercise_id": "HY-033",
+       "slot_key": "D3.calf",
+       "sets_reps": "3x15/side",
+       "rest": "45s",
+       "notes": "Pause at the bottom, full range."
+      }
+     ]
+    },
+    {
+     "day_index": 4,
+     "day_label": "Lower Body Power",
+     "exercises": [
+      {
+       "exercise_id": "SP-031",
+       "slot_key": "D4.accel_sprint",
+       "sets_reps": "4x4 yd",
+       "rest": "75s",
+       "notes": "Explosive first three steps."
+      },
+      {
+       "exercise_id": "TC-019",
+       "slot_key": "D4.tc_lower",
+       "sets_reps": "4x5",
+       "rest": "90s",
+       "notes": "Light dumbbells, fast and springy."
+      },
+      {
+       "exercise_id": "AS-006",
+       "slot_key": "D4.strength_uni",
+       "sets_reps": "3x6/side, RIR 2",
+       "rest": "60s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "PL-015",
+       "slot_key": "D4.jump_uni",
+       "sets_reps": "3x6/side",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "Fast alternation, stay light on the ground."
+      },
+      {
+       "exercise_id": "HY-004",
+       "slot_key": "D4.hyp_lower",
+       "sets_reps": "3x10/side",
+       "rest": "75s"
+      },
+      {
+       "exercise_id": "HY-036",
+       "slot_key": "D4.hamstring",
+       "sets_reps": "3x10/side",
+       "rest": "75s"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "week_number": 4,
+   "week_type": "deload",
+   "days": [
+    {
+     "day_index": 1,
+     "day_label": "Lower Strength",
+     "exercises": [
+      {
+       "exercise_id": "TC-003",
+       "slot_key": "D1.tc_lower",
+       "sets_reps": "3x3",
+       "rest": "90s",
+       "notes": "Light dumbbells, jump for height. Land quiet and stiff."
+      },
+      {
+       "exercise_id": "AS-003",
+       "slot_key": "D1.strength_lower",
+       "sets_reps": "3x6, RIR 4",
+       "rest": "2-3 min",
+       "notes": "Controlled lowering, drive up hard."
+      },
+      {
+       "exercise_id": "AS-012",
+       "slot_key": "D1.hyp_lower",
+       "sets_reps": "2x8, RIR 4",
+       "rest": "90s",
+       "circuit_label": "A1",
+       "notes": "Hips back, long hamstrings, flat back."
+      },
+      {
+       "exercise_id": "CR-003",
+       "slot_key": "D1.core_sagittal",
+       "sets_reps": "2x10",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "Slow and tight; ribs down."
+      },
+      {
+       "exercise_id": "IR-011",
+       "slot_key": "D1.iso_adductor",
+       "sets_reps": "2x20s/side",
+       "rest": "60s",
+       "notes": "Straight-leg Copenhagen side plank: top leg on the bench, hips stacked, hold."
+      },
+      {
+       "exercise_id": "HY-035",
+       "slot_key": "D1.iso_posterior",
+       "sets_reps": "2x4",
+       "rest": "90s",
+       "notes": "Lower as slowly as you can; catch yourself with your hands."
+      }
+     ]
+    },
+    {
+     "day_index": 2,
+     "day_label": "Upper Strength 1",
+     "exercises": [
+      {
+       "exercise_id": "TC-015",
+       "slot_key": "D2.tc_upper",
+       "sets_reps": "3x4",
+       "rest": "90s",
+       "notes": "Dip, drive, finish with arms locked overhead."
+      },
+      {
+       "exercise_id": "AS-019",
+       "slot_key": "D2.abs_push",
+       "sets_reps": "2x6, RIR 4",
+       "rest": "90s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "AS-028",
+       "slot_key": "D2.abs_pull",
+       "sets_reps": "2x6, RIR 4",
+       "rest": "90s",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "AS-024",
+       "slot_key": "D2.hyp_push",
+       "sets_reps": "2x8, RIR 4",
+       "rest": "75s",
+       "circuit_label": "B1"
+      },
+      {
+       "exercise_id": "HY-016",
+       "slot_key": "D2.hyp_pull",
+       "sets_reps": "2x8, RIR 4",
+       "rest": "75s",
+       "circuit_label": "B2"
+      },
+      {
+       "exercise_id": "HY-026",
+       "slot_key": "D2.shoulder_health",
+       "sets_reps": "2x15",
+       "rest": "45s",
+       "circuit_label": "C1"
+      },
+      {
+       "exercise_id": "CR-017",
+       "slot_key": "D2.core_transverse",
+       "sets_reps": "2x10/side",
+       "rest": "45s",
+       "circuit_label": "C2",
+       "notes": "Resist the rotation."
+      }
+     ]
+    },
+    {
+     "day_index": 3,
+     "day_label": "Athlete Day",
+     "exercises": [
+      {
+       "exercise_id": "SP-001",
+       "slot_key": "D3.accel_drill",
+       "sets_reps": "2x6/side",
+       "rest": "45s",
+       "notes": "Tall posture, drive the knee down hard into the ground."
+      },
+      {
+       "exercise_id": "SP-003",
+       "slot_key": "D3.accel_drill_2",
+       "sets_reps": "2x20 yd",
+       "rest": "walk back"
+      },
+      {
+       "exercise_id": "SP-006",
+       "slot_key": "D3.accel_sprint",
+       "sets_reps": "3x10 yd",
+       "rest": "90s",
+       "notes": "Fall forward at about 45 degrees, push the ground away behind you. Full effort every rep."
+      },
+      {
+       "exercise_id": "SP-007",
+       "slot_key": "D3.accel_sprint_2",
+       "sets_reps": "3x10 yd",
+       "rest": "90s",
+       "notes": "Shin angle forward, long push, no reaching."
+      },
+      {
+       "exercise_id": "SP-026",
+       "slot_key": "D3.cod",
+       "sets_reps": "2x4/side",
+       "rest": "60s",
+       "notes": "Stick every landing for 2 seconds."
+      },
+      {
+       "exercise_id": "PL-006",
+       "slot_key": "D3.jump_bilateral",
+       "sets_reps": "2x3",
+       "rest": "75s",
+       "circuit_label": "A1",
+       "notes": "Stick the landing."
+      },
+      {
+       "exercise_id": "PL-019",
+       "slot_key": "D3.jump_unilateral",
+       "sets_reps": "2x3/side",
+       "rest": "75s",
+       "circuit_label": "A2",
+       "notes": "Stick the landing."
+      },
+      {
+       "exercise_id": "RS-012",
+       "slot_key": "D3.reflexive",
+       "sets_reps": "2x6/side",
+       "rest": "60s",
+       "notes": "Snap the hips through."
+      },
+      {
+       "exercise_id": "HY-033",
+       "slot_key": "D3.calf",
+       "sets_reps": "2x12/side",
+       "rest": "45s",
+       "notes": "Pause at the bottom, full range."
+      }
+     ]
+    },
+    {
+     "day_index": 4,
+     "day_label": "Lower Body Power",
+     "exercises": [
+      {
+       "exercise_id": "SP-031",
+       "slot_key": "D4.accel_sprint",
+       "sets_reps": "2x4 yd",
+       "rest": "75s",
+       "notes": "Explosive first three steps."
+      },
+      {
+       "exercise_id": "TC-019",
+       "slot_key": "D4.tc_lower",
+       "sets_reps": "3x4",
+       "rest": "90s",
+       "notes": "Light dumbbells, fast and springy."
+      },
+      {
+       "exercise_id": "AS-006",
+       "slot_key": "D4.strength_uni",
+       "sets_reps": "2x6/side, RIR 4",
+       "rest": "60s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "PL-015",
+       "slot_key": "D4.jump_uni",
+       "sets_reps": "2x6/side",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "Fast alternation, stay light on the ground."
+      },
+      {
+       "exercise_id": "HY-004",
+       "slot_key": "D4.hyp_lower",
+       "sets_reps": "2x8/side",
+       "rest": "75s"
+      },
+      {
+       "exercise_id": "HY-036",
+       "slot_key": "D4.hamstring",
+       "sets_reps": "2x8/side",
+       "rest": "75s"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "week_number": 5,
+   "week_type": "build",
+   "days": [
+    {
+     "day_index": 1,
+     "day_label": "Lower Strength",
+     "exercises": [
+      {
+       "exercise_id": "TC-029",
+       "slot_key": "D1.tc_lower",
+       "sets_reps": "4x3",
+       "rest": "2 min",
+       "notes": "Explode through the hips and finish tall. Moderate weight, fast bar."
+      },
+      {
+       "exercise_id": "AS-003",
+       "slot_key": "D1.strength_lower",
+       "sets_reps": "4x5, RIR 2",
+       "rest": "3 min",
+       "notes": "Drive out of the hole as fast as you can."
+      },
+      {
+       "exercise_id": "AS-012",
+       "slot_key": "D1.hyp_lower",
+       "sets_reps": "3x8, RIR 3",
+       "rest": "2 min",
+       "circuit_label": "A1",
+       "notes": "Hips back, long hamstrings, flat back; drive the hips through."
+      },
+      {
+       "exercise_id": "CR-007",
+       "slot_key": "D1.core_sagittal",
+       "sets_reps": "3x8",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "No swinging."
+      },
+      {
+       "exercise_id": "IR-012",
+       "slot_key": "D1.iso_adductor",
+       "sets_reps": "3x6/side",
+       "rest": "60s",
+       "notes": "Copenhagen dip from the knee: lower slowly, no bounce."
+      },
+      {
+       "exercise_id": "HY-035",
+       "slot_key": "D1.iso_posterior",
+       "sets_reps": "3x4",
+       "rest": "90s",
+       "notes": "Lower as slowly as you can; catch yourself with your hands."
+      }
+     ]
+    },
+    {
+     "day_index": 2,
+     "day_label": "Upper Strength 1",
+     "exercises": [
+      {
+       "exercise_id": "TC-016",
+       "slot_key": "D2.tc_upper",
+       "sets_reps": "4x3",
+       "rest": "2 min",
+       "notes": "Fast dip and drive; bar speed is the goal."
+      },
+      {
+       "exercise_id": "AS-020",
+       "slot_key": "D2.abs_push",
+       "sets_reps": "4x5, RIR 2",
+       "rest": "2 min",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "AS-029",
+       "slot_key": "D2.abs_pull",
+       "sets_reps": "4x5, RIR 2",
+       "rest": "2 min",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "AS-025",
+       "slot_key": "D2.hyp_push",
+       "sets_reps": "3x6, RIR 2",
+       "rest": "90s",
+       "circuit_label": "B1"
+      },
+      {
+       "exercise_id": "AS-032",
+       "slot_key": "D2.hyp_pull",
+       "sets_reps": "3x6, RIR 2",
+       "rest": "90s",
+       "circuit_label": "B2",
+       "notes": "Add weight or use assistance to stay in the range."
+      },
+      {
+       "exercise_id": "HY-026",
+       "slot_key": "D2.shoulder_health",
+       "sets_reps": "3x15",
+       "rest": "45s",
+       "circuit_label": "C1"
+      },
+      {
+       "exercise_id": "CR-021",
+       "slot_key": "D2.core_transverse",
+       "sets_reps": "3x10/side",
+       "rest": "45s",
+       "circuit_label": "C2"
+      }
+     ]
+    },
+    {
+     "day_index": 3,
+     "day_label": "Athlete Day",
+     "exercises": [
+      {
+       "exercise_id": "SP-002",
+       "slot_key": "D3.accel_drill",
+       "sets_reps": "3x6/side",
+       "rest": "45s",
+       "notes": "Switch fast; keep the shin angle forward."
+      },
+      {
+       "exercise_id": "SP-008",
+       "slot_key": "D3.accel_sprint",
+       "sets_reps": "4x15 yd",
+       "rest": "2 min",
+       "notes": "Low first step, drive out for ten yards before rising."
+      },
+      {
+       "exercise_id": "SP-010",
+       "slot_key": "D3.accel_sprint_2",
+       "sets_reps": "4x15 yd",
+       "rest": "2 min",
+       "notes": "Use a resistance band. Your speed should not drop by more than 10 percent."
+      },
+      {
+       "exercise_id": "SP-007",
+       "slot_key": "D3.accel_sprint_3",
+       "sets_reps": "3x10 yd",
+       "rest": "90s",
+       "notes": "Half-kneeling, shin angle forward, long powerful pushes."
+      },
+      {
+       "exercise_id": "SP-028",
+       "slot_key": "D3.cod",
+       "sets_reps": "3x4/side",
+       "rest": "60s",
+       "notes": "Brake in three steps and stick."
+      },
+      {
+       "exercise_id": "PL-011",
+       "slot_key": "D3.jump_bilateral",
+       "sets_reps": "3x4",
+       "rest": "90s",
+       "circuit_label": "A1",
+       "notes": "Minimal ground contact. Step off the box, do not jump off."
+      },
+      {
+       "exercise_id": "PL-020",
+       "slot_key": "D3.jump_unilateral",
+       "sets_reps": "3x4/side",
+       "rest": "90s",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "RS-013",
+       "slot_key": "D3.reflexive",
+       "sets_reps": "3x5/side",
+       "rest": "60s"
+      },
+      {
+       "exercise_id": "HY-032",
+       "slot_key": "D3.calf",
+       "sets_reps": "3x10",
+       "rest": "60s",
+       "notes": "Pause at the bottom, then drive up."
+      }
+     ]
+    },
+    {
+     "day_index": 4,
+     "day_label": "Lower Body Power",
+     "exercises": [
+      {
+       "exercise_id": "SP-009",
+       "slot_key": "D4.accel_sprint",
+       "sets_reps": "3x10 yd",
+       "rest": "90s",
+       "notes": "Chest to the floor, then explode up into the sprint."
+      },
+      {
+       "exercise_id": "TC-019",
+       "slot_key": "D4.tc_lower",
+       "sets_reps": "4x3",
+       "rest": "2 min",
+       "notes": "Heavier dumbbells than block 1; jump for height."
+      },
+      {
+       "exercise_id": "AS-007",
+       "slot_key": "D4.strength_uni",
+       "sets_reps": "4x5/side, RIR 2",
+       "rest": "75s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "PL-021",
+       "slot_key": "D4.jump_uni",
+       "sets_reps": "3x15 yd",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "Long, powerful strides; drive off the ground."
+      },
+      {
+       "exercise_id": "HY-005",
+       "slot_key": "D4.hyp_lower",
+       "sets_reps": "3x6/side",
+       "rest": "75s"
+      },
+      {
+       "exercise_id": "HY-036",
+       "slot_key": "D4.hamstring",
+       "sets_reps": "3x8/side",
+       "rest": "75s"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "week_number": 6,
+   "week_type": "build",
+   "days": [
+    {
+     "day_index": 1,
+     "day_label": "Lower Strength",
+     "exercises": [
+      {
+       "exercise_id": "TC-029",
+       "slot_key": "D1.tc_lower",
+       "sets_reps": "5x3",
+       "rest": "2 min",
+       "notes": "Explode through the hips and finish tall. Moderate weight, fast bar."
+      },
+      {
+       "exercise_id": "AS-003",
+       "slot_key": "D1.strength_lower",
+       "sets_reps": "5x4, RIR 2",
+       "rest": "3 min",
+       "notes": "Drive out of the hole as fast as you can."
+      },
+      {
+       "exercise_id": "AS-012",
+       "slot_key": "D1.hyp_lower",
+       "sets_reps": "3x6, RIR 2",
+       "rest": "2 min",
+       "circuit_label": "A1",
+       "notes": "Hips back, long hamstrings, flat back; drive the hips through."
+      },
+      {
+       "exercise_id": "CR-007",
+       "slot_key": "D1.core_sagittal",
+       "sets_reps": "3x10",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "No swinging."
+      },
+      {
+       "exercise_id": "IR-012",
+       "slot_key": "D1.iso_adductor",
+       "sets_reps": "3x8/side",
+       "rest": "60s",
+       "notes": "Copenhagen dip from the knee: lower slowly, no bounce."
+      },
+      {
+       "exercise_id": "HY-035",
+       "slot_key": "D1.iso_posterior",
+       "sets_reps": "3x5",
+       "rest": "90s",
+       "notes": "Lower as slowly as you can; catch yourself with your hands."
+      }
+     ]
+    },
+    {
+     "day_index": 2,
+     "day_label": "Upper Strength 1",
+     "exercises": [
+      {
+       "exercise_id": "TC-016",
+       "slot_key": "D2.tc_upper",
+       "sets_reps": "5x3",
+       "rest": "2 min",
+       "notes": "Fast dip and drive; bar speed is the goal."
+      },
+      {
+       "exercise_id": "AS-020",
+       "slot_key": "D2.abs_push",
+       "sets_reps": "4x4, RIR 2",
+       "rest": "2 min",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "AS-029",
+       "slot_key": "D2.abs_pull",
+       "sets_reps": "4x4, RIR 2",
+       "rest": "2 min",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "AS-025",
+       "slot_key": "D2.hyp_push",
+       "sets_reps": "3x5, RIR 2",
+       "rest": "90s",
+       "circuit_label": "B1"
+      },
+      {
+       "exercise_id": "AS-032",
+       "slot_key": "D2.hyp_pull",
+       "sets_reps": "3x5, RIR 2",
+       "rest": "90s",
+       "circuit_label": "B2",
+       "notes": "Add weight or use assistance to stay in the range."
+      },
+      {
+       "exercise_id": "HY-026",
+       "slot_key": "D2.shoulder_health",
+       "sets_reps": "3x15",
+       "rest": "45s",
+       "circuit_label": "C1"
+      },
+      {
+       "exercise_id": "CR-021",
+       "slot_key": "D2.core_transverse",
+       "sets_reps": "3x10/side",
+       "rest": "45s",
+       "circuit_label": "C2"
+      }
+     ]
+    },
+    {
+     "day_index": 3,
+     "day_label": "Athlete Day",
+     "exercises": [
+      {
+       "exercise_id": "SP-002",
+       "slot_key": "D3.accel_drill",
+       "sets_reps": "3x6/side",
+       "rest": "45s",
+       "notes": "Switch fast; keep the shin angle forward."
+      },
+      {
+       "exercise_id": "SP-008",
+       "slot_key": "D3.accel_sprint",
+       "sets_reps": "5x15 yd",
+       "rest": "2 min",
+       "notes": "Low first step, drive out for ten yards before rising."
+      },
+      {
+       "exercise_id": "SP-010",
+       "slot_key": "D3.accel_sprint_2",
+       "sets_reps": "5x15 yd",
+       "rest": "2 min",
+       "notes": "Use a resistance band. Your speed should not drop by more than 10 percent."
+      },
+      {
+       "exercise_id": "SP-007",
+       "slot_key": "D3.accel_sprint_3",
+       "sets_reps": "3x10 yd",
+       "rest": "90s",
+       "notes": "Half-kneeling, shin angle forward, long powerful pushes."
+      },
+      {
+       "exercise_id": "SP-028",
+       "slot_key": "D3.cod",
+       "sets_reps": "3x4/side",
+       "rest": "60s",
+       "notes": "Brake in three steps and stick."
+      },
+      {
+       "exercise_id": "PL-011",
+       "slot_key": "D3.jump_bilateral",
+       "sets_reps": "3x4",
+       "rest": "90s",
+       "circuit_label": "A1",
+       "notes": "Minimal ground contact. Step off the box, do not jump off."
+      },
+      {
+       "exercise_id": "PL-020",
+       "slot_key": "D3.jump_unilateral",
+       "sets_reps": "3x4/side",
+       "rest": "90s",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "RS-013",
+       "slot_key": "D3.reflexive",
+       "sets_reps": "3x5/side",
+       "rest": "60s"
+      },
+      {
+       "exercise_id": "HY-032",
+       "slot_key": "D3.calf",
+       "sets_reps": "3x10",
+       "rest": "60s",
+       "notes": "Pause at the bottom, then drive up."
+      }
+     ]
+    },
+    {
+     "day_index": 4,
+     "day_label": "Lower Body Power",
+     "exercises": [
+      {
+       "exercise_id": "SP-009",
+       "slot_key": "D4.accel_sprint",
+       "sets_reps": "4x10 yd",
+       "rest": "90s",
+       "notes": "Chest to the floor, then explode up into the sprint."
+      },
+      {
+       "exercise_id": "TC-019",
+       "slot_key": "D4.tc_lower",
+       "sets_reps": "4x3",
+       "rest": "2 min",
+       "notes": "Heavier dumbbells than block 1; jump for height."
+      },
+      {
+       "exercise_id": "AS-007",
+       "slot_key": "D4.strength_uni",
+       "sets_reps": "4x5/side, RIR 2",
+       "rest": "75s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "PL-021",
+       "slot_key": "D4.jump_uni",
+       "sets_reps": "3x15 yd",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "Long, powerful strides; drive off the ground."
+      },
+      {
+       "exercise_id": "HY-005",
+       "slot_key": "D4.hyp_lower",
+       "sets_reps": "3x6/side",
+       "rest": "75s"
+      },
+      {
+       "exercise_id": "HY-036",
+       "slot_key": "D4.hamstring",
+       "sets_reps": "3x10/side",
+       "rest": "75s"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "week_number": 7,
+   "week_type": "build",
+   "days": [
+    {
+     "day_index": 1,
+     "day_label": "Lower Strength",
+     "exercises": [
+      {
+       "exercise_id": "TC-029",
+       "slot_key": "D1.tc_lower",
+       "sets_reps": "5x3",
+       "rest": "2 min",
+       "notes": "Explode through the hips and finish tall. Moderate weight, fast bar."
+      },
+      {
+       "exercise_id": "AS-003",
+       "slot_key": "D1.strength_lower",
+       "sets_reps": "5x3, RIR 1",
+       "rest": "3 min",
+       "notes": "Drive out of the hole as fast as you can."
+      },
+      {
+       "exercise_id": "AS-012",
+       "slot_key": "D1.hyp_lower",
+       "sets_reps": "3x6, RIR 2",
+       "rest": "2 min",
+       "circuit_label": "A1",
+       "notes": "Hips back, long hamstrings, flat back; drive the hips through."
+      },
+      {
+       "exercise_id": "CR-007",
+       "slot_key": "D1.core_sagittal",
+       "sets_reps": "3x10",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "No swinging."
+      },
+      {
+       "exercise_id": "IR-012",
+       "slot_key": "D1.iso_adductor",
+       "sets_reps": "3x8/side",
+       "rest": "60s",
+       "notes": "Copenhagen dip from the knee: lower slowly, no bounce."
+      },
+      {
+       "exercise_id": "HY-035",
+       "slot_key": "D1.iso_posterior",
+       "sets_reps": "3x6",
+       "rest": "90s",
+       "notes": "Lower as slowly as you can; catch yourself with your hands."
+      }
+     ]
+    },
+    {
+     "day_index": 2,
+     "day_label": "Upper Strength 1",
+     "exercises": [
+      {
+       "exercise_id": "TC-016",
+       "slot_key": "D2.tc_upper",
+       "sets_reps": "5x2",
+       "rest": "2 min",
+       "notes": "Fast dip and drive; bar speed is the goal."
+      },
+      {
+       "exercise_id": "AS-020",
+       "slot_key": "D2.abs_push",
+       "sets_reps": "4x3, RIR 1",
+       "rest": "2 min",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "AS-029",
+       "slot_key": "D2.abs_pull",
+       "sets_reps": "4x3, RIR 1",
+       "rest": "2 min",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "AS-025",
+       "slot_key": "D2.hyp_push",
+       "sets_reps": "3x5, RIR 2",
+       "rest": "90s",
+       "circuit_label": "B1"
+      },
+      {
+       "exercise_id": "AS-032",
+       "slot_key": "D2.hyp_pull",
+       "sets_reps": "3x5, RIR 2",
+       "rest": "90s",
+       "circuit_label": "B2",
+       "notes": "Add weight or use assistance to stay in the range."
+      },
+      {
+       "exercise_id": "HY-026",
+       "slot_key": "D2.shoulder_health",
+       "sets_reps": "3x15",
+       "rest": "45s",
+       "circuit_label": "C1"
+      },
+      {
+       "exercise_id": "CR-021",
+       "slot_key": "D2.core_transverse",
+       "sets_reps": "3x12/side",
+       "rest": "45s",
+       "circuit_label": "C2"
+      }
+     ]
+    },
+    {
+     "day_index": 3,
+     "day_label": "Athlete Day",
+     "exercises": [
+      {
+       "exercise_id": "SP-002",
+       "slot_key": "D3.accel_drill",
+       "sets_reps": "3x6/side",
+       "rest": "45s",
+       "notes": "Switch fast; keep the shin angle forward."
+      },
+      {
+       "exercise_id": "SP-008",
+       "slot_key": "D3.accel_sprint",
+       "sets_reps": "5x15 yd",
+       "rest": "2 min",
+       "notes": "Low first step, drive out for ten yards before rising."
+      },
+      {
+       "exercise_id": "SP-010",
+       "slot_key": "D3.accel_sprint_2",
+       "sets_reps": "5x15 yd",
+       "rest": "2 min",
+       "notes": "Use a resistance band. Your speed should not drop by more than 10 percent."
+      },
+      {
+       "exercise_id": "SP-007",
+       "slot_key": "D3.accel_sprint_3",
+       "sets_reps": "4x10 yd",
+       "rest": "90s",
+       "notes": "Half-kneeling, shin angle forward, long powerful pushes."
+      },
+      {
+       "exercise_id": "SP-028",
+       "slot_key": "D3.cod",
+       "sets_reps": "3x5/side",
+       "rest": "60s",
+       "notes": "Brake in three steps and stick."
+      },
+      {
+       "exercise_id": "PL-011",
+       "slot_key": "D3.jump_bilateral",
+       "sets_reps": "3x5",
+       "rest": "90s",
+       "circuit_label": "A1",
+       "notes": "Minimal ground contact. Step off the box, do not jump off."
+      },
+      {
+       "exercise_id": "PL-020",
+       "slot_key": "D3.jump_unilateral",
+       "sets_reps": "3x5/side",
+       "rest": "90s",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "RS-013",
+       "slot_key": "D3.reflexive",
+       "sets_reps": "3x6/side",
+       "rest": "60s"
+      },
+      {
+       "exercise_id": "HY-032",
+       "slot_key": "D3.calf",
+       "sets_reps": "3x8",
+       "rest": "60s",
+       "notes": "Pause at the bottom, then drive up."
+      }
+     ]
+    },
+    {
+     "day_index": 4,
+     "day_label": "Lower Body Power",
+     "exercises": [
+      {
+       "exercise_id": "SP-009",
+       "slot_key": "D4.accel_sprint",
+       "sets_reps": "4x10 yd",
+       "rest": "90s",
+       "notes": "Chest to the floor, then explode up into the sprint."
+      },
+      {
+       "exercise_id": "TC-019",
+       "slot_key": "D4.tc_lower",
+       "sets_reps": "5x3",
+       "rest": "2 min",
+       "notes": "Heavier dumbbells than block 1; jump for height."
+      },
+      {
+       "exercise_id": "AS-007",
+       "slot_key": "D4.strength_uni",
+       "sets_reps": "4x4/side, RIR 1",
+       "rest": "75s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "PL-021",
+       "slot_key": "D4.jump_uni",
+       "sets_reps": "3x20 yd",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "Long, powerful strides; drive off the ground."
+      },
+      {
+       "exercise_id": "HY-005",
+       "slot_key": "D4.hyp_lower",
+       "sets_reps": "3x8/side",
+       "rest": "75s"
+      },
+      {
+       "exercise_id": "HY-036",
+       "slot_key": "D4.hamstring",
+       "sets_reps": "3x10/side",
+       "rest": "75s"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "week_number": 8,
+   "week_type": "deload",
+   "days": [
+    {
+     "day_index": 1,
+     "day_label": "Lower Strength",
+     "exercises": [
+      {
+       "exercise_id": "TC-029",
+       "slot_key": "D1.tc_lower",
+       "sets_reps": "3x3",
+       "rest": "2 min",
+       "notes": "Explode through the hips and finish tall. Moderate weight, fast bar."
+      },
+      {
+       "exercise_id": "AS-003",
+       "slot_key": "D1.strength_lower",
+       "sets_reps": "3x5, RIR 4",
+       "rest": "3 min",
+       "notes": "Drive out of the hole as fast as you can."
+      },
+      {
+       "exercise_id": "AS-012",
+       "slot_key": "D1.hyp_lower",
+       "sets_reps": "2x6, RIR 4",
+       "rest": "2 min",
+       "circuit_label": "A1",
+       "notes": "Hips back, long hamstrings, flat back; drive the hips through."
+      },
+      {
+       "exercise_id": "CR-007",
+       "slot_key": "D1.core_sagittal",
+       "sets_reps": "2x8",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "No swinging."
+      },
+      {
+       "exercise_id": "IR-012",
+       "slot_key": "D1.iso_adductor",
+       "sets_reps": "2x6/side",
+       "rest": "60s",
+       "notes": "Copenhagen dip from the knee: lower slowly, no bounce."
+      },
+      {
+       "exercise_id": "HY-035",
+       "slot_key": "D1.iso_posterior",
+       "sets_reps": "2x4",
+       "rest": "90s",
+       "notes": "Lower as slowly as you can; catch yourself with your hands."
+      }
+     ]
+    },
+    {
+     "day_index": 2,
+     "day_label": "Upper Strength 1",
+     "exercises": [
+      {
+       "exercise_id": "TC-016",
+       "slot_key": "D2.tc_upper",
+       "sets_reps": "3x3",
+       "rest": "2 min",
+       "notes": "Fast dip and drive; bar speed is the goal."
+      },
+      {
+       "exercise_id": "AS-020",
+       "slot_key": "D2.abs_push",
+       "sets_reps": "3x5, RIR 4",
+       "rest": "2 min",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "AS-029",
+       "slot_key": "D2.abs_pull",
+       "sets_reps": "3x5, RIR 4",
+       "rest": "2 min",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "AS-025",
+       "slot_key": "D2.hyp_push",
+       "sets_reps": "2x5, RIR 4",
+       "rest": "90s",
+       "circuit_label": "B1"
+      },
+      {
+       "exercise_id": "AS-032",
+       "slot_key": "D2.hyp_pull",
+       "sets_reps": "2x5, RIR 4",
+       "rest": "90s",
+       "circuit_label": "B2",
+       "notes": "Add weight or use assistance to stay in the range."
+      },
+      {
+       "exercise_id": "HY-026",
+       "slot_key": "D2.shoulder_health",
+       "sets_reps": "2x15",
+       "rest": "45s",
+       "circuit_label": "C1"
+      },
+      {
+       "exercise_id": "CR-021",
+       "slot_key": "D2.core_transverse",
+       "sets_reps": "2x10/side",
+       "rest": "45s",
+       "circuit_label": "C2"
+      }
+     ]
+    },
+    {
+     "day_index": 3,
+     "day_label": "Athlete Day",
+     "exercises": [
+      {
+       "exercise_id": "SP-002",
+       "slot_key": "D3.accel_drill",
+       "sets_reps": "2x6/side",
+       "rest": "45s",
+       "notes": "Switch fast; keep the shin angle forward."
+      },
+      {
+       "exercise_id": "SP-008",
+       "slot_key": "D3.accel_sprint",
+       "sets_reps": "2x15 yd",
+       "rest": "2 min",
+       "notes": "Low first step, drive out for ten yards before rising."
+      },
+      {
+       "exercise_id": "SP-010",
+       "slot_key": "D3.accel_sprint_2",
+       "sets_reps": "2x15 yd",
+       "rest": "2 min",
+       "notes": "Use a resistance band. Your speed should not drop by more than 10 percent."
+      },
+      {
+       "exercise_id": "SP-007",
+       "slot_key": "D3.accel_sprint_3",
+       "sets_reps": "2x10 yd",
+       "rest": "90s",
+       "notes": "Half-kneeling, shin angle forward, long powerful pushes."
+      },
+      {
+       "exercise_id": "SP-028",
+       "slot_key": "D3.cod",
+       "sets_reps": "2x4/side",
+       "rest": "60s",
+       "notes": "Brake in three steps and stick."
+      },
+      {
+       "exercise_id": "PL-011",
+       "slot_key": "D3.jump_bilateral",
+       "sets_reps": "2x3",
+       "rest": "90s",
+       "circuit_label": "A1",
+       "notes": "Minimal ground contact. Step off the box, do not jump off."
+      },
+      {
+       "exercise_id": "PL-020",
+       "slot_key": "D3.jump_unilateral",
+       "sets_reps": "2x4/side",
+       "rest": "90s",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "RS-013",
+       "slot_key": "D3.reflexive",
+       "sets_reps": "2x5/side",
+       "rest": "60s"
+      },
+      {
+       "exercise_id": "HY-032",
+       "slot_key": "D3.calf",
+       "sets_reps": "2x8",
+       "rest": "60s",
+       "notes": "Pause at the bottom, then drive up."
+      }
+     ]
+    },
+    {
+     "day_index": 4,
+     "day_label": "Lower Body Power",
+     "exercises": [
+      {
+       "exercise_id": "SP-009",
+       "slot_key": "D4.accel_sprint",
+       "sets_reps": "2x10 yd",
+       "rest": "90s",
+       "notes": "Chest to the floor, then explode up into the sprint."
+      },
+      {
+       "exercise_id": "TC-019",
+       "slot_key": "D4.tc_lower",
+       "sets_reps": "3x3",
+       "rest": "2 min",
+       "notes": "Heavier dumbbells than block 1; jump for height."
+      },
+      {
+       "exercise_id": "AS-007",
+       "slot_key": "D4.strength_uni",
+       "sets_reps": "3x4/side, RIR 4",
+       "rest": "75s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "PL-021",
+       "slot_key": "D4.jump_uni",
+       "sets_reps": "2x15 yd",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "Long, powerful strides; drive off the ground."
+      },
+      {
+       "exercise_id": "HY-005",
+       "slot_key": "D4.hyp_lower",
+       "sets_reps": "2x6/side",
+       "rest": "75s"
+      },
+      {
+       "exercise_id": "HY-036",
+       "slot_key": "D4.hamstring",
+       "sets_reps": "2x8/side",
+       "rest": "75s"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "week_number": 9,
+   "week_type": "build",
+   "days": [
+    {
+     "day_index": 1,
+     "day_label": "Lower Strength",
+     "exercises": [
+      {
+       "exercise_id": "TC-006",
+       "slot_key": "D1.tc_lower",
+       "sets_reps": "4x3",
+       "rest": "2 min",
+       "notes": "Fast elbows around the bar, catch tall."
+      },
+      {
+       "exercise_id": "AS-004",
+       "slot_key": "D1.strength_lower",
+       "sets_reps": "4x4, RIR 2",
+       "rest": "3 min",
+       "notes": "Move the bar fast. Do not grind."
+      },
+      {
+       "exercise_id": "AS-012",
+       "slot_key": "D1.hyp_lower",
+       "sets_reps": "3x6, RIR 3",
+       "rest": "2 min",
+       "circuit_label": "A1",
+       "notes": "Controlled lowering, fast hip drive."
+      },
+      {
+       "exercise_id": "CR-002",
+       "slot_key": "D1.core_sagittal",
+       "sets_reps": "3x8",
+       "rest": "90s",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "IR-013",
+       "slot_key": "D1.iso_adductor",
+       "sets_reps": "3x6/side",
+       "rest": "60s",
+       "notes": "Straight-leg Copenhagen dip: lower slowly, no bounce."
+      },
+      {
+       "exercise_id": "HY-012",
+       "slot_key": "D1.iso_posterior",
+       "sets_reps": "3x8/side",
+       "rest": "75s",
+       "notes": "Drive through the heel; hold the top for a beat."
+      }
+     ]
+    },
+    {
+     "day_index": 2,
+     "day_label": "Upper Strength 1",
+     "exercises": [
+      {
+       "exercise_id": "TC-027",
+       "slot_key": "D2.tc_upper",
+       "sets_reps": "4x5",
+       "rest": "90s",
+       "notes": "Explode off the floor, land soft."
+      },
+      {
+       "exercise_id": "AS-020",
+       "slot_key": "D2.abs_push",
+       "sets_reps": "3x4, RIR 2",
+       "rest": "2 min",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "AS-029",
+       "slot_key": "D2.abs_pull",
+       "sets_reps": "3x4, RIR 2",
+       "rest": "2 min",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "AS-024",
+       "slot_key": "D2.hyp_push",
+       "sets_reps": "3x6, RIR 3",
+       "rest": "90s",
+       "circuit_label": "B1"
+      },
+      {
+       "exercise_id": "AS-033",
+       "slot_key": "D2.hyp_pull",
+       "sets_reps": "3x6, RIR 3",
+       "rest": "90s",
+       "circuit_label": "B2"
+      },
+      {
+       "exercise_id": "HY-026",
+       "slot_key": "D2.shoulder_health",
+       "sets_reps": "3x15",
+       "rest": "45s",
+       "circuit_label": "C1"
+      },
+      {
+       "exercise_id": "CR-011",
+       "slot_key": "D2.core_frontal",
+       "sets_reps": "3x8/side",
+       "rest": "45s",
+       "circuit_label": "C2"
+      }
+     ]
+    },
+    {
+     "day_index": 3,
+     "day_label": "Athlete Day",
+     "exercises": [
+      {
+       "exercise_id": "SP-004",
+       "slot_key": "D3.accel_drill",
+       "sets_reps": "2x20 yd",
+       "rest": "walk back",
+       "notes": "Quick, crisp, high heel recovery."
+      },
+      {
+       "exercise_id": "SP-008",
+       "slot_key": "D3.accel_sprint",
+       "sets_reps": "4x20 yd",
+       "rest": "2-3 min",
+       "notes": "Full effort, full recovery. Stop the set if your times drop off."
+      },
+      {
+       "exercise_id": "SP-012",
+       "slot_key": "D3.accel_sprint_2",
+       "sets_reps": "3x30 m",
+       "rest": "3 min",
+       "notes": "Build smoothly to top speed over the first 20 m, then hold it."
+      },
+      {
+       "exercise_id": "SP-020",
+       "slot_key": "D3.cod",
+       "sets_reps": "3x3/side",
+       "rest": "75s",
+       "notes": "Plant hard, then explode out of the cut."
+      },
+      {
+       "exercise_id": "PL-012",
+       "slot_key": "D3.jump_bilateral",
+       "sets_reps": "3x4",
+       "rest": "90s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "PL-022",
+       "slot_key": "D3.jump_unilateral",
+       "sets_reps": "3x4/side",
+       "rest": "90s",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "RS-006",
+       "slot_key": "D3.reflexive",
+       "sets_reps": "3x6/side",
+       "rest": "60s",
+       "notes": "Throw hard, catch and redirect immediately."
+      },
+      {
+       "exercise_id": "HY-033",
+       "slot_key": "D3.calf",
+       "sets_reps": "3x8/side",
+       "rest": "60s",
+       "notes": "Heavier than before; pause at the bottom."
+      }
+     ]
+    },
+    {
+     "day_index": 4,
+     "day_label": "Lower Body Power",
+     "exercises": [
+      {
+       "exercise_id": "SP-006",
+       "slot_key": "D4.accel_sprint",
+       "sets_reps": "3x10 yd",
+       "rest": "90s",
+       "notes": "Fast and relaxed, no tension in the face or shoulders."
+      },
+      {
+       "exercise_id": "TC-003",
+       "slot_key": "D4.tc_lower",
+       "sets_reps": "4x3",
+       "rest": "90s",
+       "notes": "Jump tall; absorb quietly."
+      },
+      {
+       "exercise_id": "AS-008",
+       "slot_key": "D4.strength_uni",
+       "sets_reps": "3x4/side, RIR 2",
+       "rest": "75s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "PL-018",
+       "slot_key": "D4.jump_uni",
+       "sets_reps": "3x3/side",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "Contrast jump: go as soon as the strength set ends."
+      },
+      {
+       "exercise_id": "RS-014",
+       "slot_key": "D4.reflexive",
+       "sets_reps": "3x5/side",
+       "rest": "60s"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "week_number": 10,
+   "week_type": "build",
+   "days": [
+    {
+     "day_index": 1,
+     "day_label": "Lower Strength",
+     "exercises": [
+      {
+       "exercise_id": "TC-006",
+       "slot_key": "D1.tc_lower",
+       "sets_reps": "4x3",
+       "rest": "2 min",
+       "notes": "Fast elbows around the bar, catch tall."
+      },
+      {
+       "exercise_id": "AS-004",
+       "slot_key": "D1.strength_lower",
+       "sets_reps": "4x3, RIR 2",
+       "rest": "3 min",
+       "notes": "Move the bar fast. Do not grind."
+      },
+      {
+       "exercise_id": "AS-012",
+       "slot_key": "D1.hyp_lower",
+       "sets_reps": "3x6, RIR 3",
+       "rest": "2 min",
+       "circuit_label": "A1",
+       "notes": "Controlled lowering, fast hip drive."
+      },
+      {
+       "exercise_id": "CR-002",
+       "slot_key": "D1.core_sagittal",
+       "sets_reps": "3x8",
+       "rest": "90s",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "IR-013",
+       "slot_key": "D1.iso_adductor",
+       "sets_reps": "3x6/side",
+       "rest": "60s",
+       "notes": "Straight-leg Copenhagen dip: lower slowly, no bounce."
+      },
+      {
+       "exercise_id": "HY-012",
+       "slot_key": "D1.iso_posterior",
+       "sets_reps": "3x8/side",
+       "rest": "75s",
+       "notes": "Drive through the heel; hold the top for a beat."
+      }
+     ]
+    },
+    {
+     "day_index": 2,
+     "day_label": "Upper Strength 1",
+     "exercises": [
+      {
+       "exercise_id": "TC-027",
+       "slot_key": "D2.tc_upper",
+       "sets_reps": "4x5",
+       "rest": "90s",
+       "notes": "Explode off the floor, land soft."
+      },
+      {
+       "exercise_id": "AS-020",
+       "slot_key": "D2.abs_push",
+       "sets_reps": "3x4, RIR 2",
+       "rest": "2 min",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "AS-029",
+       "slot_key": "D2.abs_pull",
+       "sets_reps": "3x4, RIR 2",
+       "rest": "2 min",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "AS-024",
+       "slot_key": "D2.hyp_push",
+       "sets_reps": "3x6, RIR 2",
+       "rest": "90s",
+       "circuit_label": "B1"
+      },
+      {
+       "exercise_id": "AS-033",
+       "slot_key": "D2.hyp_pull",
+       "sets_reps": "3x6, RIR 2",
+       "rest": "90s",
+       "circuit_label": "B2"
+      },
+      {
+       "exercise_id": "HY-026",
+       "slot_key": "D2.shoulder_health",
+       "sets_reps": "3x15",
+       "rest": "45s",
+       "circuit_label": "C1"
+      },
+      {
+       "exercise_id": "CR-011",
+       "slot_key": "D2.core_frontal",
+       "sets_reps": "3x8/side",
+       "rest": "45s",
+       "circuit_label": "C2"
+      }
+     ]
+    },
+    {
+     "day_index": 3,
+     "day_label": "Athlete Day",
+     "exercises": [
+      {
+       "exercise_id": "SP-004",
+       "slot_key": "D3.accel_drill",
+       "sets_reps": "2x20 yd",
+       "rest": "walk back",
+       "notes": "Quick, crisp, high heel recovery."
+      },
+      {
+       "exercise_id": "SP-008",
+       "slot_key": "D3.accel_sprint",
+       "sets_reps": "4x20 yd",
+       "rest": "2-3 min",
+       "notes": "Full effort, full recovery. Stop the set if your times drop off."
+      },
+      {
+       "exercise_id": "SP-012",
+       "slot_key": "D3.accel_sprint_2",
+       "sets_reps": "4x30 m",
+       "rest": "3 min",
+       "notes": "Build smoothly to top speed over the first 20 m, then hold it."
+      },
+      {
+       "exercise_id": "SP-020",
+       "slot_key": "D3.cod",
+       "sets_reps": "3x3/side",
+       "rest": "75s",
+       "notes": "Plant hard, then explode out of the cut."
+      },
+      {
+       "exercise_id": "PL-012",
+       "slot_key": "D3.jump_bilateral",
+       "sets_reps": "3x4",
+       "rest": "90s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "PL-022",
+       "slot_key": "D3.jump_unilateral",
+       "sets_reps": "3x4/side",
+       "rest": "90s",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "RS-006",
+       "slot_key": "D3.reflexive",
+       "sets_reps": "3x6/side",
+       "rest": "60s",
+       "notes": "Throw hard, catch and redirect immediately."
+      },
+      {
+       "exercise_id": "HY-033",
+       "slot_key": "D3.calf",
+       "sets_reps": "3x8/side",
+       "rest": "60s",
+       "notes": "Heavier than before; pause at the bottom."
+      }
+     ]
+    },
+    {
+     "day_index": 4,
+     "day_label": "Lower Body Power",
+     "exercises": [
+      {
+       "exercise_id": "SP-006",
+       "slot_key": "D4.accel_sprint",
+       "sets_reps": "4x10 yd",
+       "rest": "90s",
+       "notes": "Fast and relaxed, no tension in the face or shoulders."
+      },
+      {
+       "exercise_id": "TC-003",
+       "slot_key": "D4.tc_lower",
+       "sets_reps": "4x3",
+       "rest": "90s",
+       "notes": "Jump tall; absorb quietly."
+      },
+      {
+       "exercise_id": "AS-008",
+       "slot_key": "D4.strength_uni",
+       "sets_reps": "3x4/side, RIR 2",
+       "rest": "75s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "PL-018",
+       "slot_key": "D4.jump_uni",
+       "sets_reps": "3x3/side",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "Contrast jump: go as soon as the strength set ends."
+      },
+      {
+       "exercise_id": "RS-014",
+       "slot_key": "D4.reflexive",
+       "sets_reps": "3x5/side",
+       "rest": "60s"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "week_number": 11,
+   "week_type": "build",
+   "days": [
+    {
+     "day_index": 1,
+     "day_label": "Lower Strength",
+     "exercises": [
+      {
+       "exercise_id": "TC-006",
+       "slot_key": "D1.tc_lower",
+       "sets_reps": "3x3",
+       "rest": "2 min",
+       "notes": "Fast elbows around the bar, catch tall."
+      },
+      {
+       "exercise_id": "AS-004",
+       "slot_key": "D1.strength_lower",
+       "sets_reps": "3x3, RIR 1",
+       "rest": "3 min",
+       "notes": "Move the bar fast. Do not grind."
+      },
+      {
+       "exercise_id": "AS-012",
+       "slot_key": "D1.hyp_lower",
+       "sets_reps": "3x5, RIR 2",
+       "rest": "2 min",
+       "circuit_label": "A1",
+       "notes": "Controlled lowering, fast hip drive."
+      },
+      {
+       "exercise_id": "CR-002",
+       "slot_key": "D1.core_sagittal",
+       "sets_reps": "3x10",
+       "rest": "90s",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "IR-013",
+       "slot_key": "D1.iso_adductor",
+       "sets_reps": "2x6/side",
+       "rest": "60s",
+       "notes": "Straight-leg Copenhagen dip: lower slowly, no bounce."
+      },
+      {
+       "exercise_id": "HY-012",
+       "slot_key": "D1.iso_posterior",
+       "sets_reps": "3x6/side",
+       "rest": "75s",
+       "notes": "Drive through the heel; hold the top for a beat."
+      }
+     ]
+    },
+    {
+     "day_index": 2,
+     "day_label": "Upper Strength 1",
+     "exercises": [
+      {
+       "exercise_id": "TC-027",
+       "slot_key": "D2.tc_upper",
+       "sets_reps": "3x5",
+       "rest": "90s",
+       "notes": "Explode off the floor, land soft."
+      },
+      {
+       "exercise_id": "AS-020",
+       "slot_key": "D2.abs_push",
+       "sets_reps": "3x3, RIR 1",
+       "rest": "2 min",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "AS-029",
+       "slot_key": "D2.abs_pull",
+       "sets_reps": "3x3, RIR 1",
+       "rest": "2 min",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "AS-024",
+       "slot_key": "D2.hyp_push",
+       "sets_reps": "2x6, RIR 2",
+       "rest": "90s",
+       "circuit_label": "B1"
+      },
+      {
+       "exercise_id": "AS-033",
+       "slot_key": "D2.hyp_pull",
+       "sets_reps": "2x6, RIR 2",
+       "rest": "90s",
+       "circuit_label": "B2"
+      },
+      {
+       "exercise_id": "HY-026",
+       "slot_key": "D2.shoulder_health",
+       "sets_reps": "2x15",
+       "rest": "45s",
+       "circuit_label": "C1"
+      },
+      {
+       "exercise_id": "CR-011",
+       "slot_key": "D2.core_frontal",
+       "sets_reps": "3x8/side",
+       "rest": "45s",
+       "circuit_label": "C2"
+      }
+     ]
+    },
+    {
+     "day_index": 3,
+     "day_label": "Athlete Day",
+     "exercises": [
+      {
+       "exercise_id": "SP-004",
+       "slot_key": "D3.accel_drill",
+       "sets_reps": "2x20 yd",
+       "rest": "walk back",
+       "notes": "Quick, crisp, high heel recovery."
+      },
+      {
+       "exercise_id": "SP-008",
+       "slot_key": "D3.accel_sprint",
+       "sets_reps": "3x20 yd",
+       "rest": "2-3 min",
+       "notes": "Full effort, full recovery. Stop the set if your times drop off."
+      },
+      {
+       "exercise_id": "SP-012",
+       "slot_key": "D3.accel_sprint_2",
+       "sets_reps": "4x30 m",
+       "rest": "3 min",
+       "notes": "Build smoothly to top speed over the first 20 m, then hold it."
+      },
+      {
+       "exercise_id": "SP-020",
+       "slot_key": "D3.cod",
+       "sets_reps": "3x4/side",
+       "rest": "75s",
+       "notes": "Plant hard, then explode out of the cut."
+      },
+      {
+       "exercise_id": "PL-012",
+       "slot_key": "D3.jump_bilateral",
+       "sets_reps": "3x4",
+       "rest": "90s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "PL-022",
+       "slot_key": "D3.jump_unilateral",
+       "sets_reps": "3x4/side",
+       "rest": "90s",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "RS-006",
+       "slot_key": "D3.reflexive",
+       "sets_reps": "3x6/side",
+       "rest": "60s",
+       "notes": "Throw hard, catch and redirect immediately."
+      },
+      {
+       "exercise_id": "HY-033",
+       "slot_key": "D3.calf",
+       "sets_reps": "3x8/side",
+       "rest": "60s",
+       "notes": "Heavier than before; pause at the bottom."
+      }
+     ]
+    },
+    {
+     "day_index": 4,
+     "day_label": "Lower Body Power",
+     "exercises": [
+      {
+       "exercise_id": "SP-006",
+       "slot_key": "D4.accel_sprint",
+       "sets_reps": "3x10 yd",
+       "rest": "90s",
+       "notes": "Fast and relaxed, no tension in the face or shoulders."
+      },
+      {
+       "exercise_id": "TC-003",
+       "slot_key": "D4.tc_lower",
+       "sets_reps": "3x3",
+       "rest": "90s",
+       "notes": "Jump tall; absorb quietly."
+      },
+      {
+       "exercise_id": "AS-008",
+       "slot_key": "D4.strength_uni",
+       "sets_reps": "3x3/side, RIR 1",
+       "rest": "75s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "PL-018",
+       "slot_key": "D4.jump_uni",
+       "sets_reps": "3x3/side",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "Contrast jump: go as soon as the strength set ends."
+      },
+      {
+       "exercise_id": "RS-014",
+       "slot_key": "D4.reflexive",
+       "sets_reps": "3x5/side",
+       "rest": "60s"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "week_number": 12,
+   "week_type": "test",
+   "days": [
+    {
+     "day_index": 1,
+     "day_label": "Lower Strength",
+     "exercises": [
+      {
+       "exercise_id": "TC-006",
+       "slot_key": "D1.tc_lower",
+       "sets_reps": "2x3",
+       "rest": "2 min",
+       "notes": "Fast elbows around the bar, catch tall."
+      },
+      {
+       "exercise_id": "AS-004",
+       "slot_key": "D1.strength_lower",
+       "sets_reps": "2x3, RIR 3",
+       "rest": "3 min",
+       "notes": "Move the bar fast. Do not grind."
+      },
+      {
+       "exercise_id": "AS-012",
+       "slot_key": "D1.hyp_lower",
+       "sets_reps": "2x5, RIR 4",
+       "rest": "2 min",
+       "circuit_label": "A1",
+       "notes": "Controlled lowering, fast hip drive."
+      },
+      {
+       "exercise_id": "CR-002",
+       "slot_key": "D1.core_sagittal",
+       "sets_reps": "2x8",
+       "rest": "90s",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "IR-013",
+       "slot_key": "D1.iso_adductor",
+       "sets_reps": "2x5/side",
+       "rest": "60s",
+       "notes": "Straight-leg Copenhagen dip: lower slowly, no bounce."
+      },
+      {
+       "exercise_id": "HY-012",
+       "slot_key": "D1.iso_posterior",
+       "sets_reps": "2x6/side",
+       "rest": "75s",
+       "notes": "Drive through the heel; hold the top for a beat."
+      }
+     ]
+    },
+    {
+     "day_index": 2,
+     "day_label": "Upper Strength 1",
+     "exercises": [
+      {
+       "exercise_id": "TC-027",
+       "slot_key": "D2.tc_upper",
+       "sets_reps": "2x5",
+       "rest": "90s",
+       "notes": "Explode off the floor, land soft."
+      },
+      {
+       "exercise_id": "AS-020",
+       "slot_key": "D2.abs_push",
+       "sets_reps": "2x3, RIR 3",
+       "rest": "2 min",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "AS-029",
+       "slot_key": "D2.abs_pull",
+       "sets_reps": "2x3, RIR 3",
+       "rest": "2 min",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "AS-024",
+       "slot_key": "D2.hyp_push",
+       "sets_reps": "2x5, RIR 4",
+       "rest": "90s",
+       "circuit_label": "B1"
+      },
+      {
+       "exercise_id": "AS-033",
+       "slot_key": "D2.hyp_pull",
+       "sets_reps": "2x5, RIR 4",
+       "rest": "90s",
+       "circuit_label": "B2"
+      },
+      {
+       "exercise_id": "HY-026",
+       "slot_key": "D2.shoulder_health",
+       "sets_reps": "2x12",
+       "rest": "45s",
+       "circuit_label": "C1"
+      },
+      {
+       "exercise_id": "CR-011",
+       "slot_key": "D2.core_frontal",
+       "sets_reps": "2x8/side",
+       "rest": "45s",
+       "circuit_label": "C2"
+      }
+     ]
+    },
+    {
+     "day_index": 3,
+     "day_label": "Athlete Day",
+     "exercises": [
+      {
+       "exercise_id": "SP-004",
+       "slot_key": "D3.accel_drill",
+       "sets_reps": "2x20 yd",
+       "rest": "walk back",
+       "notes": "Quick, crisp, high heel recovery. RETEST DAY: after warm-up, repeat the week 1 tests first and record them under Programs > My programs > Test results."
+      },
+      {
+       "exercise_id": "SP-008",
+       "slot_key": "D3.accel_sprint",
+       "sets_reps": "2x20 yd",
+       "rest": "2-3 min",
+       "notes": "Full effort, full recovery. Stop the set if your times drop off."
+      },
+      {
+       "exercise_id": "SP-012",
+       "slot_key": "D3.accel_sprint_2",
+       "sets_reps": "2x30 m",
+       "rest": "3 min",
+       "notes": "Build smoothly to top speed over the first 20 m, then hold it."
+      },
+      {
+       "exercise_id": "SP-020",
+       "slot_key": "D3.cod",
+       "sets_reps": "2x3/side",
+       "rest": "75s",
+       "notes": "Plant hard, then explode out of the cut."
+      },
+      {
+       "exercise_id": "PL-012",
+       "slot_key": "D3.jump_bilateral",
+       "sets_reps": "2x3",
+       "rest": "90s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "PL-022",
+       "slot_key": "D3.jump_unilateral",
+       "sets_reps": "2x3/side",
+       "rest": "90s",
+       "circuit_label": "A2"
+      },
+      {
+       "exercise_id": "RS-006",
+       "slot_key": "D3.reflexive",
+       "sets_reps": "2x6/side",
+       "rest": "60s",
+       "notes": "Throw hard, catch and redirect immediately."
+      },
+      {
+       "exercise_id": "HY-033",
+       "slot_key": "D3.calf",
+       "sets_reps": "2x8/side",
+       "rest": "60s",
+       "notes": "Heavier than before; pause at the bottom."
+      }
+     ]
+    },
+    {
+     "day_index": 4,
+     "day_label": "Lower Body Power",
+     "exercises": [
+      {
+       "exercise_id": "SP-006",
+       "slot_key": "D4.accel_sprint",
+       "sets_reps": "2x10 yd",
+       "rest": "90s",
+       "notes": "Fast and relaxed, no tension in the face or shoulders."
+      },
+      {
+       "exercise_id": "TC-003",
+       "slot_key": "D4.tc_lower",
+       "sets_reps": "2x3",
+       "rest": "90s",
+       "notes": "Jump tall; absorb quietly."
+      },
+      {
+       "exercise_id": "AS-008",
+       "slot_key": "D4.strength_uni",
+       "sets_reps": "2x3/side, RIR 3",
+       "rest": "75s",
+       "circuit_label": "A1"
+      },
+      {
+       "exercise_id": "PL-018",
+       "slot_key": "D4.jump_uni",
+       "sets_reps": "2x3/side",
+       "rest": "90s",
+       "circuit_label": "A2",
+       "notes": "Contrast jump: go as soon as the strength set ends."
+      },
+      {
+       "exercise_id": "RS-014",
+       "slot_key": "D4.reflexive",
+       "sets_reps": "2x5/side",
+       "rest": "60s"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

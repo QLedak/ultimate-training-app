@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "tsx scripts/seed.ts",
-    "test": "tsx tests/slot-engine.test.ts"
+    "seed:products": "tsx scripts/seed-products.ts",
+    "test": "tsx tests/slot-engine.test.ts && tsx tests/purchases.test.ts && tsx tests/versions.test.ts"
   },
   "dependencies": {
     "next": "14.2.5",

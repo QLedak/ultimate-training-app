@@ -105,6 +105,7 @@ export async function compileSeasonReview(
       .from("scheduled_sessions")
       .select("id")
       .eq("athlete_id", athleteId)
+      .is("purchase_id", null) // one-off purchased programs are not part of the season
       .gte("date", first.start_date as string)
       .lte("date", last.end_date as string);
     const ids = (sessions ?? []).map((s) => s.id as string);

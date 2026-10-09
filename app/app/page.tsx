@@ -27,6 +27,9 @@ export default function AthleteHomePage() {
   const { athlete, authError, loadError } = useAthleteSession("/app");
   const [sessions, setSessions] = useState<SessionSummary[] | null>(null);
   const [sessionsError, setSessionsError] = useState<string | null>(null);
+  // Athletes who only bought a one-off program have no intake / coached season.
+  const [hasCoached, setHasCoached] = useState<boolean | null>(null);
+  const [programCount, setProgramCount] = useState(0);
 
   useEffect(() => {
     if (!athlete) return;
@@ -37,6 +40,18 @@ export default function AthleteHomePage() {
         setSessions(data.sessions);
       })
       .catch((e) => setSessionsError(e instanceof Error ? e.message : String(e)));
+  }, [athlete]);
+
+  useEffect(() => {
+    if (!athlete) return;
+    fetch(`/api/athletes/${athlete.id}/purchases`)
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.error) throw new Error(d.error);
+        setHasCoached(!!d.has_coached_program);
+        setProgramCount((d.purchases ?? []).length);
+      })
+      .catch(() => setHasCoached(true)); // on error keep the existing (coached) layout
   }, [athlete]);
 
   if (authError === "no-athlete") {
@@ -119,10 +134,31 @@ export default function AthleteHomePage() {
           </div>
         )}
 
-        <NextSeasonBanner athleteId={athlete.id} />
-        <InjuryCheckInBanner athleteId={athlete.id} />
-        <BodyweightWidget athleteId={athlete.id} />
-        <RebuildRequestWidget athleteId={athlete.id} />
+        {programCount > 0 && (
+          <Link
+            href="/app/programs"
+            className="mb-4 block rounded-md border border-slate-200 px-4 py-3 text-center text-sm font-medium text-brand-dark hover:border-brand"
+          >
+            My programs ({programCount})
+          </Link>
+        )}
+
+        {hasCoached === false && (
+          <div className="mb-6 rounded-lg border border-slate-200 p-4 text-sm text-slate-600">
+            Want a season plan built around your schedule, equipment, and injuries?{" "}
+            <Link href="/app/intake" className="text-brand underline">Start your intake</Link>, or{" "}
+            <Link href="/programs" className="text-brand underline">browse stand-alone programs</Link>.
+          </div>
+        )}
+
+        {hasCoached !== false && (
+          <>
+            <NextSeasonBanner athleteId={athlete.id} />
+            <InjuryCheckInBanner athleteId={athlete.id} />
+            <BodyweightWidget athleteId={athlete.id} />
+            <RebuildRequestWidget athleteId={athlete.id} />
+          </>
+        )}
 
         <div className="mt-2 grid grid-cols-2 gap-3">
           <Link
@@ -131,20 +167,24 @@ export default function AthleteHomePage() {
           >
             Full schedule
           </Link>
-          <Link
-            href="/app/log/program"
-            className="rounded-md border border-slate-200 px-4 py-3 text-center text-sm font-medium text-brand-dark hover:border-brand"
-          >
-            Season overview
-          </Link>
+          {hasCoached !== false && (
+            <Link
+              href="/app/log/program"
+              className="rounded-md border border-slate-200 px-4 py-3 text-center text-sm font-medium text-brand-dark hover:border-brand"
+            >
+              Season overview
+            </Link>
+          )}
         </div>
 
-        <Link
-          href="/app/injuries"
-          className="mt-3 block rounded-md border border-slate-200 px-4 py-3 text-center text-sm font-medium text-brand-dark hover:border-brand"
-        >
-          Update injury status
-        </Link>
+        {hasCoached !== false && (
+          <Link
+            href="/app/injuries"
+            className="mt-3 block rounded-md border border-slate-200 px-4 py-3 text-center text-sm font-medium text-brand-dark hover:border-brand"
+          >
+            Update injury status
+          </Link>
+        )}
       </main>
     </>
   );

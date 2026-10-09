@@ -31,7 +31,8 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       .from("program_drafts")
       .select("id, version, parent_version, edit_source, edit_request, status, created_at")
       .eq("lineage_id", draft.lineage_id)
-      .order("version", { ascending: true }),
+      .order("version", { ascending: true })
+      .order("created_at", { ascending: true }),
     supabase
       .from("review_thread_entries")
       .select("*")
