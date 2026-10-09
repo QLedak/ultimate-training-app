@@ -26,9 +26,10 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     .order("day_index");
   if (sErr) return dbError("products/[id]", sErr);
 
-  const weeks = new Map<number, { week_number: number; week_type: string; days: Array<{ day_label: string; exercise_count: number }> }>();
+  type OutlineWeek = { week_number: number; week_type: string; days: Array<{ day_label: string; exercise_count: number }> };
+  const weeks = new Map<number, OutlineWeek>();
   for (const s of sessions ?? []) {
-    const w = weeks.get(s.week_number) ?? { week_number: s.week_number, week_type: s.week_type, days: [] };
+    const w: OutlineWeek = weeks.get(s.week_number) ?? { week_number: s.week_number, week_type: s.week_type, days: [] };
     w.days.push({ day_label: s.day_label, exercise_count: Array.isArray(s.prescribed_exercises) ? s.prescribed_exercises.length : 0 });
     weeks.set(s.week_number, w);
   }
