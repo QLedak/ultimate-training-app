@@ -6,6 +6,7 @@ import { Guided } from "../workout/Guided";
 import { clearProgress, loadProgress } from "../workout/storage";
 import { api } from "../lib/api";
 import { addDays, prettyDate, todayStr } from "../lib/dates";
+import { workoutIcon } from "../lib/workoutIcons";
 import { colors } from "../theme";
 import type { SessionDetail, SubmitPayload } from "../types";
 
@@ -142,6 +143,7 @@ export default function SessionScreen({ route, navigation }: any) {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={["left", "right", "bottom"]}>
       <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
         <View style={{ alignItems: "center", paddingVertical: 8 }}>
+          <Text style={{ fontSize: 40 }}>{workoutIcon(session.day_label).icon}</Text>
           <Text style={{ fontSize: 26, fontWeight: "800", color: colors.text, textAlign: "center" }}>{session.day_label}</Text>
           <Text style={{ color: colors.muted, marginTop: 2 }}>Workout Preview</Text>
           <Text style={{ color: colors.faint, fontSize: 13, marginTop: 4 }}>

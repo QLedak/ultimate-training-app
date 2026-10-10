@@ -7,6 +7,7 @@ import { useAuth } from "../lib/auth";
 import { api } from "../lib/api";
 import { addDays, dowShort, prettyDate, startOfWeekStr, todayStr } from "../lib/dates";
 import { currentPhaseInfo } from "../lib/phase";
+import { workoutIcon } from "../lib/workoutIcons";
 import { colors } from "../theme";
 import type { Phase, SessionSummary } from "../types";
 
@@ -139,14 +140,21 @@ export default function HomeScreen({ navigation }: any) {
                 key={d}
                 onPress={() => setSelected(d)}
                 style={{
-                  flex: 1, alignItems: "center", paddingVertical: 10, borderRadius: 12, borderWidth: 1,
+                  flex: 1, alignItems: "center", paddingVertical: 10, borderRadius: 12, borderWidth: 1, gap: 2,
                   borderColor: isSel ? colors.brand : colors.line,
                   backgroundColor: isSel ? colors.brandBg : colors.card,
                 }}
               >
                 <Text style={{ fontSize: 11, color: d === today ? colors.brand : colors.muted, fontWeight: "700" }}>{dowShort(d).toUpperCase()}</Text>
                 <Text style={{ fontSize: 18, color: colors.text, fontWeight: "800", marginVertical: 2 }}>{Number(d.slice(8))}</Text>
-                <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: dot ?? "transparent" }} />
+                <View
+                  style={{
+                    width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center",
+                    borderWidth: 2, borderColor: dot ?? "transparent", backgroundColor: dot ? colors.bg : "transparent",
+                  }}
+                >
+                  <Text style={{ fontSize: 14 }}>{list.length ? workoutIcon(list[0].day_label).icon : ""}</Text>
+                </View>
               </Pressable>
             );
           })}
@@ -174,7 +182,8 @@ export function SessionCard({ s, onPress, primary }: { s: SessionSummary; onPres
   return (
     <Card tone={primary && !s.status ? "brand" : undefined}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-        <View style={{ flexShrink: 1 }}>
+        <Text style={{ fontSize: 30, marginRight: 10 }}>{workoutIcon(s.day_label).icon}</Text>
+        <View style={{ flexShrink: 1, flex: 1 }}>
           <Text style={{ fontSize: 18, fontWeight: "800", color: colors.text }}>{s.day_label}</Text>
           <P small muted>
             {prettyDate(s.date)} · Week {s.week_number} · {s.exercise_count} exercises{s.week_type !== "build" ? ` · ${s.week_type}` : ""}

@@ -5,6 +5,8 @@ import {
   applyToAllSets, buildFinalPayload, buildSteps, firstUnloggedIndex, initStates, logSet, logSupersetSet, stepValue, updateSet,
 } from "../mobile/src/workout/state";
 import { currentPhaseInfo } from "../mobile/src/lib/phase";
+import { workoutIcon } from "../mobile/src/lib/workoutIcons";
+import { addMonthsStr, monthGridWeeks, monthTitle, startOfMonthStr } from "../mobile/src/lib/dates";
 import type { SessionExercise } from "../mobile/src/types";
 
 // 1. The phone's copies of shared logic must match the web originals exactly.
@@ -100,5 +102,27 @@ info = currentPhaseInfo(phases as any, "2026-12-01");
 assert.equal(info?.weekOfPhase, 6); // clamped to the phase length
 assert.equal(currentPhaseInfo([], "2026-07-14"), null);
 assert.equal(currentPhaseInfo([ph(1, "upcoming", "2027-01-01", "2027-02-01", 4)] as any, "2026-07-14"), null);
+
+// 11. Workout icons match the website's rules (+ sprint days).
+assert.equal(workoutIcon("Lower Body Power").icon, "💥");
+assert.equal(workoutIcon("Lower Strength").icon, "🦵");
+assert.equal(workoutIcon("Upper Strength 2").icon, "💪");
+assert.equal(workoutIcon("Athlete Day").icon, "⚡");
+assert.equal(workoutIcon("Energy Systems").icon, "🔥");
+assert.equal(workoutIcon("Sprint Day").icon, "🏃");
+assert.equal(workoutIcon("Something new").icon, "🏋️");
+
+// 12. Month grid: whole Sun-Sat weeks covering the month.
+const oct = monthGridWeeks("2026-10-15");
+assert.equal(oct[0][0], "2026-09-27"); // Oct 1 2026 is a Thursday
+assert.equal(oct[oct.length - 1][6], "2026-10-31");
+assert.ok(oct.every((w) => w.length === 7));
+assert.equal(oct.length, 5);
+assert.equal(startOfMonthStr("2026-10-15"), "2026-10-01");
+assert.equal(addMonthsStr("2026-12-20", 1), "2027-01-01");
+assert.equal(addMonthsStr("2026-01-31", -1), "2025-12-01");
+assert.equal(monthTitle("2026-10-15"), "October 2026");
+assert.equal(monthGridWeeks("2026-02-10").length, 4); // Feb 2026 starts on a Sunday and has 28 days
+assert.equal(monthGridWeeks("2027-02-10").length, 5);
 
 console.log("mobile logic tests passed");

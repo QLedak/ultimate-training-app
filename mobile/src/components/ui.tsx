@@ -71,10 +71,11 @@ export function Button({
   );
 }
 
-export function Field(props: TextInputProps & { label?: string }) {
-  const { label, style, ...rest } = props;
+export function Field(props: TextInputProps & { label?: string; inline?: boolean }) {
+  const { label, style, inline, ...rest } = props;
+  // `inline` = sits side by side with other fields in a row; otherwise it takes its natural height.
   return (
-    <View style={{ flex: 1 }}>
+    <View style={inline ? { flex: 1 } : undefined}>
       {label ? <Text style={s.label}>{label}</Text> : null}
       <TextInput placeholderTextColor={colors.faint} selectionColor={colors.brand} keyboardAppearance="dark" style={[s.input, style]} {...rest} />
     </View>
