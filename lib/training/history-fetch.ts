@@ -20,7 +20,7 @@ export function isSafeExerciseId(id: string): boolean {
 }
 
 /** Every logged row for an athlete (optionally one exercise, counting swaps), with its session date. */
-export async function fetchHistoryRows(athleteId: string, exerciseId?: string): Promise<{ rows: HistoryRow[]; error: unknown }> {
+export async function fetchHistoryRows(athleteId: string, exerciseId?: string): Promise<{ rows: HistoryRow[]; error: { message: string } | null }> {
   const supabase = getSupabaseAdmin();
   let q = supabase
     .from("logged_exercises")
