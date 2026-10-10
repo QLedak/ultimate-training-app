@@ -201,3 +201,8 @@ logging as a coached season.
   `lib/purchases/fulfill.ts` is the only code that grants access. Adding Stripe means: create a pending purchase +
   Checkout session in `POST /api/purchases`, and call `fulfillPurchase()` from a verified webhook.
 - Pages: `/programs` (public catalog), `/programs/[id]` (details + signup + schedule), `/app/programs` (progress + tests).
+
+
+## Phone app
+
+The Expo/React Native phone app lives in `mobile/` and talks to this same backend (it signs in with a Supabase token sent as `Authorization: Bearer`). See `mobile/README.md` for setup. `mobile/` is excluded from the web build (`tsconfig.json`, `.vercelignore`).

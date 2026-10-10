@@ -1,0 +1,20 @@
+// Brand: "Cone" orange + "Asphalt" dark grey. Brand rule: no white text on orange.
+export const colors = {
+  brand: "#F47A20",
+  brandDark: "#24282D",
+  text: "#24282D",
+  muted: "#64748B",
+  faint: "#94A3B8",
+  line: "#E2E8F0",
+  bg: "#FFFFFF",
+  bgSoft: "#F8FAFC",
+  green: "#16A34A",
+  greenBg: "#F0FDF4",
+  greenLine: "#86EFAC",
+  amber: "#B45309",
+  amberBg: "#FFFBEB",
+  amberLine: "#FCD34D",
+  red: "#DC2626",
+  redBg: "#FEF2F2",
+  brandBg: "#FFF4EA",
+};

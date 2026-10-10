@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/auth/session";
 import { getSupabaseAdmin } from "@/lib/db/supabase-admin";
 import { dbError } from "@/lib/api/error-response";
 
@@ -12,10 +12,7 @@ import { dbError } from "@/lib/api/error-response";
  * instead of trusting a client-supplied athleteId.
  */
 export async function GET() {
-  const supabaseAuth = getSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabaseAuth.auth.getUser();
+  const user = await getAuthUser();
 
   if (!user) {
     return NextResponse.json({ error: "Not signed in" }, { status: 401 });

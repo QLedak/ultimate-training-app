@@ -9,7 +9,7 @@
     "lint": "next lint",
     "seed": "tsx scripts/seed.ts",
     "seed:products": "tsx scripts/seed-products.ts",
-    "test": "tsx tests/slot-engine.test.ts && tsx tests/purchases.test.ts && tsx tests/versions.test.ts"
+    "test": "tsx tests/slot-engine.test.ts && tsx tests/purchases.test.ts && tsx tests/versions.test.ts && tsx tests/auth.test.ts && tsx tests/mobile.test.ts"
   },
   "dependencies": {
     "next": "14.2.5",

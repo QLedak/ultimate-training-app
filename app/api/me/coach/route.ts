@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getAuthUser } from "@/lib/auth/session";
 import { getSupabaseAdmin } from "@/lib/db/supabase-admin";
 import { dbError } from "@/lib/api/error-response";
 
@@ -7,10 +7,7 @@ import { dbError } from "@/lib/api/error-response";
  * GET /api/me/coach — the coach-side counterpart to /api/me/athlete.
  */
 export async function GET() {
-  const supabaseAuth = getSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabaseAuth.auth.getUser();
+  const user = await getAuthUser();
 
   if (!user) {
     return NextResponse.json({ error: "Not signed in" }, { status: 401 });
