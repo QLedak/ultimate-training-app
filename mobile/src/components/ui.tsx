@@ -19,14 +19,17 @@ export function Screen({ children, scroll = true, style }: { children: React.Rea
   );
 }
 
-export function H1({ children }: { children: React.ReactNode }) {
-  return <Text style={s.h1}>{children}</Text>;
+export function H1({ children, style }: { children: React.ReactNode; style?: any }) {
+  return <Text style={[s.h1, style]}>{children}</Text>;
 }
 export function H2({ children }: { children: React.ReactNode }) {
   return <Text style={s.h2}>{children}</Text>;
 }
 export function P({ children, muted, small, style }: { children: React.ReactNode; muted?: boolean; small?: boolean; style?: any }) {
   return <Text style={[s.p, muted && { color: colors.muted }, small && { fontSize: 12 }, style]}>{children}</Text>;
+}
+export function Caps({ children, color }: { children: React.ReactNode; color?: string }) {
+  return <Text style={[s.caps, color ? { color } : null]}>{children}</Text>;
 }
 
 export function Card({ children, tone, style }: { children: React.ReactNode; tone?: "green" | "amber" | "brand"; style?: StyleProp<ViewStyle> }) {
@@ -51,8 +54,8 @@ export function Button({
       </Pressable>
     );
   }
-  const bg = variant === "primary" ? colors.brand : variant === "dark" ? colors.brandDark : colors.bg;
-  const fg = variant === "primary" ? colors.brandDark : variant === "dark" ? "#FFFFFF" : colors.text;
+  const bg = variant === "primary" ? colors.brand : variant === "dark" ? colors.cardAlt : "transparent";
+  const fg = variant === "primary" ? colors.onBrand : colors.text;
   return (
     <Pressable
       onPress={onPress}
@@ -73,7 +76,7 @@ export function Field(props: TextInputProps & { label?: string }) {
   return (
     <View style={{ flex: 1 }}>
       {label ? <Text style={s.label}>{label}</Text> : null}
-      <TextInput placeholderTextColor={colors.faint} style={[s.input, style]} {...rest} />
+      <TextInput placeholderTextColor={colors.faint} selectionColor={colors.brand} keyboardAppearance="dark" style={[s.input, style]} {...rest} />
     </View>
   );
 }
@@ -103,16 +106,17 @@ export function ProgressBar({ pct }: { pct: number }) {
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   content: { padding: 16, paddingBottom: 40, gap: 12 },
-  h1: { fontSize: 24, fontWeight: "700", color: colors.brandDark },
-  h2: { fontSize: 17, fontWeight: "600", color: colors.brandDark },
+  h1: { fontSize: 24, fontWeight: "800", color: colors.text },
+  h2: { fontSize: 17, fontWeight: "700", color: colors.text },
   p: { fontSize: 15, color: colors.text },
-  card: { borderWidth: 1, borderColor: colors.line, borderRadius: 12, padding: 14, gap: 8, backgroundColor: colors.bg },
-  btn: { minHeight: 48, borderRadius: 10, borderWidth: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 16 },
-  btnText: { fontSize: 16, fontWeight: "600" },
-  link: { fontSize: 14, color: colors.brand, textDecorationLine: "underline", fontWeight: "500" },
+  caps: { fontSize: 11, fontWeight: "700", letterSpacing: 1, color: colors.muted, textTransform: "uppercase" },
+  card: { borderWidth: 1, borderColor: colors.line, borderRadius: 14, padding: 14, gap: 8, backgroundColor: colors.card },
+  btn: { minHeight: 50, borderRadius: 12, borderWidth: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 16 },
+  btnText: { fontSize: 16, fontWeight: "700" },
+  link: { fontSize: 14, color: colors.brand, fontWeight: "600" },
   label: { fontSize: 12, color: colors.muted, marginBottom: 4 },
-  input: { borderWidth: 1, borderColor: colors.line, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 10, fontSize: 16, color: colors.text, backgroundColor: colors.bg },
-  error: { color: colors.red, backgroundColor: colors.redBg, padding: 10, borderRadius: 8, fontSize: 14 },
-  barTrack: { height: 8, borderRadius: 4, backgroundColor: "#F1F5F9", overflow: "hidden" },
-  barFill: { height: 8, backgroundColor: colors.brand },
+  input: { borderWidth: 1, borderColor: colors.line, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 12, fontSize: 16, color: colors.text, backgroundColor: colors.cardAlt },
+  error: { color: "#FCA5A5", backgroundColor: colors.redBg, padding: 10, borderRadius: 8, fontSize: 14, overflow: "hidden" },
+  barTrack: { height: 6, borderRadius: 3, backgroundColor: colors.cardAlt, overflow: "hidden" },
+  barFill: { height: 6, backgroundColor: colors.brand },
 });

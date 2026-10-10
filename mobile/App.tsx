@@ -9,7 +9,7 @@ export default function App() {
     <SafeAreaProvider>
       <AuthProvider>
         <Navigation />
-        <StatusBar style="dark" />
+        <StatusBar style="light" />
       </AuthProvider>
     </SafeAreaProvider>
   );

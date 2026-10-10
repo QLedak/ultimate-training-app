@@ -1,13 +1,14 @@
 import React, { useCallback, useState } from "react";
-import { RefreshControl, ScrollView, Text, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
-import { Button, Card, ErrorText, H1, H2, Loading, P } from "../components/ui";
+import { Button, Card, Caps, ErrorText, H1, H2, Loading, P } from "../components/ui";
 import { useAuth } from "../lib/auth";
 import { api } from "../lib/api";
-import { prettyDate, todayStr } from "../lib/dates";
+import { addDays, dowShort, prettyDate, startOfWeekStr, todayStr } from "../lib/dates";
+import { currentPhaseInfo } from "../lib/phase";
 import { colors } from "../theme";
-import type { PurchaseRow, SessionSummary } from "../types";
+import type { Phase, SessionSummary } from "../types";
 
 export function statusLabel(status: SessionSummary["status"], date: string) {
   if (status === "completed") return "Logged";
@@ -24,8 +25,12 @@ export function statusColor(status: SessionSummary["status"], date: string) {
 
 export default function HomeScreen({ navigation }: any) {
   const { athlete, noAthlete, profileError, signOut, refreshProfile } = useAuth();
-  const [sessions, setSessions] = useState<SessionSummary[] | null>(null);
-  const [purchases, setPurchases] = useState<PurchaseRow[]>([]);
+  const today = todayStr();
+  const [weekStart, setWeekStart] = useState(startOfWeekStr(today));
+  const [selected, setSelected] = useState(today);
+  const [week, setWeek] = useState<SessionSummary[] | null>(null);
+  const [missed, setMissed] = useState<SessionSummary[]>([]);
+  const [phases, setPhases] = useState<Phase[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -33,30 +38,26 @@ export default function HomeScreen({ navigation }: any) {
     if (!athlete) return;
     setError(null);
     try {
-      const [s, p] = await Promise.all([
-        api<{ sessions: SessionSummary[] }>(`/api/athletes/${athlete.id}/sessions?daysBack=7&daysForward=7`),
-        api<{ purchases: PurchaseRow[] }>(`/api/athletes/${athlete.id}/purchases`).catch(() => ({ purchases: [] as PurchaseRow[] })),
+      const [w, m, p] = await Promise.all([
+        api<{ sessions: SessionSummary[] }>(`/api/athletes/${athlete.id}/sessions?start=${weekStart}&end=${addDays(weekStart, 6)}`),
+        api<{ sessions: SessionSummary[] }>(`/api/athletes/${athlete.id}/sessions?daysBack=7&daysForward=0`),
+        api<{ phases: Phase[] }>(`/api/athletes/${athlete.id}/program`).catch(() => ({ phases: [] as Phase[] })),
       ]);
-      setSessions(s.sessions);
-      setPurchases(p.purchases ?? []);
+      setWeek(w.sessions);
+      setMissed(m.sessions.filter((x) => x.date < todayStr() && !x.status));
+      setPhases(p.phases ?? []);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     }
-  }, [athlete]);
+  }, [athlete, weekStart]);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
 
-  async function onRefresh() {
-    setRefreshing(true);
-    await load();
-    setRefreshing(false);
-  }
-
   if (noAthlete) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#fff", padding: 24, justifyContent: "center", gap: 12 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg, padding: 24, justifyContent: "center", gap: 12 }}>
         <H1>Finish setting up</H1>
-        <P muted>Your account doesn't have an athlete profile yet. Complete intake on the website, then pull to refresh here.</P>
+        <P muted>Your account doesn't have an athlete profile yet. Complete intake on the website, then check again here.</P>
         <Button title="Check again" onPress={refreshProfile} />
         <Button title="Sign out" variant="link" onPress={signOut} />
       </SafeAreaView>
@@ -64,7 +65,7 @@ export default function HomeScreen({ navigation }: any) {
   }
   if (profileError) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#fff", padding: 24, justifyContent: "center", gap: 12 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg, padding: 24, justifyContent: "center", gap: 12 }}>
         <ErrorText>{profileError}</ErrorText>
         <Button title="Try again" onPress={refreshProfile} />
         <Button title="Sign out" variant="link" onPress={signOut} />
@@ -72,77 +73,116 @@ export default function HomeScreen({ navigation }: any) {
     );
   }
 
-  const today = todayStr();
-  const todays = (sessions ?? []).filter((x) => x.date === today);
-  const upcoming = (sessions ?? []).filter((x) => x.date > today && !x.status).slice(0, 3);
-  const missed = (sessions ?? []).filter((x) => x.date < today && !x.status).slice(-3);
+  const info = currentPhaseInfo(phases, today);
+  const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  const dayList = (week ?? []).filter((x) => x.date === selected);
+  const thisWeek = startOfWeekStr(today);
 
   return (
     <ScrollView
-      style={{ backgroundColor: "#fff" }}
-      contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 40 }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      style={{ backgroundColor: colors.bg }}
+      contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: 40 }}
+      refreshControl={<RefreshControl tintColor={colors.brand} refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} />}
     >
-      <H1>Hey{athlete?.name ? `, ${athlete.name.split(" ")[0]}` : ""}</H1>
       <ErrorText>{error}</ErrorText>
-      {sessions === null && !error ? <Loading /> : null}
 
-      {sessions ? (
-        <>
-          <H2>Today</H2>
-          {todays.length === 0 ? (
-            <Card><P muted>No workout scheduled today.</P></Card>
-          ) : (
-            todays.map((x) => <SessionCard key={x.id} s={x} primary onPress={() => navigation.navigate("Session", { sessionId: x.id })} />)
-          )}
-
-          {missed.length ? (
-            <>
-              <H2>Missed</H2>
-              {missed.map((x) => <SessionCard key={x.id} s={x} onPress={() => navigation.navigate("Session", { sessionId: x.id })} />)}
-            </>
-          ) : null}
-
-          {upcoming.length ? (
-            <>
-              <H2>Coming up</H2>
-              {upcoming.map((x) => <SessionCard key={x.id} s={x} onPress={() => navigation.navigate("Session", { sessionId: x.id })} />)}
-            </>
-          ) : null}
-        </>
-      ) : null}
-
-      {purchases.length ? (
+      {info ? (
         <Card>
-          <H2>My programs</H2>
-          {purchases.map((p) => (
-            <View key={p.id}>
-              <P>{p.product?.title ?? p.product_id}</P>
-              <P small muted>{p.logged_sessions} of {p.total_sessions} workouts logged</P>
-            </View>
-          ))}
-          <Button title="Open My programs" variant="secondary" onPress={() => navigation.navigate("Programs")} />
+          <Caps color={colors.brand}>Phase {info.index + 1} of {info.phases.length}</Caps>
+          <Text style={{ color: colors.text, fontSize: 22, fontWeight: "800" }}>{info.active.phase_name}</Text>
+          <View style={{ flexDirection: "row", gap: 4, marginVertical: 4 }}>
+            {info.phases.map((p, i) => (
+              <View key={p.id} style={{ flex: Math.max(1, p.week_count), gap: 4 }}>
+                <View
+                  style={{
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: i < info.index ? "#8A4A19" : i === info.index ? colors.brand : colors.cardAlt,
+                  }}
+                />
+              </View>
+            ))}
+          </View>
+          <Text style={{ color: colors.muted, fontSize: 13 }}>
+            Week {info.weekOfPhase} of {info.active.week_count} · ends {prettyDate(info.active.end_date)}
+          </Text>
         </Card>
       ) : null}
 
-      <Button title="Sign out" variant="link" onPress={signOut} style={{ alignSelf: "center", marginTop: 12 }} />
+      <View>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+          <Pressable hitSlop={10} onPress={() => { const w = addDays(weekStart, -7); setWeekStart(w); setSelected(w); setWeek(null); }}>
+            <Text style={{ color: colors.brand, fontSize: 22 }}>‹</Text>
+          </Pressable>
+          <View style={{ alignItems: "center" }}>
+            <Caps>{weekStart === thisWeek ? "This week" : `${prettyDate(weekStart)} – ${prettyDate(addDays(weekStart, 6))}`}</Caps>
+            {weekStart !== thisWeek ? (
+              <Button title="Back to this week" variant="link" onPress={() => { setWeekStart(thisWeek); setSelected(today); setWeek(null); }} />
+            ) : null}
+          </View>
+          <Pressable hitSlop={10} onPress={() => { const w = addDays(weekStart, 7); setWeekStart(w); setSelected(w); setWeek(null); }}>
+            <Text style={{ color: colors.brand, fontSize: 22 }}>›</Text>
+          </Pressable>
+        </View>
+
+        <View style={{ flexDirection: "row", gap: 6 }}>
+          {days.map((d) => {
+            const list = (week ?? []).filter((x) => x.date === d);
+            const isSel = d === selected;
+            const dot =
+              list.length === 0 ? null
+              : list.every((x) => x.status === "completed") ? colors.green
+              : list.some((x) => x.status) ? colors.amber
+              : d < today ? colors.red : colors.brand;
+            return (
+              <Pressable
+                key={d}
+                onPress={() => setSelected(d)}
+                style={{
+                  flex: 1, alignItems: "center", paddingVertical: 10, borderRadius: 12, borderWidth: 1,
+                  borderColor: isSel ? colors.brand : colors.line,
+                  backgroundColor: isSel ? colors.brandBg : colors.card,
+                }}
+              >
+                <Text style={{ fontSize: 11, color: d === today ? colors.brand : colors.muted, fontWeight: "700" }}>{dowShort(d).toUpperCase()}</Text>
+                <Text style={{ fontSize: 18, color: colors.text, fontWeight: "800", marginVertical: 2 }}>{Number(d.slice(8))}</Text>
+                <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: dot ?? "transparent" }} />
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+
+      <H2>{selected === today ? "Today" : prettyDate(selected)}</H2>
+      {week === null && !error ? <Loading /> : null}
+      {week && dayList.length === 0 ? <Card><P muted>Rest day. Nothing scheduled.</P></Card> : null}
+      {dayList.map((x) => (
+        <SessionCard key={x.id} s={x} primary={selected === today} onPress={() => navigation.navigate("Session", { sessionId: x.id })} />
+      ))}
+
+      {missed.length ? (
+        <>
+          <H2>Missed</H2>
+          {missed.map((x) => <SessionCard key={x.id} s={x} onPress={() => navigation.navigate("Session", { sessionId: x.id })} />)}
+        </>
+      ) : null}
     </ScrollView>
   );
 }
 
 export function SessionCard({ s, onPress, primary }: { s: SessionSummary; onPress: () => void; primary?: boolean }) {
   return (
-    <Card tone={primary ? "brand" : undefined}>
+    <Card tone={primary && !s.status ? "brand" : undefined}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
         <View style={{ flexShrink: 1 }}>
-          <Text style={{ fontSize: 16, fontWeight: "700", color: colors.brandDark }}>{s.day_label}</Text>
+          <Text style={{ fontSize: 18, fontWeight: "800", color: colors.text }}>{s.day_label}</Text>
           <P small muted>
             {prettyDate(s.date)} · Week {s.week_number} · {s.exercise_count} exercises{s.week_type !== "build" ? ` · ${s.week_type}` : ""}
           </P>
         </View>
-        <Text style={{ fontSize: 12, fontWeight: "700", color: statusColor(s.status, s.date) }}>{statusLabel(s.status, s.date)}</Text>
+        <Text style={{ fontSize: 12, fontWeight: "800", color: statusColor(s.status, s.date) }}>{statusLabel(s.status, s.date)}</Text>
       </View>
-      <Button title={s.status ? "Open" : primary ? "Start workout" : "View"} variant={primary && !s.status ? "primary" : "secondary"} onPress={onPress} />
+      <Button title={s.status ? "Open" : primary ? "Start" : "View"} variant={primary && !s.status ? "primary" : "secondary"} onPress={onPress} />
     </Card>
   );
 }

@@ -251,3 +251,17 @@ export function formatClock(total: number): string {
   const t = Math.max(0, Math.floor(total));
   return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`;
 }
+
+/** +/- stepper for the weight and reps boxes; never below zero, no trailing zeros. */
+export function stepValue(current: string, delta: number): string {
+  const v = parseFloat(current);
+  const base = Number.isFinite(v) ? v : 0;
+  const next = Math.max(0, Math.round((base + delta) * 100) / 100);
+  return String(next);
+}
+
+/** Index of the first set not yet logged, or null when every set is logged. */
+export function firstUnloggedIndex(sets: { logged: boolean }[]): number | null {
+  const i = sets.findIndex((s) => !s.logged);
+  return i === -1 ? null : i;
+}

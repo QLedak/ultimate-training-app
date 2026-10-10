@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { KeyboardAvoidingView, Platform, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button, ErrorText, Field, H1, P } from "../components/ui";
+import { Button, ErrorText, Field, P } from "../components/ui";
 import { useAuth } from "../lib/auth";
+import { colors } from "../theme";
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
@@ -24,10 +25,13 @@ export default function LoginScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1, justifyContent: "center", padding: 24 }}>
         <View style={{ gap: 14 }}>
-          <H1>Ultimate Training</H1>
+          <View style={{ marginBottom: 8 }}>
+            <Text style={{ fontSize: 13, fontWeight: "800", letterSpacing: 2, color: colors.brand }}>TRUE</Text>
+            <Text style={{ fontSize: 32, fontWeight: "800", color: colors.text }}>Ultimate Training</Text>
+          </View>
           <P muted>Sign in with the account you use on the website.</P>
           <Field label="Email" value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="username" />
           <Field label="Password" value={password} onChangeText={setPassword} secureTextEntry textContentType="password" onSubmitEditing={submit} />

@@ -33,30 +33,23 @@ export function WorkTimer({
   const atTarget = targetSeconds > 0 && elapsed >= targetSeconds;
   const remaining = running ? Math.max(0, targetSeconds - elapsed) : targetSeconds;
   return (
-    <View style={box(atTarget ? colors.greenBg : colors.bg, atTarget ? colors.greenLine : colors.line)}>
+    <View style={box(atTarget ? colors.greenBg : colors.card, atTarget ? colors.greenLine : colors.line)}>
       <Text style={{ fontSize: 12, color: colors.muted }}>Target: {formatClock(targetSeconds)}</Text>
       <Text style={big}>{formatClock(remaining)}</Text>
-      {atTarget ? <Text style={{ fontSize: 12, color: colors.green, fontWeight: "600" }}>Time's up - stop when ready</Text> : null}
+      {atTarget ? <Text style={{ fontSize: 12, color: colors.green, fontWeight: "700" }}>Time's up - stop when ready</Text> : null}
       {running && !atTarget ? <Text style={{ fontSize: 12, color: colors.faint }}>{formatClock(elapsed)} elapsed</Text> : null}
       <View style={{ alignSelf: "stretch", marginTop: 8 }}>
         {!running ? (
           <Button title="Start timer" onPress={() => setRunning(true)} />
         ) : (
-          <Button
-            title="Stop"
-            variant="dark"
-            onPress={() => {
-              setRunning(false);
-              onDone(Math.max(1, elapsed));
-            }}
-          />
+          <Button title="Stop" variant="dark" onPress={() => { setRunning(false); onDone(Math.max(1, elapsed)); }} />
         )}
       </View>
     </View>
   );
 }
 
-const big = { fontSize: 34, fontWeight: "700" as const, color: colors.brandDark, fontVariant: ["tabular-nums" as const] };
+const big = { fontSize: 40, fontWeight: "800" as const, color: colors.text, fontVariant: ["tabular-nums" as const] };
 const box = (bg: string, border: string) => ({
-  borderWidth: 1, borderColor: border, backgroundColor: bg, borderRadius: 10, padding: 10, alignItems: "center" as const,
+  borderWidth: 1, borderColor: border, backgroundColor: bg, borderRadius: 14, padding: 14, alignItems: "center" as const,
 });

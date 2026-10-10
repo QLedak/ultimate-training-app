@@ -117,3 +117,42 @@ export type PurchaseRow = {
   next_session: { id: string; date: string; week_number: number; day_label: string } | null;
   tests: Array<{ test_key: string; week_number: number; value: number }>;
 };
+
+export type HistorySet = { weight: number | null; reps: number | null; rir: number | null };
+export type HistoryEntry = {
+  date: string;
+  session_id: string;
+  sets: HistorySet[];
+  top_weight: number | null;
+  best_est_1rm: number | null;
+  volume: number;
+  is_pr: boolean;
+};
+export type ExerciseHistory = {
+  exercise_id: string;
+  exercise_name: string;
+  summary: {
+    total_sessions: number;
+    best_est_1rm: { value: number; date: string } | null;
+    heaviest: { weight: number; reps: number | null; date: string } | null;
+  };
+  entries: HistoryEntry[]; // newest first
+};
+export type ExerciseListItem = {
+  exercise_id: string;
+  exercise_name: string;
+  times_logged: number;
+  last_date: string | null;
+  best_est_1rm: number | null;
+  heaviest_weight: number | null;
+};
+export type Phase = {
+  id: string;
+  phase_number: number;
+  phase_name: string;
+  goal: string;
+  start_date: string;
+  end_date: string;
+  week_count: number;
+  status: "upcoming" | "active" | "completed" | "superseded";
+};

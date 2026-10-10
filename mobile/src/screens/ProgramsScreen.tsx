@@ -46,9 +46,9 @@ export default function ProgramsScreen({ navigation }: any) {
 
   return (
     <ScrollView
-      style={{ backgroundColor: "#fff" }}
+      style={{ backgroundColor: colors.bg }}
       contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 40 }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} />}
+      refreshControl={<RefreshControl tintColor={colors.brand} refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} />}
     >
       <H1>My programs</H1>
       <ErrorText>{error}</ErrorText>
@@ -90,12 +90,13 @@ export default function ProgramsScreen({ navigation }: any) {
                         <View key={wk} style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                           <Text style={{ width: 52, fontSize: 13, color: colors.muted }}>Wk {wk}</Text>
                           <TextInput
+                            keyboardAppearance="dark"
                             value={drafts[dk] ?? ""}
                             onChangeText={(v) => setDrafts((d) => ({ ...d, [dk]: v }))}
                             placeholder={existing ? String(existing.value) : "-"}
                             placeholderTextColor={existing ? colors.text : colors.faint}
                             keyboardType="decimal-pad"
-                            style={{ flex: 1, borderWidth: 1, borderColor: colors.line, borderRadius: 8, padding: 8, fontSize: 16 }}
+                            style={{ flex: 1, borderWidth: 1, borderColor: colors.line, borderRadius: 8, padding: 8, fontSize: 16, color: colors.text, backgroundColor: colors.cardAlt }}
                           />
                           <Button title="Save" variant="secondary" disabled={!drafts[dk]} onPress={() => saveTest(p.id, t.key, wk)} style={{ minHeight: 40, paddingHorizontal: 12 }} />
                           {saved === dk ? <Text style={{ color: colors.green, fontSize: 12 }}>Saved</Text> : null}

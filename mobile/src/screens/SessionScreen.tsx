@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Card, ErrorText, H1, H2, Loading, P, Screen } from "../components/ui";
 import { Guided } from "../workout/Guided";
 import { clearProgress, loadProgress } from "../workout/storage";
@@ -15,6 +16,8 @@ const SKIP_REASONS = [
   { value: "no_equipment", label: "No equipment available" },
   { value: "other", label: "Other" },
 ];
+
+const inputStyle = { borderWidth: 1, borderColor: colors.line, borderRadius: 10, padding: 12, fontSize: 16, color: colors.text, backgroundColor: colors.cardAlt } as const;
 
 export default function SessionScreen({ route, navigation }: any) {
   const sessionId: string = route.params.sessionId;
@@ -44,9 +47,7 @@ export default function SessionScreen({ route, navigation }: any) {
     }
   }, [sessionId]);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useEffect(() => { load(); }, [load]);
 
   async function submitLog(payload: SubmitPayload) {
     setSubmitError(null);
@@ -63,10 +64,7 @@ export default function SessionScreen({ route, navigation }: any) {
   }
 
   async function reschedule() {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
-      setPanelError("Use the format YYYY-MM-DD.");
-      return;
-    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(newDate)) return setPanelError("Use the format YYYY-MM-DD.");
     setPanelBusy(true);
     setPanelError(null);
     try {
@@ -112,7 +110,7 @@ export default function SessionScreen({ route, navigation }: any) {
   if (saved) {
     return (
       <Screen>
-        <View style={{ paddingTop: 60, gap: 12, alignItems: "stretch" }}>
+        <View style={{ paddingTop: 60, gap: 12 }}>
           <H1>Logged.</H1>
           <P muted>Nice work. On to the next one.</P>
           <Button title="Done" onPress={() => navigation.popToTop()} />
@@ -138,100 +136,104 @@ export default function SessionScreen({ route, navigation }: any) {
   }
 
   const loggedCount = exercises.filter((e) => e.logged).length;
+  const warmups = exercises.reduce((n, e) => n + (e.warmup?.length ?? 0), 0);
 
   return (
-    <Screen>
-      <View>
-        <H1>{session.day_label}</H1>
-        <P muted>
-          {prettyDate(session.date)} · Week {session.week_number}
-          {session.week_type !== "build" ? ` · ${session.week_type} week` : ""}
-        </P>
-      </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={["left", "right", "bottom"]}>
+      <ScrollView contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
+        <View style={{ alignItems: "center", paddingVertical: 8 }}>
+          <Text style={{ fontSize: 26, fontWeight: "800", color: colors.text, textAlign: "center" }}>{session.day_label}</Text>
+          <Text style={{ color: colors.muted, marginTop: 2 }}>Workout Preview</Text>
+          <Text style={{ color: colors.faint, fontSize: 13, marginTop: 4 }}>
+            {prettyDate(session.date)} · Week {session.week_number}
+            {session.week_type !== "build" ? ` · ${session.week_type} week` : ""}
+          </Text>
+        </View>
 
-      {session_log ? (
-        <Card tone={session_log.status === "completed" ? "green" : "amber"}>
-          <P>
-            {session_log.status === "completed" ? "Logged - completed." : session_log.status === "partially_completed" ? "Logged - partially completed." : "Skipped."}
-            {loggedCount ? ` ${loggedCount} of ${exercises.length} exercises have results.` : ""}
-          </P>
-        </Card>
-      ) : null}
-
-      <Button
-        title={hasProgress ? "Resume workout" : session_log ? "Edit / re-log workout" : "Start workout"}
-        onPress={() => setMode("guided")}
-      />
-
-      <H2>Today's exercises</H2>
-      {exercises.map((e) => (
-        <Card key={e.exercise_id} style={{ paddingVertical: 10 }}>
-          <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 8 }}>
-            <Text style={{ fontSize: 15, fontWeight: "600", color: colors.text, flexShrink: 1 }}>
-              {e.circuit_label ? `${e.circuit_label}. ` : ""}
-              {e.exercise_name}
-            </Text>
-            {e.logged ? <Text style={{ color: colors.green, fontWeight: "700" }}>✓</Text> : null}
-          </View>
-          <P small muted>{e.prescribed_target || "-"}{e.rest ? ` · rest ${e.rest}` : ""}</P>
-        </Card>
-      ))}
-
-      <View style={{ flexDirection: "row", gap: 16, marginTop: 4 }}>
-        <Button title="Reschedule" variant="link" onPress={() => { setPanel(panel === "reschedule" ? null : "reschedule"); setPanelError(null); }} />
-        {!session_log ? (
-          <Button title="Skip this workout" variant="link" onPress={() => { setPanel(panel === "skip" ? null : "skip"); setPanelError(null); }} />
+        {session_log ? (
+          <Card tone={session_log.status === "completed" ? "green" : "amber"}>
+            <P>
+              {session_log.status === "completed" ? "Logged - completed." : session_log.status === "partially_completed" ? "Logged - partially completed." : "Skipped."}
+              {loggedCount ? ` ${loggedCount} of ${exercises.length} exercises have results.` : ""}
+            </P>
+          </Card>
         ) : null}
-      </View>
 
-      {panel === "reschedule" ? (
-        <Card>
-          <H2>Move to another day</H2>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-            <Button title="-1" variant="secondary" onPress={() => setNewDate((d) => addDays(d || session.date, -1))} style={{ minWidth: 56 }} />
-            <TextInput
-              value={newDate}
-              onChangeText={setNewDate}
-              autoCapitalize="none"
-              style={{ flex: 1, borderWidth: 1, borderColor: colors.line, borderRadius: 8, padding: 10, fontSize: 16, textAlign: "center" }}
-            />
-            <Button title="+1" variant="secondary" onPress={() => setNewDate((d) => addDays(d || session.date, 1))} style={{ minWidth: 56 }} />
-          </View>
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            <Button title="Today" variant="secondary" onPress={() => setNewDate(todayStr())} style={{ flex: 1 }} />
-            <Button title="Tomorrow" variant="secondary" onPress={() => setNewDate(addDays(todayStr(), 1))} style={{ flex: 1 }} />
-          </View>
-          <P small muted>{/^\d{4}-\d{2}-\d{2}$/.test(newDate) ? prettyDate(newDate) : "Format: YYYY-MM-DD"}</P>
-          <ErrorText>{panelError}</ErrorText>
-          <Button title="Save new date" onPress={reschedule} loading={panelBusy} />
-        </Card>
-      ) : null}
+        {warmups > 0 ? (
+          <Card style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Text style={{ fontSize: 18 }}>🔥</Text>
+            <Text style={{ color: colors.text, fontWeight: "700", fontSize: 16 }}>Warm-up sets included</Text>
+          </Card>
+        ) : null}
 
-      {panel === "skip" ? (
-        <Card>
-          <H2>Why are you skipping?</H2>
-          {SKIP_REASONS.map((r) => (
-            <Pressable
-              key={r.value}
-              onPress={() => setSkipReason(r.value)}
-              style={{ padding: 12, borderRadius: 8, borderWidth: 1, borderColor: skipReason === r.value ? colors.brand : colors.line, backgroundColor: skipReason === r.value ? colors.brandBg : "#fff" }}
-            >
-              <Text style={{ fontSize: 15, color: colors.text }}>{r.label}</Text>
-            </Pressable>
-          ))}
-          {skipReason === "other" ? (
-            <TextInput
-              placeholder="Tell us more"
-              placeholderTextColor={colors.faint}
-              value={skipOther}
-              onChangeText={setSkipOther}
-              style={{ borderWidth: 1, borderColor: colors.line, borderRadius: 8, padding: 10, fontSize: 15 }}
-            />
+        {exercises.map((e) => (
+          <Card key={e.exercise_id}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 8 }}>
+              <Text style={{ fontSize: 17, fontWeight: "700", color: colors.text, flexShrink: 1 }}>
+                {e.circuit_label ? `${e.circuit_label}. ` : ""}
+                {e.exercise_name}
+              </Text>
+              {e.logged ? <Text style={{ color: colors.green, fontWeight: "800" }}>✓</Text> : null}
+            </View>
+            <Text style={{ color: colors.muted, fontSize: 14 }}>
+              {e.prescribed_target || "-"}
+              {e.rest ? ` · rest ${e.rest}` : ""}
+            </Text>
+          </Card>
+        ))}
+
+        <View style={{ flexDirection: "row", gap: 20, marginTop: 4, justifyContent: "center" }}>
+          <Button title="Reschedule" variant="link" onPress={() => { setPanel(panel === "reschedule" ? null : "reschedule"); setPanelError(null); }} />
+          {!session_log ? (
+            <Button title="Skip this workout" variant="link" onPress={() => { setPanel(panel === "skip" ? null : "skip"); setPanelError(null); }} />
           ) : null}
-          <ErrorText>{panelError}</ErrorText>
-          <Button title="Mark as skipped" variant="dark" onPress={skipSession} loading={panelBusy} />
-        </Card>
-      ) : null}
-    </Screen>
+        </View>
+
+        {panel === "reschedule" ? (
+          <Card>
+            <H2>Move to another day</H2>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <Button title="−1" variant="secondary" onPress={() => setNewDate((d) => addDays(d || session.date, -1))} style={{ minWidth: 56 }} />
+              <TextInput value={newDate} onChangeText={setNewDate} autoCapitalize="none" keyboardAppearance="dark" style={[inputStyle, { flex: 1, textAlign: "center" }]} />
+              <Button title="+1" variant="secondary" onPress={() => setNewDate((d) => addDays(d || session.date, 1))} style={{ minWidth: 56 }} />
+            </View>
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              <Button title="Today" variant="secondary" onPress={() => setNewDate(todayStr())} style={{ flex: 1 }} />
+              <Button title="Tomorrow" variant="secondary" onPress={() => setNewDate(addDays(todayStr(), 1))} style={{ flex: 1 }} />
+            </View>
+            <P small muted>{/^\d{4}-\d{2}-\d{2}$/.test(newDate) ? prettyDate(newDate) : "Format: YYYY-MM-DD"}</P>
+            <ErrorText>{panelError}</ErrorText>
+            <Button title="Save new date" onPress={reschedule} loading={panelBusy} />
+          </Card>
+        ) : null}
+
+        {panel === "skip" ? (
+          <Card>
+            <H2>Why are you skipping?</H2>
+            {SKIP_REASONS.map((r) => (
+              <Pressable
+                key={r.value}
+                onPress={() => setSkipReason(r.value)}
+                style={{ padding: 14, borderRadius: 10, borderWidth: 1, borderColor: skipReason === r.value ? colors.brand : colors.line, backgroundColor: skipReason === r.value ? colors.brandBg : colors.cardAlt }}
+              >
+                <Text style={{ fontSize: 15, color: colors.text }}>{r.label}</Text>
+              </Pressable>
+            ))}
+            {skipReason === "other" ? (
+              <TextInput placeholder="Tell us more" placeholderTextColor={colors.faint} keyboardAppearance="dark" value={skipOther} onChangeText={setSkipOther} style={inputStyle} />
+            ) : null}
+            <ErrorText>{panelError}</ErrorText>
+            <Button title="Mark as skipped" variant="dark" onPress={skipSession} loading={panelBusy} />
+          </Card>
+        ) : null}
+      </ScrollView>
+
+      <View style={{ padding: 12, borderTopWidth: 1, borderTopColor: colors.line, backgroundColor: colors.card }}>
+        <Button
+          title={hasProgress ? "Resume workout" : session_log ? "Edit / re-log workout" : "Start workout"}
+          onPress={() => setMode("guided")}
+        />
+      </View>
+    </SafeAreaView>
   );
 }

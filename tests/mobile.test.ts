@@ -2,8 +2,9 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
-  applyToAllSets, buildFinalPayload, buildSteps, initStates, logSet, logSupersetSet, updateSet,
+  applyToAllSets, buildFinalPayload, buildSteps, firstUnloggedIndex, initStates, logSet, logSupersetSet, stepValue, updateSet,
 } from "../mobile/src/workout/state";
+import { currentPhaseInfo } from "../mobile/src/lib/phase";
 import type { SessionExercise } from "../mobile/src/types";
 
 // 1. The phone's copies of shared logic must match the web originals exactly.
@@ -77,5 +78,27 @@ assert.equal(fin.exercises.length, 2);
 assert.equal(fin.anySkipped, true); // LONE never logged
 assert.equal(fin.exercises[0].set_results?.[0].rir, 3); // "moderate" => RIR 3
 assert.equal(fin.exercises[0].set_results?.[0].set_number, 1);
+
+// 9. Steppers and active-set helpers.
+assert.equal(stepValue("200", 5), "205");
+assert.equal(stepValue("", 5), "5");
+assert.equal(stepValue("2", -5), "0"); // never negative
+assert.equal(stepValue("102.5", 2.5), "105");
+assert.equal(firstUnloggedIndex([{ logged: true }, { logged: false }]), 1);
+assert.equal(firstUnloggedIndex([{ logged: true }]), null);
+
+// 10. Phase outline: active phase, week-of-phase, clamping, superseded ignored.
+const ph = (n: number, status: any, start: string, end: string, weeks: number) =>
+  ({ id: `p${n}`, phase_number: n, phase_name: `Phase ${n}`, goal: "x", start_date: start, end_date: end, week_count: weeks, status });
+const phases = [ph(1, "completed", "2026-06-01", "2026-06-28", 4), ph(2, "active", "2026-06-29", "2026-08-09", 6), ph(3, "upcoming", "2026-08-10", "2026-09-06", 4), ph(9, "superseded", "2026-06-29", "2026-07-05", 1)];
+let info = currentPhaseInfo(phases as any, "2026-07-14");
+assert.equal(info?.active.phase_number, 2);
+assert.equal(info?.index, 1);
+assert.equal(info?.phases.length, 3);
+assert.equal(info?.weekOfPhase, 3); // Jun 29 + 15 days -> week 3
+info = currentPhaseInfo(phases as any, "2026-12-01");
+assert.equal(info?.weekOfPhase, 6); // clamped to the phase length
+assert.equal(currentPhaseInfo([], "2026-07-14"), null);
+assert.equal(currentPhaseInfo([ph(1, "upcoming", "2027-01-01", "2027-02-01", 4)] as any, "2026-07-14"), null);
 
 console.log("mobile logic tests passed");

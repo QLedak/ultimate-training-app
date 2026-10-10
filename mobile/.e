@@ -1,0 +1,3 @@
+EXPO_PUBLIC_SUPABASE_URL=https://qlhjchcuirnxgfayngzs.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_WDENh7Fbqkxlh4ZOjg0_Rg_9hjodr2o
+EXPO_PUBLIC_API_URL=https://ultimate-training-app.vercel.app

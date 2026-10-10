@@ -1,8 +1,8 @@
 # Ultimate Training - phone app (Expo / React Native)
 
 A second front end for the SAME backend as the website. Nothing about the website changes.
-Screens in v1: Login, Today, Schedule, Workout logging (guided, with effort slider, rest timer,
-swaps, skip, reschedule), My programs + test results. Buying programs and the coach screens stay on the web.
+Screens in v1: Login, Today (phase outline + week strip), Schedule, Workout preview and set-by-set logging (effort slider,
+rest timer, replace exercise, history), My programs + test results, Progress (per-exercise estimated 1RM chart and history). Buying programs and the coach screens stay on the web.
 
 ## One-time setup (Windows + iPhone)
 
@@ -22,7 +22,7 @@ Remove-Item _scaffold -Recurse -Force
 
 # 3. Install the libraries (expo install picks versions that match your Expo version)
 cd mobile
-npx expo install @supabase/supabase-js @react-native-async-storage/async-storage react-native-url-polyfill @react-navigation/native @react-navigation/native-stack @react-navigation/bottom-tabs react-native-screens react-native-safe-area-context @react-native-community/slider expo-keep-awake expo-status-bar
+npx expo install @supabase/supabase-js @react-native-async-storage/async-storage react-native-url-polyfill @react-navigation/native @react-navigation/native-stack @react-navigation/bottom-tabs react-native-screens react-native-safe-area-context @react-native-community/slider expo-keep-awake expo-status-bar expo-linear-gradient
 
 # 4. Name the app (change the id to something of yours; you can change it later)
 node scripts/finish-setup.js "Ultimate Training" com.yourname.ultimatetraining
@@ -68,3 +68,7 @@ They are copied from `../lib` automatically before every `npx expo start` (or ru
 - "Can't reach the server": wrong `EXPO_PUBLIC_API_URL`, or the site isn't deployed with the latest code.
 - Signed in but "Finish setting up": that account has no athlete profile yet - complete intake on the website.
 - Login works but every screen says Not signed in: the deployed site doesn't have the bearer-token update yet.
+
+## Updating an existing setup
+
+If you already ran setup: unzip over the repo, then from `mobile/` run `npx expo install expo-linear-gradient` and `node scripts/finish-setup.js "Ultimate Training" com.yourname.ultimatetraining` (safe to re-run; it switches the app to dark mode), then `npx expo start -c`.

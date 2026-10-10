@@ -26,7 +26,8 @@ app.expo.slug = slug;
 app.expo.scheme = slug;
 app.expo.ios = { ...(app.expo.ios || {}), bundleIdentifier: bundleId, supportsTablet: false };
 app.expo.android = { ...(app.expo.android || {}), package: bundleId };
-app.expo.userInterfaceStyle = "light";
+app.expo.userInterfaceStyle = "dark";
+app.expo.backgroundColor = "#15181B";
 fs.writeFileSync(appPath, JSON.stringify(app, null, 2) + "\n");
 
 console.log(`Done. App name: ${displayName}, id: ${bundleId}`);

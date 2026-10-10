@@ -43,9 +43,9 @@ export default function ScheduleScreen({ navigation }: any) {
 
   return (
     <ScrollView
-      style={{ backgroundColor: "#fff" }}
+      style={{ backgroundColor: colors.bg }}
       contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: 40 }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      refreshControl={<RefreshControl tintColor={colors.brand} refreshing={refreshing} onRefresh={onRefresh} />}
     >
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
         <Button title="‹ Prev" variant="secondary" onPress={() => setWeekStart(addDays(weekStart, -7))} />
@@ -70,13 +70,13 @@ export default function ScheduleScreen({ navigation }: any) {
                 </View>
                 <View style={{ flex: 1, gap: 6 }}>
                   {list.length === 0 ? (
-                    <Card style={{ paddingVertical: 12, backgroundColor: colors.bgSoft }}><P small muted>Rest</P></Card>
+                    <Card style={{ paddingVertical: 12, backgroundColor: colors.cardAlt }}><P small muted>Rest</P></Card>
                   ) : (
                     list.map((s) => (
                       <Pressable key={s.id} onPress={() => navigation.navigate("Session", { sessionId: s.id })}>
                         <Card tone={d === today ? "brand" : undefined} style={{ paddingVertical: 10 }}>
                           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                            <Text style={{ fontSize: 15, fontWeight: "700", color: colors.brandDark, flexShrink: 1 }}>{s.day_label}</Text>
+                            <Text style={{ fontSize: 15, fontWeight: "700", color: colors.text, flexShrink: 1 }}>{s.day_label}</Text>
                             <Text style={{ fontSize: 12, fontWeight: "700", color: statusColor(s.status, s.date) }}>{statusLabel(s.status, s.date)}</Text>
                           </View>
                           <P small muted>Week {s.week_number} · {s.exercise_count} exercises{s.week_type !== "build" ? ` · ${s.week_type}` : ""}</P>
