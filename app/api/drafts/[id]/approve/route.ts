@@ -3,6 +3,7 @@ import { latestDraft } from "@/lib/review/versions";
 import { getSupabaseAdmin } from "@/lib/db/supabase-admin";
 import { materializeMacrocycleSkeleton, materializeScheduledSessions, buildCorpusSituationTags } from "@/lib/review/materialize";
 import { getSessionCoachId, unauthorized } from "@/lib/auth/session";
+import { planPublishedMessage, sendPushToAthlete } from "@/lib/push/expo";
 
 /**
  * POST /api/drafts/[id]/approve
@@ -122,8 +123,14 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     );
   }
 
+  // Tell the athlete's phone. Best-effort: never throws, and never changes the result of the approval.
+  const notified = publishToAthlete
+    ? await sendPushToAthlete(supabase, draft.athlete_id as string, planPublishedMessage(draft.call_type as string))
+    : 0;
+
   return NextResponse.json({
     draft: { ...draft, status: "approved", publish_to_athlete: !!publishToAthlete, add_to_corpus: !!addToCorpus },
     materialized,
+    notified_devices: notified,
   });
 }

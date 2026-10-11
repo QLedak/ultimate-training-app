@@ -3,6 +3,7 @@ import { Linking, Pressable, Text, View } from "react-native";
 import { Button, Card, Caps, ErrorText, H1, Loading, P, Screen } from "../components/ui";
 import { useAuth } from "../lib/auth";
 import { clampTime, DEFAULT_REMINDERS, formatReminderTime, type ReminderSettings } from "../lib/reminders.core";
+import { disablePush, enablePush, pushEnabled } from "../lib/push";
 import { ensurePermission, loadReminderSettings, saveReminderSettings, sendTestReminder, syncReminders } from "../lib/reminders";
 import { colors } from "../theme";
 
@@ -26,8 +27,30 @@ export default function RemindersScreen() {
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [blocked, setBlocked] = useState(false);
+  const [push, setPush] = useState<boolean | null>(null);
+  const [pushNote, setPushNote] = useState<string | null>(null);
 
-  useEffect(() => { loadReminderSettings().then(setS); }, []);
+  useEffect(() => { loadReminderSettings().then(setS); pushEnabled().then(setPush); }, []);
+
+  async function togglePush() {
+    if (!athlete || push === null) return;
+    setPushNote(null);
+    if (push) {
+      await disablePush(athlete.id);
+      setPush(false);
+      return;
+    }
+    const r = await enablePush(athlete.id);
+    if (r === "blocked") {
+      setBlocked(true);
+      setPushNote("Notifications are turned off for this app. Turn them on in your phone's settings, then try again.");
+    } else if (r === "unavailable") {
+      setPush(true);
+      setPushNote("Saved. Coach updates will start working once you're using the installed (TestFlight) version of the app.");
+    } else {
+      setPush(true);
+    }
+  }
 
   async function apply(next: ReminderSettings) {
     setS(next);
@@ -73,6 +96,17 @@ export default function RemindersScreen() {
           </View>
           <Button title={s.enabled ? "Turn off" : "Turn on"} variant={s.enabled ? "secondary" : "primary"} onPress={toggle} />
         </View>
+      </Card>
+
+      <Card tone={push ? "green" : undefined}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <View style={{ flex: 1, paddingRight: 12 }}>
+            <Text style={{ color: colors.text, fontSize: 17, fontWeight: "700" }}>Coach updates</Text>
+            <P small muted>{push ? "On. We'll tell you when your coach publishes or updates your plan." : "Off"}</P>
+          </View>
+          <Button title={push ? "Turn off" : "Turn on"} variant={push ? "secondary" : "primary"} onPress={togglePush} disabled={push === null} />
+        </View>
+        {pushNote ? <P small muted>{pushNote}</P> : null}
       </Card>
 
       {s.enabled ? (

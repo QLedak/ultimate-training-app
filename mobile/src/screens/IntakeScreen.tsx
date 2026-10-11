@@ -4,6 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Button, Card, Caps, Choice, Chip, ErrorText, Field, H1, H2, Loading, P, ProgressBar, Screen } from "../components/ui";
 import { SeasonFields } from "../components/SeasonFields";
 import { useAuth } from "../lib/auth";
+import { enablePush } from "../lib/push";
 import { api } from "../lib/api";
 import { injuryLabel, INJURY_LOCATIONS } from "../lib/injuries";
 import { equipmentLabel } from "../lib/plans.core";
@@ -60,6 +61,7 @@ export default function IntakeScreen({ navigation }: any) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [pushState, setPushState] = useState<"idle" | "on" | "blocked">("idle");
 
   const set = <K extends keyof IntakeState>(k: K, v: IntakeState[K]) => setS((cur) => ({ ...cur, [k]: v }));
 
@@ -127,6 +129,13 @@ export default function IntakeScreen({ navigation }: any) {
       <Screen>
         <H1>You're all set{athlete?.name ? `, ${athlete.name.split(" ")[0]}` : ""}.</H1>
         <P muted>Your answers are in. Your coach builds and reviews your season plan next, so check back soon. It will show up on Today once it's ready.</P>
+        <Card tone={pushState === "on" ? "green" : "brand"}>
+          <H2>Get notified</H2>
+          <P muted>{pushState === "on" ? "Done. We'll send a notification as soon as your plan is ready." : pushState === "blocked" ? "Notifications are off for this app. You can turn them on later in My info > Workout reminders." : "Want a notification the moment your coach publishes your plan?"}</P>
+          {pushState === "idle" ? (
+            <Button title="Notify me" onPress={async () => { if (athlete) setPushState((await enablePush(athlete.id)) === "blocked" ? "blocked" : "on"); }} />
+          ) : null}
+        </Card>
         <Card>
           <H2>While you wait</H2>
           <P muted>You can browse ready-made programs and start one right now, or set up workout reminders.</P>

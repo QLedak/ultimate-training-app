@@ -26,7 +26,10 @@ import IntakeScreen from "../screens/IntakeScreen";
 import NextSeasonScreen from "../screens/NextSeasonScreen";
 import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
 import DeleteAccountScreen from "../screens/DeleteAccountScreen";
+import * as Notifications from "expo-notifications";
 import { syncReminders } from "../lib/reminders";
+import { syncPushRegistration } from "../lib/push";
+import { screenForPush } from "../lib/push.core";
 import { colors } from "../theme";
 
 const Stack = createNativeStackNavigator();
@@ -55,6 +58,22 @@ function ReminderSync() {
     syncReminders(athlete.id);
     const sub = AppState.addEventListener("change", (st) => { if (st === "active") syncReminders(athlete.id); });
     return () => sub.remove();
+  }, [athlete]);
+  return null;
+}
+
+/** Keeps this phone registered for coach-update pushes, and opens the app to the right place when one is tapped. */
+function PushSync() {
+  const { athlete } = useAuth();
+  useEffect(() => {
+    if (!athlete) return;
+    syncPushRegistration(athlete.id);
+    const sub = AppState.addEventListener("change", (st) => { if (st === "active") syncPushRegistration(athlete.id); });
+    const open = (data: unknown) => { if (navRef.isReady()) navRef.navigate("Main", { screen: screenForPush(data) }); };
+    const tap = Notifications.addNotificationResponseReceivedListener((r) => open(r.notification.request.content.data));
+    // App was closed and opened by tapping a push.
+    Notifications.getLastNotificationResponseAsync().then((r) => { if (r) open(r.notification.request.content.data); }).catch(() => {});
+    return () => { sub.remove(); tap.remove(); };
   }, [athlete]);
   return null;
 }
@@ -125,6 +144,7 @@ export default function Navigation() {
     >
       {session ? <ReminderSync /> : null}
       {session ? <PendingPlanRouter /> : null}
+      {session ? <PushSync /> : null}
       <Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: colors.bg }, headerTitleStyle: { color: colors.text }, headerTintColor: colors.brand, headerShadowVisible: false }}>
         {session ? (
           <>

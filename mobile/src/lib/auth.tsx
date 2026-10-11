@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 import { api, ApiError } from "./api";
+import { forgetToken } from "./push";
 import type { Athlete } from "../types";
 
 type AuthState = {
@@ -93,8 +94,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const signOut = useCallback(async () => {
+    // Stop pushes to this phone first (needs the session), so the next person to sign in here isn't notified.
+    if (athlete) await forgetToken(athlete.id);
     await supabase.auth.signOut();
-  }, []);
+  }, [athlete]);
 
   return (
     <Ctx.Provider value={{ loading, session, athlete, noAthlete, hasIntake, pendingPlanId, setPendingPlanId, signUp, profileError, signIn, signOut, refreshProfile: loadProfile }}>

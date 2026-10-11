@@ -434,6 +434,8 @@ import {
 import { buildErrorReport, createDeduper, supportMailto } from "../mobile/src/lib/errorReport.core";
 import { sanitizeClientError } from "../lib/client-errors";
 import { createRequire } from "node:module";
+import { buildPushMessages, chunk, deadTokensFromTickets, isExpoPushToken, planPublishedMessage } from "../lib/push/expo";
+import { projectIdFrom, pushEnabledFromStore, screenForPush } from "../mobile/src/lib/push.core";
 import { validateDeleteRequest } from "../lib/account/delete";
 import { resetEmailProblem } from "../mobile/src/lib/signup.core";
 {
@@ -559,4 +561,54 @@ import { resetEmailProblem } from "../mobile/src/lib/signup.core";
   assert.equal(merged.build.preview.env.EXPO_PUBLIC_API_URL, "https://app.example.com");
   assert.equal(merged.build.production.env.EXPO_PUBLIC_SUPABASE_URL, "https://abc.supabase.co");
   console.log("testflight readiness tests passed");
+}
+
+
+// ---- Push notifications when the coach publishes ----
+{
+  assert.equal(isExpoPushToken("ExponentPushToken[abc123]"), true);
+  assert.equal(isExpoPushToken("ExpoPushToken[abc-123_x]"), true);
+  assert.equal(isExpoPushToken("fcm:abc"), false);
+  assert.equal(isExpoPushToken("ExponentPushToken[]"), false);
+  assert.equal(isExpoPushToken(null), false);
+
+  const msgs = buildPushMessages(["ExponentPushToken[a]", "garbage", "ExponentPushToken[b]"], { title: "T", body: "B", data: { screen: "Today" } });
+  assert.equal(msgs.length, 2, "invalid tokens are dropped");
+  assert.deepEqual(msgs.map((m) => m.to), ["ExponentPushToken[a]", "ExponentPushToken[b]"]);
+  assert.equal(msgs[0].title, "T");
+  assert.deepEqual(msgs[0].data, { screen: "Today" });
+
+  assert.deepEqual(chunk([1, 2, 3, 4, 5], 2), [[1, 2], [3, 4], [5]]);
+  assert.equal(chunk(Array.from({ length: 250 }, (_, i) => i)).length, 3);
+
+  const tokens = ["ExponentPushToken[a]", "ExponentPushToken[b]", "ExponentPushToken[c]"];
+  const tickets = [{ status: "ok", id: "1" }, { status: "error", details: { error: "DeviceNotRegistered" } }, { status: "error", details: { error: "MessageRateExceeded" } }];
+  assert.deepEqual(deadTokensFromTickets(tokens, tickets), ["ExponentPushToken[b]"], "only dead devices are removed");
+  assert.deepEqual(deadTokensFromTickets(tokens, null), []);
+
+  assert.match(planPublishedMessage("macrocycle_planner").title, /season plan is ready/i);
+  assert.match(planPublishedMessage("phase_builder").title, /updated/i);
+  assert.equal(planPublishedMessage("phase_builder").data!.screen, "Today");
+
+  // phone side
+  assert.equal(pushEnabledFromStore(null), true, "on by default");
+  assert.equal(pushEnabledFromStore("on"), true);
+  assert.equal(pushEnabledFromStore("off"), false);
+  assert.equal(projectIdFrom({ expoConfig: { extra: { eas: { projectId: "p-1" } } } }), "p-1");
+  assert.equal(projectIdFrom({ easConfig: { projectId: "p-2" } }), "p-2");
+  assert.equal(projectIdFrom({ expoConfig: {} }), null);
+  assert.equal(projectIdFrom(null), null);
+  assert.equal(screenForPush({ screen: "Schedule" }), "Schedule");
+  assert.equal(screenForPush({ screen: "nope" }), "Today");
+  assert.equal(screenForPush(undefined), "Today");
+
+  // wiring: approving + publishing is what sends it, and only after the draft is marked approved
+  const approve = readFileSync("app/api/drafts/[id]/approve/route.ts", "utf8");
+  assert.ok(approve.includes("sendPushToAthlete"));
+  assert.ok(approve.indexOf('status: "approved"') < approve.indexOf("await sendPushToAthlete"), "push is sent after approval is saved");
+  assert.ok(/publishToAthlete\s*\?\s*await sendPushToAthlete/.test(approve), "only when publishing to the athlete");
+  const tokenRoute = readFileSync("app/api/athletes/[id]/push-token/route.ts", "utf8");
+  assert.ok(tokenRoute.includes("sessionAthleteId !== params.id"), "athletes can only register their own phone");
+  assert.ok(readFileSync("supabase/migrations/0019_push_tokens.sql", "utf8").includes("on delete cascade"), "tokens are removed with the account");
+  console.log("push notification tests passed");
 }

@@ -61,6 +61,14 @@ This uploads it to App Store Connect. Build numbers go up automatically each tim
 - Testers see crashes: they are reported to your Sentry project (the same one as the website), tagged `mobile`.
 - Changing the app's code later: bump nothing by hand. Run `eas build` and `eas submit` again.
 
+## Push notifications (coach publishes or updates a plan)
+- Run the new database migration first: paste `supabase/migrations/0019_push_tokens.sql` into the Supabase SQL editor and run it.
+- Pushes only reach the installed TestFlight build. In Expo Go the app works normally but has no push token, so Reminders shows a note instead.
+- `eas init` (step 1) is what gives the app its Expo project id, which push needs. If you ran `eas init` before this update, nothing more to do.
+- Athletes turn them on at the end of intake ("Notify me") or under My info > Workout reminders > Coach updates. iPhone asks permission then.
+- A push goes out when you approve a draft with "publish to athlete" on. A new season plan says "Your season plan is ready"; anything else says "Your plan was updated". Tapping it opens Today.
+- Optional: set `EXPO_ACCESS_TOKEN` in Vercel (Expo account > Access tokens) if you turn on "enhanced push security" in your Expo account. Not needed otherwise.
+- To test: install the TestFlight build on your phone, turn on Coach updates with a test athlete account, then approve a draft for that athlete.
+
 ## Not done yet (separate work)
-- Push notifications when your coach publishes a plan.
 - Payments. Apple requires in-app purchase for paid plans sold inside the app. Everything is free right now, which keeps review simple.
