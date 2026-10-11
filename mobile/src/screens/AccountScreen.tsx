@@ -83,6 +83,7 @@ export default function AccountScreen({ navigation }: any) {
         variant="secondary"
         onPress={() => Alert.alert("Sign out?", "", [{ text: "Cancel", style: "cancel" }, { text: "Sign out", style: "destructive", onPress: () => signOut() }])}
       />
+      <Button title="Delete account" variant="link" onPress={() => navigation.navigate("DeleteAccount")} style={{ alignSelf: "center", marginTop: 8 }} />
     </Screen>
   );
 }

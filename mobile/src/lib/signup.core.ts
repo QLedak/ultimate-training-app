@@ -6,3 +6,10 @@ export function signUpProblem(f: { name: string; email: string; password: string
   if (!f.agreed) return "Please agree to the Terms and Privacy Policy to continue.";
   return null;
 }
+
+/** Forgot-password form check (pure). */
+export function resetEmailProblem(email: string): string | null {
+  if (!email.trim()) return "Enter the email you signed up with.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return "Enter a valid email address.";
+  return null;
+}

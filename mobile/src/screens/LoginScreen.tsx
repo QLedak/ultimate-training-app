@@ -37,6 +37,7 @@ export default function LoginScreen({ navigation }: any) {
           <Field label="Password" value={password} onChangeText={setPassword} secureTextEntry textContentType="password" onSubmitEditing={submit} />
           <ErrorText>{error}</ErrorText>
           <Button title="Sign in" onPress={submit} loading={busy} />
+          <Button title="Forgot password?" variant="link" onPress={() => navigation.navigate("ForgotPassword")} style={{ alignSelf: "center" }} />
           <View style={{ height: 1, backgroundColor: colors.line, marginVertical: 6 }} />
           <P muted>New here?</P>
           <Button title="Create an account" variant="secondary" onPress={() => navigation.navigate("SignUp")} />

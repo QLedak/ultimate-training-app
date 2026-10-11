@@ -426,3 +426,22 @@ console.log("mobile logic tests passed");
   assert.ok(COACH_PLAN.bullets.length >= 4 && COACH_PLAN.how.length === 4);
 }
 console.log("onboarding (sign-up, intake, plans) tests passed");
+
+// ---- Account deletion + password reset ----
+import { validateDeleteRequest } from "../lib/account/delete";
+import { resetEmailProblem } from "../mobile/src/lib/signup.core";
+{
+  assert.equal(validateDeleteRequest({ confirm: "DELETE" }).ok, true);
+  assert.equal(validateDeleteRequest({ confirm: " delete " }).ok, true);
+  assert.equal(validateDeleteRequest({ confirm: "yes" }).ok, false);
+  assert.equal(validateDeleteRequest(null).ok, false);
+  assert.equal(validateDeleteRequest({}).ok, false);
+  assert.equal(resetEmailProblem(""), "Enter the email you signed up with.");
+  assert.equal(resetEmailProblem("bad"), "Enter a valid email address.");
+  assert.equal(resetEmailProblem("a@b.co"), null);
+  // The route must delete athlete data before the login, and refuse coaches.
+  const route = readFileSync("app/api/me/account/route.ts", "utf8");
+  assert.ok(route.indexOf('from("athletes").delete()') < route.indexOf("auth.admin.deleteUser"));
+  assert.ok(route.includes("403"));
+  console.log("account deletion + reset tests passed");
+}

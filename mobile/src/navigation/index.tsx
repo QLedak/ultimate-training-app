@@ -23,6 +23,8 @@ import PlansScreen from "../screens/PlansScreen";
 import PlanDetailScreen from "../screens/PlanDetailScreen";
 import CoachPlanScreen from "../screens/CoachPlanScreen";
 import IntakeScreen from "../screens/IntakeScreen";
+import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
+import DeleteAccountScreen from "../screens/DeleteAccountScreen";
 import { syncReminders } from "../lib/reminders";
 import { colors } from "../theme";
 
@@ -138,11 +140,13 @@ export default function Navigation() {
             <Stack.Screen name="PlanDetail" component={PlanDetailScreen} options={{ title: "Program", headerBackTitle: "Back" }} />
             <Stack.Screen name="CoachPlan" component={CoachPlanScreen} options={{ title: "Your season plan", headerBackTitle: "Back" }} />
             <Stack.Screen name="Intake" component={IntakeScreen} options={{ title: "Intake", headerBackTitle: "Back" }} />
+            <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} options={{ title: "Delete account", headerBackTitle: "Back" }} />
           </>
         ) : (
           <>
             <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
             <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Plans" component={PlansScreen} options={{ title: "Programs & plans", headerBackTitle: "Back" }} />
             <Stack.Screen name="PlanDetail" component={PlanDetailScreen} options={{ title: "Program", headerBackTitle: "Back" }} />
             <Stack.Screen name="CoachPlan" component={CoachPlanScreen} options={{ title: "Your season plan", headerBackTitle: "Back" }} />
