@@ -6,12 +6,11 @@ import { Button, Card, ErrorText, H1, P } from "../components/ui";
 import { ExercisePanel } from "./ExercisePanel";
 import {
   States, addSet, applyToAllSets, buildFinalPayload, buildSteps, firstUnloggedIndex, initStates, logSet, logSupersetSet,
-  removeSet, updateExercise, updateSet, canLogSet,
+  removeSet, updateExercise, updateSet, canLogSet, effectiveOf,
 } from "./state";
 import { clearProgress, loadProgress, saveProgress } from "./storage";
-import { parseTimedTarget } from "../shared/parse-prescription";
 import { colors } from "../theme";
-import type { ExercisePayload, SessionDetail, SessionExercise } from "../types";
+import type { ExercisePayload, GuidedExerciseState, SessionDetail, SessionExercise } from "../types";
 
 type Rest = { endsAt: number; exerciseId: string } | null;
 
@@ -236,7 +235,7 @@ export function Guided({
           <Button
             title={buttonLabel}
             onPress={() => (showNext ? go(1) : logActive())}
-            disabled={!showNext && activeIndex != null && !canLogHere(exercise, st.sets[activeIndex])}
+            disabled={!showNext && activeIndex != null && !canLogHere(exercise, st.sets[activeIndex], st)}
             style={{ flex: 1 }}
           />
         </View>
@@ -245,7 +244,8 @@ export function Guided({
   );
 }
 
-function canLogHere(exercise: SessionExercise, set: { weight: string; reps: string; rir: any; logged: boolean }): boolean {
+function canLogHere(exercise: SessionExercise, set: { weight: string; reps: string; rir: any; logged: boolean }, st: GuidedExerciseState): boolean {
   if (set.logged) return true;
-  return canLogSet(exercise.tier, set as any, parseTimedTarget(exercise.prescribed_target ?? "")?.seconds ?? null);
+  const eff = effectiveOf(exercise, st);
+  return canLogSet(eff.tier, set as any, eff.timedSeconds);
 }

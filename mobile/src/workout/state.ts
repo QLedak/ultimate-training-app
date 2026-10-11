@@ -20,6 +20,38 @@ export type WeekType = "build" | "deload" | "test";
 export type Step = { kind: "single" | "superset"; exerciseIndexes: number[] };
 export type States = Record<string, GuidedExerciseState>;
 
+/**
+ * What the athlete is actually doing right now: the prescribed exercise, or the one they
+ * swapped in (with its own sets/reps, tier and weight rules).
+ */
+export type Effective = {
+  id: string;
+  name: string;
+  target: string | null;
+  tier: 1 | 2 | 3;
+  usesWeight: boolean;
+  perDumbbell: boolean;
+  /** Seconds to hold, or null for rep-based work. Never set for tempo work. */
+  timedSeconds: number | null;
+};
+
+export function effectiveOf(exercise: SessionExercise, st?: Pick<GuidedExerciseState, "substituted" | "substitutedExerciseId"> | null): Effective {
+  const alt = st?.substituted && st.substitutedExerciseId ? exercise.alternatives.find((a) => a.exercise_id === st.substitutedExerciseId) : undefined;
+  const typedIn = !!st?.substituted && !alt; // "something else" typed by the athlete
+  const target = alt ? alt.prescribed_target ?? exercise.prescribed_target : exercise.prescribed_target;
+  // Tempo work (e.g. 3s down, 3s up) is paced by feel, so it never gets a countdown timer.
+  const timedSeconds = exercise.tempo ? null : parseTimedTarget(target ?? "")?.seconds ?? null;
+  return {
+    id: alt ? alt.exercise_id : exercise.exercise_id,
+    name: alt ? alt.exercise_name : exercise.exercise_name,
+    target: target ?? null,
+    tier: alt?.tier ?? exercise.tier,
+    usesWeight: alt ? !!alt.uses_weight : typedIn ? true : !!exercise.uses_weight || exercise.tier === 1,
+    perDumbbell: alt ? !!alt.uses_dumbbells : !!exercise.uses_dumbbells,
+    timedSeconds,
+  };
+}
+
 export function defaultSetCount(exercise: SessionExercise): number {
   const parsed = parsePrescribedTarget(exercise.prescribed_target ?? "");
   if (parsed.sets) return parsed.sets;
@@ -32,9 +64,42 @@ export function blankSet(): GuidedSetState {
   return { weight: "", reps: "", rir: "moderate", logged: false, autoSuggested: false };
 }
 
+/** An unlogged set with weight and reps/seconds filled in from the (possibly swapped) prescription. */
+export function freshSet(exercise: SessionExercise, eff: Effective, swapped: boolean): GuidedSetState {
+  const s = blankSet();
+  if (!swapped) {
+    s.weight =
+      exercise.prescribed_weight_hint != null
+        ? String(exercise.prescribed_weight_hint)
+        : exercise.last_time?.weight_used != null
+        ? String(exercise.last_time.weight_used)
+        : "";
+  }
+  if (eff.timedSeconds != null) {
+    // Timed sets default to the prescribed time; the countdown timer is only a guide.
+    s.reps = String(eff.timedSeconds);
+  } else {
+    const info = parsePrescribedTarget(eff.target ?? "");
+    s.reps = info.minReps != null ? String(info.minReps) : "";
+  }
+  return s;
+}
+
+/** Patch for picking a replacement ("" = typed in, null = back to the prescribed exercise); unlogged sets follow the new prescription. */
+export function swapPatch(exercise: SessionExercise, st: GuidedExerciseState, altId: string | null): Partial<GuidedExerciseState> {
+  const next = { substituted: altId !== null, substitutedExerciseId: altId ?? "" };
+  const eff = effectiveOf(exercise, next);
+  return {
+    ...next,
+    substitutionReason: "",
+    sets: st.sets.map((set) => (set.logged ? set : freshSet(exercise, eff, altId !== null))),
+  };
+}
+
 export function initExerciseState(exercise: SessionExercise): GuidedExerciseState {
   const priorSets = exercise.logged?.set_results;
-  const targetInfo = parsePrescribedTarget(exercise.prescribed_target ?? "");
+  const swappedState = { substituted: !!exercise.logged?.substituted_exercise_id, substitutedExerciseId: exercise.logged?.substituted_exercise_id ?? "" };
+  const eff = effectiveOf(exercise, swappedState);
   const count = priorSets?.length || defaultSetCount(exercise);
 
   const sets: GuidedSetState[] = [];
@@ -48,16 +113,7 @@ export function initExerciseState(exercise: SessionExercise): GuidedExerciseStat
         logged: true,
       });
     } else {
-      const s = blankSet();
-      s.weight =
-        exercise.prescribed_weight_hint != null
-          ? String(exercise.prescribed_weight_hint)
-          : exercise.last_time?.weight_used != null
-          ? String(exercise.last_time.weight_used)
-          : "";
-      // Timed holds store the seconds held in `reps`, so never prefill them.
-      const isTimed = parseTimedTarget(exercise.prescribed_target ?? "") != null;
-      s.reps = !isTimed && targetInfo.minReps != null ? String(targetInfo.minReps) : "";
+      const s = freshSet(exercise, eff, swappedState.substituted);
       sets.push(s);
     }
   }
@@ -182,7 +238,7 @@ export function logSet(
 
   // Tier 3 has no effort rating, and test weeks / true-max attempts chase a
   // ceiling, so the athlete drives the weight there.
-  const eligible = exercise.tier !== 3 && weekType !== "test" && !exState.isTrueMax;
+  const eligible = effectiveOf(exercise, exState).tier !== 3 && weekType !== "test" && !exState.isTrueMax;
   if (eligible && !isLastSetOfExercise) {
     const priorWeight = parseFloat(loggedSet.weight);
     const suggestion = !Number.isNaN(priorWeight) && priorWeight > 0 ? suggestNextWeight(priorWeight, loggedSet.rir) : null;
@@ -237,7 +293,7 @@ export function buildFinalPayload(
     payload.push({
       exercise_id: ex.exercise_id,
       substituted_exercise_id: s.substituted ? s.substitutedExerciseId || null : null,
-      substitution_reason: s.substituted ? s.substitutionReason : null,
+      substitution_reason: s.substituted ? s.substitutionReason || "Swapped" : null,
       notes: s.notes || null,
       load_descriptor: s.loadDescriptor || null,
       is_true_max: s.isTrueMax,

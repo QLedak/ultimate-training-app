@@ -22,7 +22,7 @@ Remove-Item _scaffold -Recurse -Force
 
 # 3. Install the libraries (expo install picks versions that match your Expo version)
 cd mobile
-npx expo install @supabase/supabase-js @react-native-async-storage/async-storage react-native-url-polyfill @react-navigation/native @react-navigation/native-stack @react-navigation/bottom-tabs react-native-screens react-native-safe-area-context @react-native-community/slider expo-keep-awake expo-status-bar expo-linear-gradient
+npx expo install @supabase/supabase-js @react-native-async-storage/async-storage react-native-url-polyfill @react-navigation/native @react-navigation/native-stack @react-navigation/bottom-tabs react-native-screens react-native-safe-area-context @react-native-community/slider expo-keep-awake expo-status-bar expo-linear-gradient @expo/vector-icons expo-notifications
 
 # 4. Name the app (change the id to something of yours; you can change it later)
 node scripts/finish-setup.js "Ultimate Training" com.yourname.ultimatetraining
@@ -71,4 +71,4 @@ They are copied from `../lib` automatically before every `npx expo start` (or ru
 
 ## Updating an existing setup
 
-If you already ran setup: unzip over the repo, then from `mobile/` run `npx expo install expo-linear-gradient` and `node scripts/finish-setup.js "Ultimate Training" com.yourname.ultimatetraining` (safe to re-run; it switches the app to dark mode), then `npx expo start -c`.
+If you already ran setup: unzip over the repo, then from `mobile/` run `npx expo install expo-notifications` and `node scripts/finish-setup.js "Ultimate Training" com.yourname.ultimatetraining` (safe to re-run; it switches the app to dark mode), then `npx expo start -c`.

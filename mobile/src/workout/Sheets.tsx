@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Card, H2 } from "../components/ui";
 import { ExerciseHistoryView } from "../components/ExerciseHistoryView";
 import { colors } from "../theme";
+import { swapPatch } from "./state";
 import type { GuidedExerciseState, SessionExercise } from "../types";
 
 function Sheet({ visible, title, onClose, children }: { visible: boolean; title: string; onClose: () => void; children: React.ReactNode }) {
@@ -43,39 +44,29 @@ export function ReplaceSheet({
       <Choice
         text={`Keep as prescribed: ${exercise.exercise_name}`}
         selected={!state.substituted}
-        onPress={() => { setOther(false); onUpdate({ substituted: false, substitutedExerciseId: "", substitutionReason: "" }); }}
+        onPress={() => { setOther(false); onUpdate(swapPatch(exercise, state, null)); }}
       />
       {exercise.alternatives.map((a) => (
         <Choice
           key={a.exercise_id}
-          text={`Do instead: ${a.exercise_name}`}
+          text={`Do instead: ${a.exercise_name}${a.prescribed_target ? ` (${a.prescribed_target})` : ""}`}
           selected={state.substituted && state.substitutedExerciseId === a.exercise_id}
-          onPress={() => { setOther(false); onUpdate({ substituted: true, substitutedExerciseId: a.exercise_id }); }}
+          onPress={() => { setOther(false); onUpdate(swapPatch(exercise, state, a.exercise_id)); }}
         />
       ))}
       <Choice
         text="Do something else (type it in)"
         selected={state.substituted && other}
-        onPress={() => { setOther(true); onUpdate({ substituted: true, substitutedExerciseId: "" }); }}
+        onPress={() => { setOther(true); onUpdate(swapPatch(exercise, state, "")); }}
       />
-      {state.substituted ? (
+      {state.substituted && other ? (
         <Card>
-          {other ? (
-            <TextInput
-              placeholder="What exercise did you do instead?"
-              placeholderTextColor={colors.faint}
-              keyboardAppearance="dark"
-              value={state.substitutedExerciseId}
-              onChangeText={(v) => onUpdate({ substitutedExerciseId: v })}
-              style={inputStyle}
-            />
-          ) : null}
           <TextInput
-            placeholder="Why? (no equipment, different gym, etc.)"
+            placeholder="What exercise did you do instead?"
             placeholderTextColor={colors.faint}
             keyboardAppearance="dark"
-            value={state.substitutionReason}
-            onChangeText={(v) => onUpdate({ substitutionReason: v })}
+            value={state.substitutedExerciseId}
+            onChangeText={(v) => onUpdate({ substitutedExerciseId: v })}
             style={inputStyle}
           />
         </Card>

@@ -153,12 +153,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       logging_tier: (libraryRow?.logging_tier as number | null | undefined) ?? null,
     });
 
-    if (ex.substituted_exercise_id && !ex.substitution_reason) {
-      return NextResponse.json(
-        { error: `A substitution reason is required for ${ex.exercise_id} (substituted).` },
-        { status: 400 }
-      );
-    }
+    // A reason for a swap is optional: the athlete just picks the replacement.
 
     // When the guided workout submitted a per-set breakdown, that's the
     // source of truth for the aggregate fields below — recomputed here

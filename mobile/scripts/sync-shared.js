@@ -12,6 +12,7 @@ const files = [
   ["training/autoregulate.ts", "autoregulate.ts"],
   ["training/display-labels.ts", "display-labels.ts"],
   ["pps/parse-prescription.ts", "parse-prescription.ts"],
+  ["training/equipment-options.ts", "equipment-options.ts"],
 ];
 
 if (!fs.existsSync(root)) {

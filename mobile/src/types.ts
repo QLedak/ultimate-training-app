@@ -25,8 +25,18 @@ export type SessionExercise = {
   tempo: string | null;
   rest: string | null;
   coach_notes: string | null;
-  alternatives: Array<{ exercise_id: string; exercise_name: string; uses_dumbbells?: boolean }>;
+  alternatives: Array<{
+    exercise_id: string;
+    exercise_name: string;
+    uses_dumbbells?: boolean;
+    uses_weight?: boolean;
+    tier?: 1 | 2 | 3;
+    /** Sets/reps rewritten to fit this exercise (reps vs seconds vs distance, per side). */
+    prescribed_target?: string | null;
+  }>;
   uses_dumbbells?: boolean;
+  /** Any loaded movement can take a weight, whatever its logging tier. */
+  uses_weight?: boolean;
   active_injury_locations?: string[];
   warmup: Array<{ sets_reps: string; suggested_weight: number }>;
   logged: {

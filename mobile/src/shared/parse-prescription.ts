@@ -73,8 +73,21 @@ export function parseRestSeconds(rest: string | null | undefined): number | null
  */
 export type ParsedTimedTarget = { sets: number | null; seconds: number };
 
-export function parseTimedTarget(target: string | null | undefined): ParsedTimedTarget | null {
-  if (!target) return null;
+/**
+ * Tempo cues such as "3s down, 3s up" or "4 sec lowering" describe HOW to move a rep,
+ * not how long to hold, so they must never turn a rep-based set into a timed one.
+ */
+export function stripTempoPhrases(target: string): string {
+  const unit = "(?:s|secs?|seconds?)";
+  const word = "(?:down|up|lower(?:ing)?|eccentric|concentric|negative|descent|ascent|raise|pause|tempo)";
+  return target
+    .replace(new RegExp(`\\b\\d+\\s*${unit}\\s*${word}\\b`, "gi"), " ")
+    .replace(new RegExp(`\\b${word}\\s*:?\\s*(?:for\\s*)?\\d+\\s*${unit}\\b`, "gi"), " ");
+}
+
+export function parseTimedTarget(rawTarget: string | null | undefined): ParsedTimedTarget | null {
+  if (!rawTarget) return null;
+  const target = stripTempoPhrases(rawTarget);
 
   // Sets x duration, e.g. "3x30s", "3 x 30 sec", "6-8 x 30s", "3 x 20-30s", "4 x 5 min".
   // Ranges take the top of the duration range (the number the athlete is timing toward).

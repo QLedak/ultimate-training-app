@@ -2,6 +2,7 @@ import React, { useCallback, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
+import { SyncBanner } from "../components/SyncBanner";
 import { Button, Card, Caps, ErrorText, H1, H2, Loading, P } from "../components/ui";
 import { useAuth } from "../lib/auth";
 import { api } from "../lib/api";
@@ -85,6 +86,7 @@ export default function HomeScreen({ navigation }: any) {
       contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: 40 }}
       refreshControl={<RefreshControl tintColor={colors.brand} refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} />}
     >
+      <SyncBanner onSynced={load} />
       <ErrorText>{error}</ErrorText>
 
       {info ? (

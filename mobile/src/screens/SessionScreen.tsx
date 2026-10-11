@@ -4,7 +4,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Card, ErrorText, H1, H2, Loading, P, Screen } from "../components/ui";
 import { Guided } from "../workout/Guided";
 import { clearProgress, loadProgress } from "../workout/storage";
-import { api } from "../lib/api";
+import { api, ApiError } from "../lib/api";
+import { enqueueLog, flushPendingLogs, hasPendingLog } from "../lib/pendingLogs";
+import { syncReminders } from "../lib/reminders";
+import { useAuth } from "../lib/auth";
 import { addDays, prettyDate, todayStr } from "../lib/dates";
 import { workoutIcon } from "../lib/workoutIcons";
 import { colors } from "../theme";
@@ -22,11 +25,13 @@ const inputStyle = { borderWidth: 1, borderColor: colors.line, borderRadius: 10,
 
 export default function SessionScreen({ route, navigation }: any) {
   const sessionId: string = route.params.sessionId;
+  const { athlete } = useAuth();
   const [data, setData] = useState<SessionDetail | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [mode, setMode] = useState<"overview" | "guided">("overview");
   const [hasProgress, setHasProgress] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [savedOffline, setSavedOffline] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -43,6 +48,14 @@ export default function SessionScreen({ route, navigation }: any) {
       setData(d);
       setNewDate(d.session.date);
       setHasProgress(!!(await loadProgress(sessionId)));
+      if (await hasPendingLog(sessionId)) {
+        // Finished earlier without a connection. Try once more now; otherwise show it as waiting.
+        const r = await flushPendingLogs();
+        if (r.waiting + r.rejected > 0 && (await hasPendingLog(sessionId))) {
+          setSavedOffline(true);
+          setSaved(true);
+        }
+      }
     } catch (e) {
       setLoadError(e instanceof Error ? e.message : String(e));
     }
@@ -57,8 +70,17 @@ export default function SessionScreen({ route, navigation }: any) {
       await api(`/api/sessions/${sessionId}/log`, { method: "POST", body: payload });
       await clearProgress(sessionId);
       setSaved(true);
+      if (athlete) syncReminders(athlete.id); // today's reminder drops out once it's logged
     } catch (e) {
-      setSubmitError(e instanceof Error ? e.message : String(e));
+      if (e instanceof ApiError && e.status === 0) {
+        // No connection: keep the workout on the phone and send it when we're back online.
+        await enqueueLog(sessionId, payload);
+        await clearProgress(sessionId);
+        setSavedOffline(true);
+        setSaved(true);
+      } else {
+        setSubmitError(e instanceof Error ? e.message : String(e));
+      }
     } finally {
       setSubmitting(false);
     }
@@ -92,7 +114,14 @@ export default function SessionScreen({ route, navigation }: any) {
       await clearProgress(sessionId);
       setSaved(true);
     } catch (e) {
-      setPanelError(e instanceof Error ? e.message : String(e));
+      if (e instanceof ApiError && e.status === 0) {
+        await enqueueLog(sessionId, { status: "skipped", skip_reason: skipReason, skip_reason_other_text: skipOther || null, exercises: [] } as SubmitPayload);
+        await clearProgress(sessionId);
+        setSavedOffline(true);
+        setSaved(true);
+      } else {
+        setPanelError(e instanceof Error ? e.message : String(e));
+      }
     } finally {
       setPanelBusy(false);
     }
@@ -112,8 +141,12 @@ export default function SessionScreen({ route, navigation }: any) {
     return (
       <Screen>
         <View style={{ paddingTop: 60, gap: 12 }}>
-          <H1>Logged.</H1>
-          <P muted>Nice work. On to the next one.</P>
+          <H1>{savedOffline ? "Saved on your phone." : "Logged."}</H1>
+          <P muted>
+            {savedOffline
+              ? "No connection right now. Your workout is stored here and will send automatically when you're back online."
+              : "Nice work. On to the next one."}
+          </P>
           <Button title="Done" onPress={() => navigation.popToTop()} />
         </View>
       </Screen>

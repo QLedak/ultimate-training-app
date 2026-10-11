@@ -5,8 +5,7 @@ import { NumberBox } from "./NumberBox";
 import { EffortSlider } from "./EffortSlider";
 import { WorkTimer } from "./WorkTimer";
 import { HistorySheet, ReplaceSheet } from "./Sheets";
-import { formatClock } from "./state";
-import { parseTimedTarget } from "../shared/parse-prescription";
+import { effectiveOf, formatClock } from "./state";
 import { EFFORT_SCALE } from "../shared/perceived-effort";
 import { colors } from "../theme";
 import type { GuidedExerciseState, GuidedSetState, SessionExercise } from "../types";
@@ -36,16 +35,16 @@ function setSummary(set: GuidedSetState, timed: boolean, tier: number, perDb: bo
 
 export function ExercisePanel(p: Props) {
   const { exercise, state } = p;
-  const timed = parseTimedTarget(exercise.prescribed_target ?? "");
+  const eff = effectiveOf(exercise, state);
+  const timed = eff.timedSeconds != null ? { seconds: eff.timedSeconds } : null;
   const [showDetails, setShowDetails] = useState(false);
   const [showNotes, setShowNotes] = useState(!!state.notes);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [replaceOpen, setReplaceOpen] = useState(false);
 
-  const swappedAlt = state.substituted ? exercise.alternatives.find((a) => a.exercise_id === state.substitutedExerciseId) : undefined;
-  const perDumbbell = swappedAlt ? !!swappedAlt.uses_dumbbells : !!exercise.uses_dumbbells;
-  const effectiveId = state.substituted && state.substitutedExerciseId && swappedAlt ? swappedAlt.exercise_id : exercise.exercise_id;
-  const effectiveName = swappedAlt ? swappedAlt.exercise_name : exercise.exercise_name;
+  const perDumbbell = eff.perDumbbell;
+  const effectiveId = eff.id;
+  const effectiveName = eff.name;
 
   const set = p.activeIndex != null ? state.sets[p.activeIndex] : null;
   const unlogged = state.sets.filter((s) => !s.logged).length;
@@ -59,7 +58,7 @@ export function ExercisePanel(p: Props) {
           {state.substituted && state.substitutedExerciseId ? effectiveName : exercise.exercise_name}
         </Text>
         <Text style={{ fontSize: 14, color: colors.muted, marginTop: 2 }}>
-          Target: {exercise.prescribed_target || "-"}
+          Target: {eff.target || "-"}
           {exercise.tempo ? ` · Tempo ${exercise.tempo}` : ""}
           {exercise.rest ? ` · Rest ${exercise.rest}` : ""}
         </Text>
@@ -127,25 +126,20 @@ export function ExercisePanel(p: Props) {
           <P>All {state.sets.length} sets logged ✓</P>
           <P small muted>Tap a set above to edit it, or move on.</P>
         </Card>
-      ) : exercise.tier === 3 && timed == null ? (
+      ) : eff.tier === 3 && timed == null && !eff.usesWeight ? (
         <Card>
           <P muted>Do the work as prescribed, then tap Log Set.</P>
         </Card>
       ) : timed != null ? (
         <View style={{ gap: 10 }}>
-          {exercise.tier !== 3 ? (
+          {eff.tier !== 3 || eff.usesWeight ? (
             <View style={{ flexDirection: "row" }}>
               <NumberBox label={perDumbbell ? "POUNDS EACH" : "POUNDS (OPT.)"} value={set.weight} step={5} decimal onChange={(v) => p.onUpdateSet(p.activeIndex!, { weight: v })} />
             </View>
           ) : null}
-          <WorkTimer
-            targetSeconds={timed.seconds}
-            recordedSeconds={set.reps}
-            onDone={(sec) => p.onUpdateSet(p.activeIndex!, { reps: String(sec) })}
-            onClear={() => p.onUpdateSet(p.activeIndex!, { reps: "" })}
-          />
+          <WorkTimer targetSeconds={timed.seconds} />
           <View style={{ flexDirection: "row" }}>
-            <NumberBox label="SECONDS HELD" value={set.reps} step={5} onChange={(v) => p.onUpdateSet(p.activeIndex!, { reps: v })} />
+            <NumberBox label="SECONDS" value={set.reps} step={5} onChange={(v) => p.onUpdateSet(p.activeIndex!, { reps: v })} />
           </View>
         </View>
       ) : (
@@ -153,7 +147,7 @@ export function ExercisePanel(p: Props) {
           <View style={{ flexDirection: "row", gap: 10 }}>
             <NumberBox label="REPS" value={set.reps} step={1} onChange={(v) => p.onUpdateSet(p.activeIndex!, { reps: v })} />
             <NumberBox
-              label={perDumbbell ? "POUNDS EACH" : exercise.tier === 1 ? "POUNDS" : "POUNDS (OPT.)"}
+              label={perDumbbell ? "POUNDS EACH" : eff.tier === 1 ? "POUNDS" : "POUNDS (OPT.)"}
               value={set.weight}
               step={5}
               decimal
@@ -161,7 +155,7 @@ export function ExercisePanel(p: Props) {
             />
           </View>
           {perDumbbell ? <Text style={{ fontSize: 11, color: colors.muted }}>Enter the weight of ONE dumbbell, not the total.</Text> : null}
-          <EffortSlider value={set.rir} onChange={(v) => p.onUpdateSet(p.activeIndex!, { rir: v })} />
+          {eff.tier !== 3 ? <EffortSlider value={set.rir} onChange={(v) => p.onUpdateSet(p.activeIndex!, { rir: v })} /> : null}
           {!set.logged && set.autoSuggested ? (
             <Text style={{ fontSize: 12, color: colors.brand }}>Weight adjusted from your last set's effort - change it if this isn't right.</Text>
           ) : null}

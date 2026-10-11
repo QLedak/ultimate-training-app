@@ -28,6 +28,27 @@ app.expo.ios = { ...(app.expo.ios || {}), bundleIdentifier: bundleId, supportsTa
 app.expo.android = { ...(app.expo.android || {}), package: bundleId };
 app.expo.userInterfaceStyle = "dark";
 app.expo.backgroundColor = "#15181B";
+
+// Brand icon (Arc T on asphalt), splash mark and Android adaptive icon live in ./assets.
+app.expo.icon = "./assets/icon.png";
+app.expo.android = {
+  ...app.expo.android,
+  adaptiveIcon: { foregroundImage: "./assets/adaptive-icon.png", backgroundColor: "#24282D" },
+};
+app.expo.web = { ...(app.expo.web || {}), favicon: "./assets/favicon.png" };
+const splash = { image: "./assets/splash-icon.png", imageWidth: 200, resizeMode: "contain", backgroundColor: "#15181B" };
+app.expo.plugins = app.expo.plugins || [];
+const hasSplashPlugin = app.expo.plugins.some((p) => (Array.isArray(p) ? p[0] : p) === "expo-splash-screen");
+if (app.expo.splash || !hasSplashPlugin) {
+  // Older templates use the top-level "splash" key; newer ones configure the plugin instead.
+  if (app.expo.splash) app.expo.splash = { ...app.expo.splash, ...splash };
+  else app.expo.plugins.push(["expo-splash-screen", splash]);
+} else {
+  app.expo.plugins = app.expo.plugins.map((p) => ((Array.isArray(p) ? p[0] : p) === "expo-splash-screen" ? ["expo-splash-screen", splash] : p));
+}
+if (!app.expo.plugins.some((p) => (Array.isArray(p) ? p[0] : p) === "expo-notifications")) {
+  app.expo.plugins.push("expo-notifications");
+}
 fs.writeFileSync(appPath, JSON.stringify(app, null, 2) + "\n");
 
 console.log(`Done. App name: ${displayName}, id: ${bundleId}`);

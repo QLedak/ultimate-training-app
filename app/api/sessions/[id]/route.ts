@@ -5,6 +5,7 @@ import { parsePrescribedWeightHint } from "@/lib/pps/parse-prescription";
 import { humanizeExerciseId, isSupersetLabel } from "@/lib/training/display-labels";
 import { getSessionAthleteId, unauthorized, forbidden } from "@/lib/auth/session";
 import { dbError } from "@/lib/api/error-response";
+import { adaptPrescription, usesWeight } from "@/lib/training/swap-prescription";
 
 /**
  * GET /api/sessions/[id]
@@ -92,7 +93,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   const { data: alternativeRows, error: alternativesError } = patterns.length
     ? await supabase
         .from("exercise_library")
-        .select("exercise_id, exercise_name, movement_pattern, equipment_needed, equipment_all")
+        .select("exercise_id, exercise_name, movement_pattern, category, laterality, logging_tier, injury_considerations, equipment_needed, equipment_all")
         .in("movement_pattern", patterns)
         .eq("is_active", true) // retired exercises are never offered as a swap
         .eq("library_version", 2)
@@ -106,7 +107,15 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 
   const alternativesByPattern = new Map<
     string,
-    Array<{ exercise_id: string; exercise_name: string; uses_dumbbells: boolean }>
+    Array<{
+      exercise_id: string;
+      exercise_name: string;
+      uses_dumbbells: boolean;
+      uses_weight: boolean;
+      tier: 1 | 2 | 3;
+      category: string | null;
+      laterality: string | null;
+    }>
   >();
   for (const row of alternativeRows ?? []) {
     const pattern = row.movement_pattern as string;
@@ -115,6 +124,14 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       exercise_id: row.exercise_id as string,
       exercise_name: row.exercise_name as string,
       uses_dumbbells: usesDumbbells(row),
+      uses_weight: usesWeight(row),
+      tier: deriveLoggingTier({
+        movement_pattern: row.movement_pattern as string | null,
+        injury_considerations: (row.injury_considerations as string[] | undefined) ?? null,
+        logging_tier: (row.logging_tier as number | null | undefined) ?? null,
+      }),
+      category: (row.category as string | null) ?? null,
+      laterality: (row.laterality as string | null) ?? null,
     });
     alternativesByPattern.set(pattern, list);
   }
@@ -173,6 +190,8 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       cue: libraryRow?.cue ?? null,
       tier,
       uses_dumbbells: libraryRow ? usesDumbbells(libraryRow) : false,
+      // Any loaded movement can take a weight, whatever its logging tier.
+      uses_weight: libraryRow ? usesWeight(libraryRow) : false,
       // Active injury areas this exercise is tagged for — the logging page asks
       // "still bothering you?" so an athlete never stays on isometrics by accident.
       active_injury_locations: ((libraryRow?.injury_considerations as string[] | undefined) ?? []).filter((loc) =>
@@ -193,9 +212,17 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       rest: prescribed.rest ?? null,
       coach_notes: prescribed.notes ?? null,
       alternatives: libraryRow?.movement_pattern
-        ? (alternativesByPattern.get(libraryRow.movement_pattern as string) ?? []).filter(
-            (alt) => alt.exercise_id !== exerciseId
-          )
+        ? (alternativesByPattern.get(libraryRow.movement_pattern as string) ?? [])
+            .filter((alt) => alt.exercise_id !== exerciseId)
+            .map((alt) => ({
+              ...alt,
+              // Sets/reps rewritten to fit the swapped-in exercise (reps vs seconds vs distance, per side).
+              prescribed_target: adaptPrescription(
+                prescribed.sets_reps as string | null,
+                { exercise_name: libraryRow.exercise_name as string, laterality: (libraryRow.laterality as string | null) ?? null },
+                alt
+              ),
+            }))
         : [],
       logged,
       last_time: lastTime

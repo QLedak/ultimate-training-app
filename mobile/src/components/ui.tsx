@@ -121,3 +121,31 @@ const s = StyleSheet.create({
   barTrack: { height: 6, borderRadius: 3, backgroundColor: colors.cardAlt, overflow: "hidden" },
   barFill: { height: 6, backgroundColor: colors.brand },
 });
+
+/** Tap-to-select pill, for multi-select lists (equipment) and single-select choices. */
+export function Chip({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={{
+        paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20, borderWidth: 1,
+        borderColor: selected ? colors.brand : colors.line,
+        backgroundColor: selected ? colors.brandBg : colors.card,
+      }}
+    >
+      <Text style={{ color: selected ? colors.brand : colors.text, fontWeight: "600" }}>{label}</Text>
+    </Pressable>
+  );
+}
+
+/** Full-width single-choice row. */
+export function Choice({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={{ padding: 14, borderRadius: 12, borderWidth: 1, borderColor: selected ? colors.brand : colors.line, backgroundColor: selected ? colors.brandBg : colors.card }}
+    >
+      <Text style={{ fontSize: 15, color: colors.text }}>{label}</Text>
+    </Pressable>
+  );
+}
