@@ -141,6 +141,8 @@ export type HistoryEntry = {
 export type ExerciseHistory = {
   exercise_id: string;
   exercise_name: string;
+  /** Est. 1RM chart is only shown for absolute strength lifts. */
+  is_absolute_strength?: boolean;
   summary: {
     total_sessions: number;
     best_est_1rm: { value: number; date: string } | null;
@@ -155,6 +157,7 @@ export type ExerciseListItem = {
   last_date: string | null;
   best_est_1rm: number | null;
   heaviest_weight: number | null;
+  is_absolute_strength?: boolean;
 };
 export type Phase = {
   id: string;

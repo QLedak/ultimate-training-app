@@ -8,6 +8,10 @@ import { parseTimedTarget } from "../mobile/src/shared/parse-prescription";
 import { currentPhaseInfo } from "../mobile/src/lib/phase";
 import { workoutIcon } from "../mobile/src/lib/workoutIcons";
 import { addMonthsStr, monthGridWeeks, monthTitle, startOfMonthStr } from "../mobile/src/lib/dates";
+import { matchesSearch } from "../mobile/src/lib/search";
+import {
+  blankCommitment, commitmentsPayload, fromHHMM, fromIso, isGameLabel, normalizeCommitments, prettyTime, setPriorityTournament, toHHMM, toIso, validateScheduleForm,
+} from "../mobile/src/lib/schedule.core";
 import { planReminders, formatReminderTime, clampTime, MAX_REMINDERS } from "../mobile/src/lib/reminders.core";
 import { createQueue, type PendingLog } from "../mobile/src/lib/pendingLogs.core";
 import type { SessionExercise, SubmitPayload } from "../mobile/src/types";
@@ -206,6 +210,40 @@ assert.equal(parseTimedTarget("Hold 45 sec x3")?.seconds, 45);
   assert.equal(formatReminderTime(0, 0), "12:00 AM");
   assert.equal(formatReminderTime(12, 0), "12:00 PM");
   assert.deepEqual(clampTime(25, -3), { hour: 23, minute: 0 });
+}
+
+// Progress search
+assert.equal(matchesSearch("Barbell Bench Press", "bench"), true);
+assert.equal(matchesSearch("Barbell Bench Press", "BARB press"), true, "every word must match, any order, any case");
+assert.equal(matchesSearch("Barbell Bench Press", "squat"), false);
+assert.equal(matchesSearch("Barbell Bench Press", "  "), true, "empty search shows everything");
+
+// Season schedule helpers
+{
+  const ok = { season_start: "2026-03-01", season_end: "2026-09-30", tournaments: [], commitments: [] as any[] };
+  assert.equal(validateScheduleForm(ok), null);
+  assert.ok(validateScheduleForm({ ...ok, season_end: "2026-02-01" }));
+  assert.ok(validateScheduleForm({ ...ok, season_start: "" }));
+  assert.ok(validateScheduleForm({ ...ok, tournaments: [{ start_date: "2026-05-02", end_date: "", label: "", is_priority: false }] }));
+  assert.ok(validateScheduleForm({ ...ok, tournaments: [{ start_date: "2026-05-03", end_date: "2026-05-02", label: "", is_priority: false }] }));
+  assert.ok(validateScheduleForm({ ...ok, commitments: [blankCommitment()] }), "a weekly commitment needs a day");
+  assert.equal(validateScheduleForm({ ...ok, commitments: [{ ...blankCommitment(), day_of_week: "Tuesday" }] }), null);
+
+  const t = [{ start_date: "a", end_date: "b", label: "x", is_priority: true }, { start_date: "c", end_date: "d", label: "y", is_priority: false }];
+  assert.deepEqual(setPriorityTournament(t, 1).map((x) => x.is_priority), [false, true], "only one priority event");
+  assert.deepEqual(setPriorityTournament(setPriorityTournament(t, 1), 1).map((x) => x.is_priority), [false, false], "tap again to clear");
+
+  assert.equal(isGameLabel("League night"), true);
+  assert.equal(isGameLabel("Team practice"), false);
+  const norm = normalizeCommitments([{ day_of_week: "Tuesday", time: "19:00", label: "League game", startDate: "2026-04-01", endDate: "2026-06-01" }]);
+  assert.equal(norm[0].start_date, "2026-04-01", "camelCase rows from older saves are read");
+  const payload = commitmentsPayload([{ day_of_week: "Tuesday", time: "", label: " ", start_date: "", end_date: "" }]);
+  assert.deepEqual(payload[0], { day_of_week: "Tuesday", time: "", label: "League game", start_date: null, end_date: null });
+
+  assert.equal(toIso(fromIso("2026-10-11")!), "2026-10-11", "dates round-trip without drifting a day");
+  assert.equal(toHHMM(fromHHMM("19:05")!), "19:05");
+  assert.equal(prettyTime("19:05"), "7:05 PM");
+  assert.equal(fromIso("nope"), null);
 }
 
 // Offline log queue

@@ -34,6 +34,9 @@ export function ExerciseHistoryView({ exerciseId, onLoaded }: { exerciseId: stri
   if (!data) return <Loading />;
   if (data.entries.length === 0) return <P muted>No logged sets for this exercise yet. Log it once and your history shows up here.</P>;
 
+  // The estimated-1RM view is for absolute strength lifts only (squat, bench, ...). Other weighted
+  // exercises show their loads and sets without a 1RM estimate. Older servers omit the flag.
+  const strength = data.is_absolute_strength !== false;
   const chronological = data.entries.slice().reverse();
   const points = chronological
     .filter((e) => e.best_est_1rm != null)
@@ -42,34 +45,39 @@ export function ExerciseHistoryView({ exerciseId, onLoaded }: { exerciseId: stri
   return (
     <View style={{ gap: 12 }}>
       <View style={{ flexDirection: "row", gap: 10 }}>
-        <Stat label="Best est. 1RM" value={data.summary.best_est_1rm ? `${Math.round(data.summary.best_est_1rm.value)} lb` : "-"} sub={data.summary.best_est_1rm ? prettyDate(data.summary.best_est_1rm.date) : ""} />
+        {strength ? (
+          <Stat label="Best est. 1RM" value={data.summary.best_est_1rm ? `${Math.round(data.summary.best_est_1rm.value)} lb` : "-"} sub={data.summary.best_est_1rm ? prettyDate(data.summary.best_est_1rm.date) : ""} />
+        ) : null}
         <Stat
           label="Heaviest set"
           value={data.summary.heaviest ? `${data.summary.heaviest.weight} lb` : "-"}
           sub={data.summary.heaviest ? `${data.summary.heaviest.reps ?? "?"} reps · ${prettyDate(data.summary.heaviest.date)}` : ""}
         />
+        {!strength ? <Stat label="Workouts" value={String(data.summary.total_sessions)} /> : null}
       </View>
 
-      {points.length >= 2 ? (
-        <Card>
-          <Caps>Estimated 1RM over time</Caps>
-          <LineChart points={points} />
-        </Card>
-      ) : (
-        <P small muted>The chart appears once you've logged this lift in two different workouts.</P>
-      )}
+      {strength ? (
+        points.length >= 2 ? (
+          <Card>
+            <Caps>Estimated 1RM over time</Caps>
+            <LineChart points={points} />
+          </Card>
+        ) : (
+          <P small muted>The chart appears once you've logged this lift in two different workouts.</P>
+        )
+      ) : null}
 
       <Caps>History</Caps>
       {data.entries.map((e) => (
         <Card key={e.session_id} style={{ paddingVertical: 10 }}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
             <Text style={{ color: colors.text, fontWeight: "700" }}>{prettyDate(e.date)}</Text>
-            {e.is_pr ? <Text style={{ color: colors.brand, fontWeight: "800", fontSize: 12 }}>NEW PR</Text> : null}
+            {strength && e.is_pr ? <Text style={{ color: colors.brand, fontWeight: "800", fontSize: 12 }}>NEW PR</Text> : null}
           </View>
           <Text style={{ color: colors.muted, fontSize: 14 }}>
             {e.sets.map((s) => `${s.weight ?? "-"}×${s.reps ?? "-"}`).join("  ·  ")}
           </Text>
-          {e.best_est_1rm != null ? <Text style={{ color: colors.faint, fontSize: 12 }}>Est. 1RM {Math.round(e.best_est_1rm)} lb</Text> : null}
+          {strength && e.best_est_1rm != null ? <Text style={{ color: colors.faint, fontSize: 12 }}>Est. 1RM {Math.round(e.best_est_1rm)} lb</Text> : null}
         </Card>
       ))}
     </View>

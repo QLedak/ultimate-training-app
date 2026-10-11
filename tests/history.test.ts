@@ -47,3 +47,9 @@ assert.equal(effectiveExerciseId({ exercise_id: "BP-001", substituted_exercise_i
 assert.equal(effectiveExerciseId({ exercise_id: "BP-001", substituted_exercise_id: null }), "BP-001");
 
 console.log("history tests passed");
+
+import { isAbsoluteStrength } from "../lib/training/history";
+assert.equal(isAbsoluteStrength("Absolute strength"), true);
+assert.equal(isAbsoluteStrength("Hypertrophy"), false);
+assert.equal(isAbsoluteStrength(null), false);
+console.log("absolute strength flag tests passed");

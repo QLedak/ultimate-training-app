@@ -3,7 +3,7 @@ import { getSupabaseAdmin } from "@/lib/db/supabase-admin";
 import { getSessionAthleteId, getSessionCoachId, unauthorized, forbidden } from "@/lib/auth/session";
 import { dbError } from "@/lib/api/error-response";
 import { humanizeExerciseId } from "@/lib/training/display-labels";
-import { buildEntries, summarize } from "@/lib/training/history";
+import { buildEntries, isAbsoluteStrength, summarize } from "@/lib/training/history";
 import { fetchHistoryRows, isSafeExerciseId } from "@/lib/training/history-fetch";
 
 /**
@@ -27,7 +27,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string;
 
   const { data: lib } = await getSupabaseAdmin()
     .from("exercise_library")
-    .select("exercise_id, exercise_name")
+    .select("exercise_id, exercise_name, category")
     .eq("exercise_id", exerciseId)
     .limit(1);
 
@@ -35,6 +35,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string;
   return NextResponse.json({
     exercise_id: exerciseId,
     exercise_name: lib?.[0]?.exercise_name ?? humanizeExerciseId(exerciseId),
+    is_absolute_strength: isAbsoluteStrength(lib?.[0]?.category as string | null | undefined),
     summary: summarize(entries),
     // Newest first for the list; the chart reverses it.
     entries: entries.slice().reverse(),

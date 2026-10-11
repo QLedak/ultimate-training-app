@@ -16,6 +16,8 @@ import AccountScreen from "../screens/AccountScreen";
 import EquipmentScreen from "../screens/EquipmentScreen";
 import InjuriesScreen from "../screens/InjuriesScreen";
 import RemindersScreen from "../screens/RemindersScreen";
+import SeasonScreen from "../screens/SeasonScreen";
+import TrainingDaysScreen from "../screens/TrainingDaysScreen";
 import { syncReminders } from "../lib/reminders";
 import { colors } from "../theme";
 
@@ -98,7 +100,9 @@ export default function Navigation() {
           <>
             <Stack.Screen name="Main" component={MainTabs} options={{ headerShown: false }} />
             <Stack.Screen name="Session" component={SessionScreen} options={{ title: "Workout", headerBackTitle: "Back" }} />
-            <Stack.Screen name="Account" component={AccountScreen} options={{ title: "Account", headerBackTitle: "Back" }} />
+            <Stack.Screen name="Account" component={AccountScreen} options={{ title: "My info", headerBackTitle: "Back" }} />
+            <Stack.Screen name="Season" component={SeasonScreen} options={{ title: "Season & game days", headerBackTitle: "Back" }} />
+            <Stack.Screen name="TrainingDays" component={TrainingDaysScreen} options={{ title: "Training days", headerBackTitle: "Back" }} />
             <Stack.Screen name="Equipment" component={EquipmentScreen} options={{ title: "Equipment", headerBackTitle: "Back" }} />
             <Stack.Screen name="Injuries" component={InjuriesScreen} options={{ title: "Injury status", headerBackTitle: "Back" }} />
             <Stack.Screen name="Reminders" component={RemindersScreen} options={{ title: "Reminders", headerBackTitle: "Back" }} />

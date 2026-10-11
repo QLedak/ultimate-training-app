@@ -5,6 +5,7 @@ import { dbError } from "@/lib/api/error-response";
 import { humanizeExerciseId } from "@/lib/training/display-labels";
 import { buildEntries, effectiveExerciseId, summarize, type HistoryRow } from "@/lib/training/history";
 import { fetchHistoryRows } from "@/lib/training/history-fetch";
+import { isAbsoluteStrength } from "@/lib/training/history";
 
 /**
  * GET /api/athletes/[id]/exercise-history
@@ -32,13 +33,19 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 
   const ids = Array.from(byExercise.keys());
   const names = new Map<string, string>();
+  const categories = new Map<string, string | null>();
   if (ids.length) {
     const { data: lib, error: libError } = await getSupabaseAdmin()
       .from("exercise_library")
-      .select("exercise_id, exercise_name")
+      .select("exercise_id, exercise_name, category")
       .in("exercise_id", ids);
     if (libError) return dbError("athletes/[id]/exercise-history", libError);
-    for (const l of lib ?? []) if (!names.has(l.exercise_id)) names.set(l.exercise_id, l.exercise_name);
+    for (const l of lib ?? []) {
+      if (!names.has(l.exercise_id)) {
+        names.set(l.exercise_id, l.exercise_name);
+        categories.set(l.exercise_id, (l.category as string | null) ?? null);
+      }
+    }
   }
 
   const exercises = ids
@@ -48,6 +55,8 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       return {
         exercise_id: id,
         exercise_name: names.get(id) ?? humanizeExerciseId(id),
+        // The estimated-1RM chart only makes sense for absolute strength lifts (squat, bench, ...).
+        is_absolute_strength: isAbsoluteStrength(categories.get(id)),
         times_logged: entries.length,
         last_date: entries.length ? entries[entries.length - 1].date : null,
         best_est_1rm: summary.best_est_1rm?.value ?? null,

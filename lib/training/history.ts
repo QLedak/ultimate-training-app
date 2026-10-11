@@ -117,3 +117,8 @@ export function summarize(entries: HistoryEntry[]): HistorySummary {
   }
   return { total_sessions: entries.length, best_est_1rm: best, heaviest };
 }
+
+/** Estimated-1RM charts are only meaningful for the big absolute-strength lifts, not every weighted exercise. */
+export function isAbsoluteStrength(category: string | null | undefined): boolean {
+  return category === "Absolute strength";
+}
