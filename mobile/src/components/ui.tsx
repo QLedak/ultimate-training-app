@@ -25,8 +25,8 @@ export function H1({ children, style }: { children: React.ReactNode; style?: any
 export function H2({ children }: { children: React.ReactNode }) {
   return <Text style={s.h2}>{children}</Text>;
 }
-export function P({ children, muted, small, style }: { children: React.ReactNode; muted?: boolean; small?: boolean; style?: any }) {
-  return <Text style={[s.p, muted && { color: colors.muted }, small && { fontSize: 12 }, style]}>{children}</Text>;
+export function P({ children, muted, small, style, numberOfLines }: { children: React.ReactNode; muted?: boolean; small?: boolean; style?: any; numberOfLines?: number }) {
+  return <Text numberOfLines={numberOfLines} style={[s.p, muted && { color: colors.muted }, small && { fontSize: 12 }, style]}>{children}</Text>;
 }
 export function Caps({ children, color }: { children: React.ReactNode; color?: string }) {
   return <Text style={[s.caps, color ? { color } : null]}>{children}</Text>;

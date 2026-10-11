@@ -35,5 +35,14 @@ export async function GET() {
     );
   }
 
-  return NextResponse.json({ athlete });
+  // Additive: lets the mobile app tell "account, no intake yet" from "intake done".
+  const { count, error: intakeErr } = await supabase
+    .from("athlete_intake")
+    .select("id", { count: "exact", head: true })
+    .eq("athlete_id", athlete.id);
+  if (intakeErr) {
+    return dbError("me/athlete", intakeErr);
+  }
+
+  return NextResponse.json({ athlete, has_intake: (count ?? 0) > 0 });
 }

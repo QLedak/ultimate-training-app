@@ -54,7 +54,7 @@ export default function ProgramsScreen({ navigation }: any) {
       <ErrorText>{error}</ErrorText>
       {purchases === null && !error ? <Loading /> : null}
       {purchases?.length === 0 ? (
-        <P muted>You haven't added a program yet. Programs can be added on the website.</P>
+        <P muted>You haven't added a program yet. Pick one below and choose your start date and training days.</P>
       ) : null}
 
       {purchases?.map((p) => {
@@ -110,6 +110,10 @@ export default function ProgramsScreen({ navigation }: any) {
           </Card>
         );
       })}
+
+      {purchases ? (
+        <Button title={purchases.length ? "Browse more programs" : "Browse programs"} variant={purchases.length ? "secondary" : "primary"} onPress={() => navigation.navigate("Plans")} />
+      ) : null}
     </ScrollView>
   );
 }

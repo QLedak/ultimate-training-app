@@ -56,6 +56,10 @@ Code changes on your PC reload on the phone automatically. Shake the phone for t
 They are copied from `../lib` automatically before every `npx expo start` (or run `npm run sync`).
 **Never edit `src/shared` by hand.** `npm test` in the repo root fails if the copies drift.
 
+## Sign-up, intake and plans (no new installs)
+
+New people can now do everything in the app: create an account, browse the coach-built season plan and the ready-made programs, buy (free during launch) a program with their start date and training days, and complete the full intake. Intake answers save on the phone as they go, so closing the app mid-way loses nothing. Payments are not connected yet (the website's `PURCHASES_MODE=free` applies); Apple requires in-app purchase for paid plans sold inside the app, so that comes later.
+
 ## Updating after testing
 
 - Fix on the phone side: edit files in `mobile/src`, save, the phone reloads.

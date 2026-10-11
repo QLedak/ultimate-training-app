@@ -32,7 +32,8 @@
           "backgroundColor": "#15181B"
         }
       ],
-      "expo-notifications"
+      "expo-notifications",
+      "@react-native-community/datetimepicker"
     ],
     "scheme": "ultimate-training",
     "backgroundColor": "#15181B"

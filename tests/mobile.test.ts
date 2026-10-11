@@ -14,6 +14,11 @@ import {
 } from "../mobile/src/lib/schedule.core";
 import { planReminders, formatReminderTime, clampTime, MAX_REMINDERS } from "../mobile/src/lib/reminders.core";
 import { createQueue, type PendingLog } from "../mobile/src/lib/pendingLogs.core";
+import {
+  addGoal, buildIntakePayload, firstInvalidStep, initialIntake, parseDraft, toggleEquipment, validateIntakeStep, TOTAL_STEPS, type IntakeState,
+} from "../mobile/src/lib/intake.core";
+import { COACH_PLAN, daysProblem, defaultDaysFor, equipmentLabel, factsLine, levelLabel, priceLabel, toggleWeekday } from "../mobile/src/lib/plans.core";
+import { signUpProblem } from "../mobile/src/lib/signup.core";
 import type { SessionExercise, SubmitPayload } from "../mobile/src/types";
 
 // 1. The phone's copies of shared logic must match the web originals exactly.
@@ -297,3 +302,127 @@ async function queueTests() {
 queueTests().then(() => console.log("offline queue tests passed"));
 
 console.log("mobile logic tests passed");
+
+
+// ---- Sign-up, intake wizard and plans (mobile onboarding) ----
+{
+  // sign-up form
+  const ok = { name: "Sam", email: "sam@example.com", password: "longenough", agreed: true };
+  assert.equal(signUpProblem(ok), null);
+  assert.match(signUpProblem({ ...ok, name: " " })!, /name/i);
+  assert.match(signUpProblem({ ...ok, email: "nope" })!, /email/i);
+  assert.match(signUpProblem({ ...ok, password: "short" })!, /8 characters/);
+  assert.match(signUpProblem({ ...ok, agreed: false })!, /agree/i);
+
+  // intake step validation
+  const s0 = initialIntake();
+  assert.equal(validateIntakeStep(0, s0), null, "age is optional");
+  assert.match(validateIntakeStep(0, { ...s0, age: "abc" })!, /age/i);
+  assert.match(validateIntakeStep(1, s0)!, /structured training/i);
+  assert.match(validateIntakeStep(1, { ...s0, yearsStructuredTraining: "2" })!, /lifting experience/i);
+  assert.equal(validateIntakeStep(1, { ...s0, yearsStructuredTraining: "0", liftingExperience: "new" }), null);
+  assert.match(validateIntakeStep(2, s0)!, /start and end/i);
+  assert.match(validateIntakeStep(2, { ...s0, seasonStart: "2026-11-01", seasonEnd: "2026-10-01" })!, /end before/i);
+  assert.match(validateIntakeStep(2, { ...s0, seasonStart: "2026-11-01", seasonEnd: "2027-06-01" })!, /schedule is set/i);
+  assert.match(validateIntakeStep(3, s0)!, /days/i);
+  assert.match(validateIntakeStep(4, s0)!, /equipment/i);
+  assert.match(validateIntakeStep(4, { ...s0, equipment: ["dumbbells"] })!, /space/i);
+  assert.match(validateIntakeStep(5, { ...s0, backSquat: { weight: "225", reps: "", skip: false } })!, /both weight and reps/);
+  assert.equal(validateIntakeStep(5, { ...s0, backSquat: { weight: "225", reps: "", skip: true } }), null);
+
+  // equipment exclusivity is shared with the website
+  assert.deepEqual(toggleEquipment(["dumbbells"], "bodyweight_only"), ["bodyweight_only"]);
+  assert.deepEqual(toggleEquipment(["bodyweight_only"], "dumbbells"), ["dumbbells"]);
+
+  // goal chips add once
+  assert.equal(addGoal("", "Get faster"), "Get faster");
+  assert.equal(addGoal("Get faster", "Jump higher"), "Get faster. Jump higher");
+  assert.equal(addGoal("Get faster", "get faster"), "Get faster");
+
+  // a complete answer set passes every step and builds the exact payload the API expects
+  const full: IntakeState = {
+    ...s0,
+    age: "27",
+    benchmarkSet: "general_range",
+    yearsPlayingUltimate: "6",
+    yearsStructuredTraining: "3",
+    liftingExperience: "comfortable_with_basics",
+    seasonStart: "2026-11-01",
+    seasonEnd: "2027-06-01",
+    commitments: [{ day_of_week: "Wednesday", time: "19:00", label: "", start_date: "", end_date: "" }],
+    tournaments: [{ start_date: "2027-05-01", end_date: "2027-05-02", label: "Regionals", is_priority: true }],
+    calendarConfirmed: "yes",
+    trainingDaysPerWeek: "4",
+    equipment: ["dumbbells", "pullup_bar"],
+    availableSpace: "standard",
+    bodyweightLb: "180",
+    backSquat: { weight: "225", reps: "5", skip: false },
+    benchPress: { weight: "", reps: "", skip: true },
+    pullupMaxReps: "8",
+    currentInjuries: ["ankle"],
+    injuryHistory: ["hamstring"],
+    catchall: " tight left calf ",
+    goals: "Get faster",
+  };
+  for (let i = 0; i < TOTAL_STEPS; i++) assert.equal(validateIntakeStep(i, full), null, `step ${i}`);
+  assert.equal(firstInvalidStep(full), null);
+  assert.equal(firstInvalidStep({ ...full, trainingDaysPerWeek: "" }), 3);
+
+  const p = buildIntakePayload("ath-1", full);
+  assert.equal(p.athleteId, "ath-1");
+  assert.equal(p.age, 27);
+  assert.equal(p.season_calendar_confirmed, true);
+  assert.equal(p.training_days_per_week, 4);
+  assert.equal(p.back_squat_weight, 225);
+  assert.equal(p.back_squat_reps, 5);
+  assert.equal(p.bench_press_weight, null, "skipped max is dropped");
+  assert.equal(p.deadlift_weight, null, "untouched max is null");
+  assert.equal(p.vertical_jump_in, null);
+  assert.equal(p.pullup_max_reps, 8);
+  assert.equal(p.recurring_commitments[0].label, "League game", "blank label defaults like the Season screen");
+  assert.equal(p.recurring_commitments[0].start_date, null);
+  assert.deepEqual(p.injuryReports, [
+    { location: "ankle", report_type: "current_active" },
+    { location: "hamstring", report_type: "history" },
+  ]);
+  assert.deepEqual(p.catchallRestrictions, ["tight left calf"]);
+  // keys must be ones the intake table / route know about
+  const known = new Set([
+    "athleteId", "age", "benchmark_set", "years_playing_ultimate", "years_structured_training", "lifting_experience_selfdescribe",
+    "season_start", "season_end", "recurring_commitments", "tournament_weekends", "season_calendar_confirmed", "training_days_per_week",
+    "equipment", "available_space", "conditioning_modality", "bodyweight_lb", "back_squat_weight", "back_squat_reps", "bench_press_weight",
+    "bench_press_reps", "deadlift_weight", "deadlift_reps", "power_clean_weight", "power_clean_reps", "pullup_max_reps", "vertical_jump_in",
+    "goals", "injuryReports", "catchallRestrictions",
+  ]);
+  assert.deepEqual(Object.keys(p).filter((k) => !known.has(k)), []);
+  const webSrc = readFileSync("app/app/intake/page.tsx", "utf8");
+  for (const k of known) if (k !== "athleteId") assert.ok(webSrc.includes(k), `website intake payload no longer has ${k}`);
+
+  // drafts
+  assert.equal(parseDraft(null), null);
+  assert.equal(parseDraft("{not json"), null);
+  const d = parseDraft(JSON.stringify({ step: 99, state: { age: "30" } }))!;
+  assert.equal(d.step, TOTAL_STEPS - 1);
+  assert.equal(d.state.age, "30");
+  assert.deepEqual(d.state.equipment, [], "missing fields fall back to defaults");
+
+  // plans
+  assert.equal(priceLabel(0), "Free during launch");
+  assert.equal(priceLabel(4900), "$49");
+  assert.equal(priceLabel(4950), "$49.50");
+  assert.equal(levelLabel("comfortable"), "For lifters comfortable with the basics");
+  assert.equal(levelLabel(null), "All levels");
+  assert.equal(factsLine({ week_count: 12, days_per_week: 4, level: "comfortable" }), "12 weeks · 4 days/week · For lifters comfortable with the basics");
+  assert.equal(equipmentLabel("dumbbells"), "Dumbbells");
+  assert.match(equipmentLabel("turf_track"), /sprint/);
+  assert.deepEqual(defaultDaysFor(4), [1, 2, 4, 6]);
+  assert.deepEqual(defaultDaysFor(3), [1, 2, 4]);
+  assert.equal(defaultDaysFor(6).length, 6);
+  assert.deepEqual(toggleWeekday([1, 4], 2), [1, 2, 4]);
+  assert.deepEqual(toggleWeekday([1, 2, 4], 2), [1, 4]);
+  assert.equal(daysProblem([1, 2, 4, 6], 4), null);
+  assert.match(daysProblem([1], 4)!, /3 more days/);
+  assert.match(daysProblem([1, 2, 3, 4, 5], 4)!, /exactly 4/);
+  assert.ok(COACH_PLAN.bullets.length >= 4 && COACH_PLAN.how.length === 4);
+}
+console.log("onboarding (sign-up, intake, plans) tests passed");

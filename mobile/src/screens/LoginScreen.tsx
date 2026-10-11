@@ -5,7 +5,7 @@ import { Button, ErrorText, Field, P } from "../components/ui";
 import { useAuth } from "../lib/auth";
 import { colors } from "../theme";
 
-export default function LoginScreen() {
+export default function LoginScreen({ navigation }: any) {
   const { signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,12 +32,15 @@ export default function LoginScreen() {
             <Text style={{ fontSize: 13, fontWeight: "800", letterSpacing: 2, color: colors.brand }}>TRUE</Text>
             <Text style={{ fontSize: 32, fontWeight: "800", color: colors.text }}>Ultimate Training</Text>
           </View>
-          <P muted>Sign in with the account you use on the website.</P>
+          <P muted>Sign in with the same account you use on the website.</P>
           <Field label="Email" value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false} keyboardType="email-address" textContentType="username" />
           <Field label="Password" value={password} onChangeText={setPassword} secureTextEntry textContentType="password" onSubmitEditing={submit} />
           <ErrorText>{error}</ErrorText>
           <Button title="Sign in" onPress={submit} loading={busy} />
-          <P small muted>New here? Create your account on the website first, then sign in here.</P>
+          <View style={{ height: 1, backgroundColor: colors.line, marginVertical: 6 }} />
+          <P muted>New here?</P>
+          <Button title="Create an account" variant="secondary" onPress={() => navigation.navigate("SignUp")} />
+          <Button title="Browse programs and plans" variant="link" onPress={() => navigation.navigate("Plans")} style={{ alignSelf: "center" }} />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

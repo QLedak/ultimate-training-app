@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { ActivityIndicator, AppState, Pressable, Text, View } from "react-native";
-import { NavigationContainer, DarkTheme, useNavigation } from "@react-navigation/native";
+import { NavigationContainer, DarkTheme, createNavigationContainerRef, useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,10 +18,16 @@ import InjuriesScreen from "../screens/InjuriesScreen";
 import RemindersScreen from "../screens/RemindersScreen";
 import SeasonScreen from "../screens/SeasonScreen";
 import TrainingDaysScreen from "../screens/TrainingDaysScreen";
+import SignUpScreen from "../screens/SignUpScreen";
+import PlansScreen from "../screens/PlansScreen";
+import PlanDetailScreen from "../screens/PlanDetailScreen";
+import CoachPlanScreen from "../screens/CoachPlanScreen";
+import IntakeScreen from "../screens/IntakeScreen";
 import { syncReminders } from "../lib/reminders";
 import { colors } from "../theme";
 
 const Stack = createNativeStackNavigator();
+const navRef = createNavigationContainerRef<any>();
 const Tabs = createBottomTabNavigator();
 
 function ProfileButton() {
@@ -47,6 +53,25 @@ function ReminderSync() {
     const sub = AppState.addEventListener("change", (st) => { if (st === "active") syncReminders(athlete.id); });
     return () => sub.remove();
   }, [athlete]);
+  return null;
+}
+
+/**
+ * After someone signs up (or signs in) from a plan page, take them back to what they were looking at:
+ * the program they chose, or the intake for the coach-built plan.
+ */
+function PendingPlanRouter() {
+  const { athlete, hasIntake, pendingPlanId, setPendingPlanId } = useAuth();
+  useEffect(() => {
+    if (!athlete || !pendingPlanId || !navRef.isReady()) return;
+    const id = pendingPlanId;
+    setPendingPlanId(null);
+    if (id === "coach") {
+      if (!hasIntake) navRef.navigate("Intake");
+    } else {
+      navRef.navigate("PlanDetail", { id });
+    }
+  }, [athlete, hasIntake, pendingPlanId, setPendingPlanId]);
   return null;
 }
 
@@ -92,9 +117,11 @@ export default function Navigation() {
   }
   return (
     <NavigationContainer
+      ref={navRef}
       theme={{ ...DarkTheme, colors: { ...DarkTheme.colors, primary: colors.brand, background: colors.bg, card: colors.bg, text: colors.text, border: colors.line } }}
     >
       {session ? <ReminderSync /> : null}
+      {session ? <PendingPlanRouter /> : null}
       <Stack.Navigator screenOptions={{ headerStyle: { backgroundColor: colors.bg }, headerTitleStyle: { color: colors.text }, headerTintColor: colors.brand, headerShadowVisible: false }}>
         {session ? (
           <>
@@ -107,9 +134,19 @@ export default function Navigation() {
             <Stack.Screen name="Injuries" component={InjuriesScreen} options={{ title: "Injury status", headerBackTitle: "Back" }} />
             <Stack.Screen name="Reminders" component={RemindersScreen} options={{ title: "Reminders", headerBackTitle: "Back" }} />
             <Stack.Screen name="ExerciseHistory" component={ExerciseHistoryScreen} options={{ title: "History", headerBackTitle: "Back" }} />
+            <Stack.Screen name="Plans" component={PlansScreen} options={{ title: "Programs & plans", headerBackTitle: "Back" }} />
+            <Stack.Screen name="PlanDetail" component={PlanDetailScreen} options={{ title: "Program", headerBackTitle: "Back" }} />
+            <Stack.Screen name="CoachPlan" component={CoachPlanScreen} options={{ title: "Your season plan", headerBackTitle: "Back" }} />
+            <Stack.Screen name="Intake" component={IntakeScreen} options={{ title: "Intake", headerBackTitle: "Back" }} />
           </>
         ) : (
-          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="SignUp" component={SignUpScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Plans" component={PlansScreen} options={{ title: "Programs & plans", headerBackTitle: "Back" }} />
+            <Stack.Screen name="PlanDetail" component={PlanDetailScreen} options={{ title: "Program", headerBackTitle: "Back" }} />
+            <Stack.Screen name="CoachPlan" component={CoachPlanScreen} options={{ title: "Your season plan", headerBackTitle: "Back" }} />
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>

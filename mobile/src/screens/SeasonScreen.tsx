@@ -1,13 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
-import { Button, Card, Caps, ErrorText, H1, Loading, P, Screen } from "../components/ui";
-import { DateField } from "../components/DateField";
+import { Button, Card, ErrorText, H1, Loading, P, Screen } from "../components/ui";
+import { SeasonFields } from "../components/SeasonFields";
 import { useAuth } from "../lib/auth";
 import { api } from "../lib/api";
-import {
-  DAYS_OF_WEEK, blankCommitment, blankTournament, commitmentsPayload, isGameLabel, normalizeCommitments, normalizeTournaments,
-  setPriorityTournament, validateScheduleForm, type Commitment, type Tournament,
-} from "../lib/schedule.core";
+import { commitmentsPayload, normalizeCommitments, normalizeTournaments, validateScheduleForm, type Commitment, type Tournament } from "../lib/schedule.core";
 import { colors } from "../theme";
 
 type ScheduleResponse = {
@@ -17,8 +13,6 @@ type ScheduleResponse = {
   recurring_commitments: unknown;
   tournament_weekends: unknown;
 };
-
-const inputStyle = { borderWidth: 1, borderColor: colors.line, borderRadius: 10, padding: 12, fontSize: 15, color: colors.text, backgroundColor: colors.cardAlt } as const;
 
 export default function SeasonScreen() {
   const { athlete } = useAuth();
@@ -50,9 +44,6 @@ export default function SeasonScreen() {
   useEffect(() => { load(); }, [load]);
 
   const edit = <T,>(set: (v: T) => void) => (v: T) => { set(v); setDirty(true); setMessage(null); };
-
-  const updTournament = (i: number, patch: Partial<Tournament>) => edit(setTournaments)(tournaments.map((t, idx) => (idx === i ? { ...t, ...patch } : t)));
-  const updCommitment = (i: number, patch: Partial<Commitment>) => edit(setCommitments)(commitments.map((c, idx) => (idx === i ? { ...c, ...patch } : c)));
 
   async function save() {
     if (!athlete) return;
@@ -96,72 +87,16 @@ export default function SeasonScreen() {
 
       {loaded && !seasonOver ? (
         <>
-          <Caps>Season dates</Caps>
-          <View style={{ flexDirection: "row", gap: 12 }}>
-            <DateField label="Starts" value={start} onChange={edit(setStart)} />
-            <DateField label="Ends" value={end} onChange={edit(setEnd)} />
-          </View>
-
-          <Caps>Game and league nights (every week)</Caps>
-          <P small muted>Name game nights with "league" or "game" so your program treats that day as a game day. Add a date range if it only runs part of the season.</P>
-          {commitments.map((c, i) => (
-            <Card key={i}>
-              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
-                {DAYS_OF_WEEK.map((d) => (
-                  <Pressable
-                    key={d}
-                    onPress={() => updCommitment(i, { day_of_week: d })}
-                    style={{ paddingHorizontal: 10, paddingVertical: 8, borderRadius: 16, borderWidth: 1, borderColor: c.day_of_week === d ? colors.brand : colors.line, backgroundColor: c.day_of_week === d ? colors.brandBg : colors.cardAlt }}
-                  >
-                    <Text style={{ color: c.day_of_week === d ? colors.brand : colors.text, fontWeight: "700", fontSize: 13 }}>{d.slice(0, 3)}</Text>
-                  </Pressable>
-                ))}
-              </View>
-              <TextInput
-                value={c.label}
-                onChangeText={(v) => updCommitment(i, { label: v })}
-                placeholder="Label (League game, Team practice)"
-                placeholderTextColor={colors.faint}
-                keyboardAppearance="dark"
-                style={inputStyle}
-              />
-              {c.label && !isGameLabel(c.label) ? <P small muted>This will count as a regular commitment, not a game day.</P> : null}
-              <View style={{ flexDirection: "row", gap: 12 }}>
-                <DateField mode="time" label="Time (optional)" value={c.time} onChange={(v) => updCommitment(i, { time: v })} clearable />
-              </View>
-              <View style={{ flexDirection: "row", gap: 12 }}>
-                <DateField label="Runs from (optional)" value={c.start_date} onChange={(v) => updCommitment(i, { start_date: v })} clearable />
-                <DateField label="Until (optional)" value={c.end_date} onChange={(v) => updCommitment(i, { end_date: v })} clearable />
-              </View>
-              <Button title="Remove" variant="link" onPress={() => edit(setCommitments)(commitments.filter((_, idx) => idx !== i))} style={{ alignSelf: "flex-start" }} />
-            </Card>
-          ))}
-          <Button title="+ Add a game or league night" variant="secondary" onPress={() => edit(setCommitments)([...commitments, blankCommitment()])} />
-
-          <Caps>Tournaments and league weekends</Caps>
-          <P small muted>Mark the one event you most want to peak for. Only one can be the most important.</P>
-          {tournaments.map((t, i) => (
-            <Card key={i} tone={t.is_priority ? "brand" : undefined}>
-              <View style={{ flexDirection: "row", gap: 12 }}>
-                <DateField label="First day" value={t.start_date} onChange={(v) => updTournament(i, { start_date: v, end_date: t.end_date && t.end_date < v ? v : t.end_date })} />
-                <DateField label="Last day" value={t.end_date} onChange={(v) => updTournament(i, { end_date: v })} />
-              </View>
-              <TextInput
-                value={t.label}
-                onChangeText={(v) => updTournament(i, { label: v })}
-                placeholder="Name (Regionals, Nationals)"
-                placeholderTextColor={colors.faint}
-                keyboardAppearance="dark"
-                style={inputStyle}
-              />
-              <Pressable onPress={() => edit(setTournaments)(setPriorityTournament(tournaments, i))} style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
-                <View style={{ width: 24, height: 24, borderRadius: 6, borderWidth: 2, borderColor: colors.brand, backgroundColor: t.is_priority ? colors.brand : "transparent" }} />
-                <P small>Most important. Peak for this one</P>
-              </Pressable>
-              <Button title="Remove" variant="link" onPress={() => edit(setTournaments)(tournaments.filter((_, idx) => idx !== i))} style={{ alignSelf: "flex-start" }} />
-            </Card>
-          ))}
-          <Button title="+ Add a tournament" variant="secondary" onPress={() => edit(setTournaments)([...tournaments, blankTournament()])} />
+          <SeasonFields
+            start={start}
+            end={end}
+            tournaments={tournaments}
+            commitments={commitments}
+            onStart={edit(setStart)}
+            onEnd={edit(setEnd)}
+            onTournaments={edit(setTournaments)}
+            onCommitments={edit(setCommitments)}
+          />
 
           <Button title="Save schedule" onPress={save} loading={saving} disabled={!dirty} />
         </>

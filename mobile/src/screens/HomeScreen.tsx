@@ -26,7 +26,7 @@ export function statusColor(status: SessionSummary["status"], date: string) {
 }
 
 export default function HomeScreen({ navigation }: any) {
-  const { athlete, noAthlete, profileError, signOut, refreshProfile } = useAuth();
+  const { athlete, noAthlete, hasIntake, profileError, signOut, refreshProfile } = useAuth();
   const today = todayStr();
   const [weekStart, setWeekStart] = useState(startOfWeekStr(today));
   const [selected, setSelected] = useState(today);
@@ -59,7 +59,7 @@ export default function HomeScreen({ navigation }: any) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg, padding: 24, justifyContent: "center", gap: 12 }}>
         <H1>Finish setting up</H1>
-        <P muted>Your account doesn't have an athlete profile yet. Complete intake on the website, then check again here.</P>
+        <P muted>This login isn't set up as an athlete account. If you meant to train here, sign out and create an athlete account.</P>
         <Button title="Check again" onPress={refreshProfile} />
         <Button title="Sign out" variant="link" onPress={signOut} />
       </SafeAreaView>
@@ -88,6 +88,21 @@ export default function HomeScreen({ navigation }: any) {
     >
       <SyncBanner onSynced={load} />
       <ErrorText>{error}</ErrorText>
+
+      {!hasIntake ? (
+        <Card tone="brand">
+          <H2>Welcome{athlete?.name ? `, ${athlete.name.split(" ")[0]}` : ""}. Let's get you training.</H2>
+          <P muted>Answer the intake and your coach builds your season plan, or start a ready-made program right now.</P>
+          <Button title="Build my season plan" onPress={() => navigation.navigate("Intake")} />
+          <Button title="Browse ready-made programs" variant="secondary" onPress={() => navigation.navigate("Plans")} />
+        </Card>
+      ) : week && !error && phases.length === 0 && (week.length === 0) ? (
+        <Card>
+          <H2>Your coach is building your plan</H2>
+          <P muted>Your intake is in. Your season plan shows up here once your coach has reviewed it. Meanwhile you can start a ready-made program.</P>
+          <Button title="Browse programs" variant="secondary" onPress={() => navigation.navigate("Plans")} />
+        </Card>
+      ) : null}
 
       {info ? (
         <Card>
