@@ -23,6 +23,7 @@ import PlansScreen from "../screens/PlansScreen";
 import PlanDetailScreen from "../screens/PlanDetailScreen";
 import CoachPlanScreen from "../screens/CoachPlanScreen";
 import IntakeScreen from "../screens/IntakeScreen";
+import NextSeasonScreen from "../screens/NextSeasonScreen";
 import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
 import DeleteAccountScreen from "../screens/DeleteAccountScreen";
 import { syncReminders } from "../lib/reminders";
@@ -140,6 +141,7 @@ export default function Navigation() {
             <Stack.Screen name="PlanDetail" component={PlanDetailScreen} options={{ title: "Program", headerBackTitle: "Back" }} />
             <Stack.Screen name="CoachPlan" component={CoachPlanScreen} options={{ title: "Your season plan", headerBackTitle: "Back" }} />
             <Stack.Screen name="Intake" component={IntakeScreen} options={{ title: "Intake", headerBackTitle: "Back" }} />
+            <Stack.Screen name="NextSeason" component={NextSeasonScreen} options={{ title: "Plan next season", headerBackTitle: "Back" }} />
             <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} options={{ title: "Delete account", headerBackTitle: "Back" }} />
           </>
         ) : (

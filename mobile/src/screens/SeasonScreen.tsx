@@ -14,7 +14,7 @@ type ScheduleResponse = {
   tournament_weekends: unknown;
 };
 
-export default function SeasonScreen() {
+export default function SeasonScreen({ navigation }: any) {
   const { athlete } = useAuth();
   const [loaded, setLoaded] = useState(false);
   const [seasonOver, setSeasonOver] = useState(false);
@@ -79,7 +79,8 @@ export default function SeasonScreen() {
       <P muted>Keep your season dates, tournaments and weekly game or league nights current so your program plans around them.</P>
       {seasonOver ? (
         <Card tone="amber">
-          <P>Your last season has ended. Planning your next season is done on the website under "Plan next season". Your coach builds your next plan from it.</P>
+          <P>Your last season has ended. Enter your next season's dates under "Plan next season" and your coach builds your next plan from them.</P>
+          <Button title="Plan next season" onPress={() => navigation.navigate("NextSeason")} />
         </Card>
       ) : null}
       <ErrorText>{error}</ErrorText>

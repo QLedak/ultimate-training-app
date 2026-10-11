@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Alert, Pressable, Text, View } from "react-native";
+import { Alert, Linking, Platform, Pressable, Text, View } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { Button, Card, H1, P, Screen } from "../components/ui";
@@ -9,6 +9,9 @@ import { api } from "../lib/api";
 import { prettyDate } from "../lib/dates";
 import { injuryLabel } from "../lib/injuries";
 import { isGameLabel, normalizeCommitments, normalizeTournaments } from "../lib/schedule.core";
+import { SUPPORT_EMAIL } from "../config";
+import { APP_VERSION } from "../lib/errorReport";
+import { supportMailto } from "../lib/errorReport.core";
 import { colors } from "../theme";
 
 function Row({ icon, title, sub, onPress }: { icon: string; title: string; sub: string; onPress: () => void }) {
@@ -73,10 +76,17 @@ export default function AccountScreen({ navigation }: any) {
         <Row icon="repeat-outline" title="Training days per week" sub={sum.days ?? "Request a change"} onPress={() => navigation.navigate("TrainingDays")} />
         <Row icon="barbell-outline" title="Equipment" sub={sum.equipment ?? "What you can train with"} onPress={() => navigation.navigate("Equipment")} />
         <Row icon="bandage-outline" title="Injury status" sub={sum.injuries ?? "Check in or report something new"} onPress={() => navigation.navigate("Injuries")} />
+        <Row icon="flag-outline" title="Plan next season" sub="Enter next season's dates for your coach" onPress={() => navigation.navigate("NextSeason")} />
         <Row icon="notifications-outline" title="Workout reminders" sub="A nudge on training days" onPress={() => navigation.navigate("Reminders")} />
       </Card>
 
       <RebuildRequestCard />
+
+      {SUPPORT_EMAIL ? (
+        <Card>
+          <Row icon="chatbubble-ellipses-outline" title="Help & feedback" sub="Report a problem or suggest something" onPress={() => Linking.openURL(supportMailto(SUPPORT_EMAIL, APP_VERSION, Platform.OS, Platform.Version))} />
+        </Card>
+      ) : null}
 
       <Button
         title="Sign out"
@@ -84,6 +94,7 @@ export default function AccountScreen({ navigation }: any) {
         onPress={() => Alert.alert("Sign out?", "", [{ text: "Cancel", style: "cancel" }, { text: "Sign out", style: "destructive", onPress: () => signOut() }])}
       />
       <Button title="Delete account" variant="link" onPress={() => navigation.navigate("DeleteAccount")} style={{ alignSelf: "center", marginTop: 8 }} />
+      <P small muted style={{ textAlign: "center" }}>Version {APP_VERSION}</P>
     </Screen>
   );
 }

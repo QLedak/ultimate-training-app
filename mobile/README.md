@@ -60,6 +60,10 @@ They are copied from `../lib` automatically before every `npx expo start` (or ru
 
 New people can now do everything in the app: create an account, browse the coach-built season plan and the ready-made programs, buy (free during launch) a program with their start date and training days, and complete the full intake. Intake answers save on the phone as they go, so closing the app mid-way loses nothing. Payments are not connected yet (the website's `PURCHASES_MODE=free` applies); Apple requires in-app purchase for paid plans sold inside the app, so that comes later.
 
+## TestFlight
+
+See `TESTFLIGHT.md` for the step-by-step (Apple developer account, EAS build, App Store Connect).
+
 ## Updating after testing
 
 - Fix on the phone side: edit files in `mobile/src`, save, the phone reloads.

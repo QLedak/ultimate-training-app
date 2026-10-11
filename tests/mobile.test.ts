@@ -428,6 +428,12 @@ console.log("mobile logic tests passed");
 console.log("onboarding (sign-up, intake, plans) tests passed");
 
 // ---- Account deletion + password reset ----
+import {
+  buildNextSeasonBody, formFromState, isLocked, nextSeasonProblem, plannedStatus, seasonIntro, shouldPromptNextSeason, type SeasonState, type PlannedSeason,
+} from "../mobile/src/lib/nextSeason.core";
+import { buildErrorReport, createDeduper, supportMailto } from "../mobile/src/lib/errorReport.core";
+import { sanitizeClientError } from "../lib/client-errors";
+import { createRequire } from "node:module";
 import { validateDeleteRequest } from "../lib/account/delete";
 import { resetEmailProblem } from "../mobile/src/lib/signup.core";
 {
@@ -444,4 +450,113 @@ import { resetEmailProblem } from "../mobile/src/lib/signup.core";
   assert.ok(route.indexOf('from("athletes").delete()') < route.indexOf("auth.admin.deleteUser"));
   assert.ok(route.includes("403"));
   console.log("account deletion + reset tests passed");
+}
+
+
+// ---- Plan next season (mobile) ----
+{
+  const base: SeasonState = {
+    stage: "ending_soon", is_bridge: false, active_season: { label: "2026", season_end: "2026-11-01" }, planned_season: null,
+    days_until_final_phase_end: 20, prefill: { training_days_per_week: 4, goals: "Get faster", equipment: [], active_injuries: 0 },
+  };
+  assert.equal(shouldPromptNextSeason(base), true);
+  assert.equal(shouldPromptNextSeason({ ...base, stage: "bridge", is_bridge: true }), true);
+  assert.equal(shouldPromptNextSeason({ ...base, stage: "in_season_plan" }), false);
+  assert.equal(shouldPromptNextSeason({ ...base, stage: "no_plan" }), false);
+  assert.equal(shouldPromptNextSeason(null), false);
+  assert.match(seasonIntro("bridge"), /off-season/);
+  assert.match(seasonIntro("ending_soon"), /close to done/);
+
+  // empty form falls back to prefill
+  const f0 = formFromState(base);
+  assert.deepEqual([f0.start, f0.end, f0.days, f0.goals], ["", "", 4, "Get faster"]);
+
+  // a saved plan wins over prefill, and old camelCase / missing fields normalize
+  const planned: PlannedSeason = {
+    id: "s1", label: "2027", season_start: "2027-03-01", season_end: "2027-07-01",
+    recurring_commitments: [{ day_of_week: "Tuesday", time: "", label: "Practice" }],
+    tournament_weekends: [{ start_date: "2027-06-01", end_date: "2027-06-02", label: "Nationals", is_priority: true }],
+    skeleton_id: null, intake_changes: { training_days_per_week: 5, goals: "Peak for nationals" }, draft_status: "pending_review",
+  };
+  const withPlan = { ...base, planned_season: planned };
+  const f1 = formFromState(withPlan);
+  assert.equal(f1.start, "2027-03-01");
+  assert.equal(f1.days, 5);
+  assert.equal(f1.goals, "Peak for nationals");
+  assert.equal(f1.tournaments[0].is_priority, true);
+  assert.equal(f1.commitments[0].start_date, "");
+
+  assert.match(plannedStatus(planned)!, /reviewing/);
+  assert.match(plannedStatus({ ...planned, draft_status: "rejected" })!, /reworking/);
+  assert.match(plannedStatus({ ...planned, draft_status: "none" })!, /being drafted/);
+  assert.match(plannedStatus({ ...planned, skeleton_id: "k1" })!, /approved/);
+  assert.equal(plannedStatus(null), null);
+  assert.equal(isLocked({ ...planned, skeleton_id: "k1" }), true);
+  assert.equal(isLocked(planned), false);
+
+  // validation
+  assert.match(nextSeasonProblem({ ...f0 }, "2026-10-11")!, /season start/i);
+  assert.match(nextSeasonProblem({ ...f1, start: "2026-01-01", end: "2026-02-01" }, "2026-10-11")!, /future/);
+  assert.match(nextSeasonProblem({ ...f1, start: "2027-08-01", end: "2027-07-01" }, "2026-10-11")!, /end before/i);
+  assert.equal(nextSeasonProblem(f1, "2026-10-11"), null);
+
+  // body matches what the route reads
+  const body = buildNextSeasonBody(f1);
+  assert.deepEqual(Object.keys(body).sort(), ["goals", "recurring_commitments", "season_calendar_confirmed", "season_end", "season_start", "tournament_weekends", "training_days_per_week"]);
+  assert.equal(body.recurring_commitments[0].start_date, null);
+  const route = readFileSync("app/api/athletes/[id]/next-season/route.ts", "utf8");
+  for (const k of Object.keys(body)) assert.ok(route.includes(k), `next-season route no longer reads ${k}`);
+  console.log("next season tests passed");
+}
+
+
+// ---- TestFlight readiness: crash reports, support link, EAS env ----
+{
+  const r = buildErrorReport(new Error("boom"), "screen-crash", { platform: "ios", appVersion: "1.0.0" }, true);
+  assert.equal(r.message, "boom");
+  assert.equal(r.fatal, true);
+  assert.ok(r.stack.includes("boom"));
+  assert.equal(buildErrorReport("text only", "x", { platform: "ios", appVersion: "1" }).message, "text only");
+  assert.equal(buildErrorReport(undefined, "x", { platform: "ios", appVersion: "1" }).message, "Unknown error");
+  assert.equal(buildErrorReport(new Error("x".repeat(900)), "c", { platform: "ios", appVersion: "1" }).message.length, 500);
+
+  let t = 0;
+  const once = createDeduper(1000, () => t);
+  assert.equal(once("a"), true);
+  assert.equal(once("a"), false, "same error within the window is dropped");
+  assert.equal(once("b"), true);
+  t = 1500;
+  assert.equal(once("a"), true, "and allowed again after the window");
+
+  const mail = supportMailto("help@example.com", "1.0.0", "ios", "18.1");
+  assert.ok(mail.startsWith("mailto:help@example.com?subject="));
+  assert.ok(decodeURIComponent(mail).includes("App 1.0.0 · ios 18.1"));
+
+  // server side sanitizer
+  assert.equal(sanitizeClientError(null), null);
+  assert.equal(sanitizeClientError({ message: "  " }), null);
+  const ok = sanitizeClientError({ message: "m".repeat(900), stack: "s".repeat(9000), fatal: true, extra: "ignored" })!;
+  assert.equal(ok.message.length, 500);
+  assert.equal(ok.stack.length, 4000);
+  assert.equal(ok.fatal, true);
+  assert.equal("extra" in ok, false);
+
+  // EAS env builder
+  const require2 = createRequire(import.meta.url);
+  const { buildEasEnv, applyEnv, isServiceRoleKey } = require2("../mobile/scripts/eas-env.core.js");
+  const jwt = (role: string) => `x.${Buffer.from(JSON.stringify({ role })).toString("base64")}.y`;
+  const good = `# comment\nEXPO_PUBLIC_SUPABASE_URL=https://abc.supabase.co\nEXPO_PUBLIC_SUPABASE_ANON_KEY=${jwt("anon")}\nEXPO_PUBLIC_API_URL="https://app.example.com/"\nEXPO_PUBLIC_SUPPORT_EMAIL=\n`;
+  const built = buildEasEnv(good);
+  assert.equal(built.ok, true);
+  assert.equal(built.env.EXPO_PUBLIC_API_URL, "https://app.example.com", "trailing slash and quotes removed");
+  assert.equal("EXPO_PUBLIC_SUPPORT_EMAIL" in built.env, false, "blank optional values are left out");
+  assert.equal(buildEasEnv(good.replace(jwt("anon"), jwt("service_role"))).ok, false);
+  assert.equal(isServiceRoleKey(jwt("service_role")), true);
+  assert.equal(buildEasEnv(good.replace("https://app.example.com/", "http://192.168.1.5:3000")).ok, false);
+  assert.equal(buildEasEnv("EXPO_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co\n").ok, false);
+  const merged = applyEnv(JSON.parse(readFileSync("mobile/eas.json", "utf8")), built.env);
+  assert.equal(merged.build.production.autoIncrement, true, "existing settings kept");
+  assert.equal(merged.build.preview.env.EXPO_PUBLIC_API_URL, "https://app.example.com");
+  assert.equal(merged.build.production.env.EXPO_PUBLIC_SUPABASE_URL, "https://abc.supabase.co");
+  console.log("testflight readiness tests passed");
 }

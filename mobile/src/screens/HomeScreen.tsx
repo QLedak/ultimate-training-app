@@ -8,6 +8,7 @@ import { useAuth } from "../lib/auth";
 import { api } from "../lib/api";
 import { addDays, dowShort, prettyDate, startOfWeekStr, todayStr } from "../lib/dates";
 import { currentPhaseInfo } from "../lib/phase";
+import { plannedStatus, shouldPromptNextSeason, type SeasonState } from "../lib/nextSeason.core";
 import { workoutIcon } from "../lib/workoutIcons";
 import { colors } from "../theme";
 import type { Phase, SessionSummary } from "../types";
@@ -33,6 +34,7 @@ export default function HomeScreen({ navigation }: any) {
   const [week, setWeek] = useState<SessionSummary[] | null>(null);
   const [missed, setMissed] = useState<SessionSummary[]>([]);
   const [phases, setPhases] = useState<Phase[]>([]);
+  const [seasonState, setSeasonState] = useState<SeasonState | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -48,6 +50,8 @@ export default function HomeScreen({ navigation }: any) {
       setWeek(w.sessions);
       setMissed(m.sessions.filter((x) => x.date < todayStr() && !x.status));
       setPhases(p.phases ?? []);
+      // Nudge to plan next season; a failure here just hides the card.
+      api<SeasonState>(`/api/athletes/${athlete.id}/next-season`).then(setSeasonState).catch(() => setSeasonState(null));
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     }
@@ -88,6 +92,14 @@ export default function HomeScreen({ navigation }: any) {
     >
       <SyncBanner onSynced={load} />
       <ErrorText>{error}</ErrorText>
+
+      {hasIntake && shouldPromptNextSeason(seasonState) ? (
+        <Card tone={seasonState?.planned_season ? undefined : "brand"}>
+          <H2>{seasonState?.stage === "bridge" ? "Season complete. Plan your next one." : "Plan your next season"}</H2>
+          <P muted>{plannedStatus(seasonState?.planned_season ?? null) ?? (seasonState?.stage === "bridge" ? "You're in off-season blocks until you enter new dates." : "Your plan is close to done. Enter next season's dates so your next plan is ready.")}</P>
+          <Button title={seasonState?.planned_season ? "View next season" : "Plan next season"} variant={seasonState?.planned_season ? "secondary" : "primary"} onPress={() => navigation.navigate("NextSeason")} />
+        </Card>
+      ) : null}
 
       {!hasIntake ? (
         <Card tone="brand">
