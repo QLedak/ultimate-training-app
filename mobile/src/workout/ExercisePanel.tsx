@@ -4,6 +4,8 @@ import { Button, Card, Caps, P } from "../components/ui";
 import { NumberBox } from "./NumberBox";
 import { EffortSlider } from "./EffortSlider";
 import { WorkTimer } from "./WorkTimer";
+import { TimePicker } from "./TimePicker";
+import { parsePrescribedTarget } from "../shared/parse-prescription";
 import { HistorySheet, ReplaceSheet } from "./Sheets";
 import { effectiveOf, formatClock } from "./state";
 import { EFFORT_SCALE } from "../shared/perceived-effort";
@@ -26,8 +28,8 @@ type Props = {
   onApplyToAll: () => void;
 };
 
-function setSummary(set: GuidedSetState, timed: boolean, tier: number, perDb: boolean) {
-  if (timed) return `${set.reps}s`;
+function setSummary(set: GuidedSetState, timed: boolean, tier: number, perDb: boolean, perSide = false) {
+  if (timed) return `${set.reps}s${perSide ? "/side" : ""}`;
   const parts = [set.weight ? `${set.weight}${perDb ? " ea" : ""}` : "", set.reps ? `×${set.reps}` : ""].filter(Boolean).join(" ");
   const eff = tier !== 3 ? EFFORT_SCALE.find((e) => e.value === set.rir)?.shortLabel : "";
   return [parts || "Done", eff].filter(Boolean).join(" · ");
@@ -41,6 +43,7 @@ export function ExercisePanel(p: Props) {
   const [showNotes, setShowNotes] = useState(!!state.notes);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [replaceOpen, setReplaceOpen] = useState(false);
+  const [partial, setPartial] = useState(false);
 
   const perDumbbell = eff.perDumbbell;
   const effectiveId = eff.id;
@@ -80,7 +83,7 @@ export function ExercisePanel(p: Props) {
         </Card>
       ) : null}
 
-      {exercise.warmup?.length ? <Warmup warmup={exercise.warmup} /> : null}
+      {exercise.warmup?.length ? <Warmup warmup={exercise.warmup} done={state.warmupDone ?? 0} onDone={(n) => p.onUpdate({ warmupDone: n })} /> : null}
 
       {/* Set chips */}
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
@@ -124,7 +127,13 @@ export function ExercisePanel(p: Props) {
       {set == null ? (
         <Card tone="green">
           <P>All {state.sets.length} sets logged ✓</P>
-          <P small muted>Tap a set above to edit it, or move on.</P>
+          <P small muted>Tap a set to change what you logged, or move on.</P>
+          {state.sets.map((s, i) => (
+            <Pressable key={i} onPress={() => p.onSelectSet(i)} style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 8, borderTopWidth: i ? 1 : 0, borderTopColor: colors.greenLine }}>
+              <Text style={{ color: colors.text, fontSize: 15 }}>Set {i + 1}: {setSummary(s, timed != null, eff.tier, perDumbbell, eff.perSide)}</Text>
+              <Text style={{ color: colors.brand, fontWeight: "700" }}>Edit</Text>
+            </Pressable>
+          ))}
         </Card>
       ) : eff.tier === 3 && timed == null && !eff.usesWeight ? (
         <Card>
@@ -137,17 +146,24 @@ export function ExercisePanel(p: Props) {
               <NumberBox label={perDumbbell ? "POUNDS EACH" : "POUNDS (OPT.)"} value={set.weight} step={5} decimal onChange={(v) => p.onUpdateSet(p.activeIndex!, { weight: v })} />
             </View>
           ) : null}
-          <WorkTimer targetSeconds={timed.seconds} />
-          <View style={{ flexDirection: "row" }}>
-            <NumberBox label="SECONDS" value={set.reps} step={5} onChange={(v) => p.onUpdateSet(p.activeIndex!, { reps: v })} />
-          </View>
+          <WorkTimer targetSeconds={timed.seconds} perSide={eff.perSide} />
+          <TimePicker
+            label={eff.perSide ? "TIME HELD - EACH SIDE" : "TIME HELD"}
+            value={set.reps}
+            onChange={(v) => p.onUpdateSet(p.activeIndex!, { reps: v })}
+          />
+          {Number(set.reps) < timed.seconds ? (
+            <Text style={{ fontSize: 12, color: colors.amber }}>
+              {formatClock(Number(set.reps) || 0)} of {formatClock(timed.seconds)} - this is what gets logged.
+            </Text>
+          ) : null}
         </View>
       ) : (
         <View style={{ gap: 10 }}>
           <View style={{ flexDirection: "row", gap: 10 }}>
-            <NumberBox label="REPS" value={set.reps} step={1} onChange={(v) => p.onUpdateSet(p.activeIndex!, { reps: v })} />
+            <NumberBox label={partial ? "REPS YOU DID" : "REPS"} value={set.reps} step={1} onChange={(v) => p.onUpdateSet(p.activeIndex!, { reps: v })} />
             <NumberBox
-              label={perDumbbell ? "POUNDS EACH" : eff.tier === 1 ? "POUNDS" : "POUNDS (OPT.)"}
+              label={partial ? "POUNDS YOU USED" : perDumbbell ? "POUNDS EACH" : eff.tier === 1 ? "POUNDS" : "POUNDS (OPT.)"}
               value={set.weight}
               step={5}
               decimal
@@ -155,6 +171,16 @@ export function ExercisePanel(p: Props) {
             />
           </View>
           {perDumbbell ? <Text style={{ fontSize: 11, color: colors.muted }}>Enter the weight of ONE dumbbell, not the total.</Text> : null}
+          {(() => {
+            const goal = parsePrescribedTarget(eff.target ?? "").minReps;
+            const did = parseInt(set.reps, 10);
+            return goal != null && !Number.isNaN(did) && did < goal ? (
+              <Text style={{ fontSize: 12, color: colors.amber }}>{did} of {goal} reps - this is what gets logged.</Text>
+            ) : null;
+          })()}
+          {!set.logged && !partial ? (
+            <Button title="Couldn't finish? Enter what you did" variant="link" onPress={() => setPartial(true)} style={{ alignSelf: "flex-start" }} />
+          ) : null}
           {eff.tier !== 3 ? <EffortSlider value={set.rir} onChange={(v) => p.onUpdateSet(p.activeIndex!, { rir: v })} /> : null}
           {!set.logged && set.autoSuggested ? (
             <Text style={{ fontSize: 12, color: colors.brand }}>Weight adjusted from your last set's effort - change it if this isn't right.</Text>
@@ -219,24 +245,38 @@ function Row({ text, onPress, open }: { text: string; onPress: () => void; open?
   );
 }
 
-function Warmup({ warmup }: { warmup: SessionExercise["warmup"] }) {
+function Warmup({ warmup, done, onDone }: { warmup: SessionExercise["warmup"]; done: number; onDone: (n: number) => void }) {
   const [open, setOpen] = useState(false);
-  const [done, setDone] = useState<boolean[]>([]);
+  const finished = done >= warmup.length;
+  if (finished) {
+    return (
+      <Card tone="amber">
+        <Pressable onPress={() => setOpen((v) => !v)} style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <Caps color={colors.amber}>Warm-up done ✓ ({warmup.length} sets)</Caps>
+          <Text style={{ color: colors.amber }}>{open ? "▲" : "▼"}</Text>
+        </Pressable>
+        {open ? (
+          <View style={{ gap: 4, marginTop: 6 }}>
+            {warmup.map((w, i) => (
+              <Text key={i} style={{ fontSize: 14, color: colors.muted }}>{w.sets_reps} @ {w.suggested_weight} lb</Text>
+            ))}
+            <Button title="Redo warm-up" variant="link" onPress={() => onDone(0)} style={{ alignSelf: "flex-start" }} />
+          </View>
+        ) : null}
+      </Card>
+    );
+  }
+  const w = warmup[done];
   return (
     <Card tone="amber">
-      <Pressable onPress={() => setOpen((v) => !v)}>
-        <Caps color={colors.amber}>Warm-up sets ({warmup.length}) · not working sets {open ? "▲" : "▼"}</Caps>
-      </Pressable>
-      {open
-        ? warmup.map((w, i) => (
-            <Pressable key={i} onPress={() => setDone((d) => { const n = [...d]; n[i] = !n[i]; return n; })} style={{ flexDirection: "row", gap: 10, alignItems: "center", paddingVertical: 4 }}>
-              <View style={{ width: 22, height: 22, borderRadius: 5, borderWidth: 2, borderColor: colors.amber, backgroundColor: done[i] ? colors.amber : "transparent" }} />
-              <Text style={{ fontSize: 15, color: colors.text, textDecorationLine: done[i] ? "line-through" : "none" }}>
-                {w.sets_reps} @ {w.suggested_weight} lb
-              </Text>
-            </Pressable>
-          ))
-        : null}
+      <Caps color={colors.amber}>Warm-up set {done + 1} of {warmup.length} · not a working set</Caps>
+      <Text style={{ fontSize: 28, fontWeight: "800", color: colors.text, marginTop: 4 }}>
+        {w.sets_reps} @ {w.suggested_weight} lb
+      </Text>
+      <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
+        <Button title={done + 1 === warmup.length ? "Done - start working sets" : "Done, next warm-up"} onPress={() => onDone(done + 1)} style={{ flex: 1 }} />
+        <Button title="Skip all" variant="secondary" onPress={() => onDone(warmup.length)} />
+      </View>
     </Card>
   );
 }

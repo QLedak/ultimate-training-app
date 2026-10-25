@@ -5,7 +5,9 @@ import { parsePrescribedWeightHint } from "@/lib/pps/parse-prescription";
 import { humanizeExerciseId, isSupersetLabel } from "@/lib/training/display-labels";
 import { getSessionAthleteId, unauthorized, forbidden } from "@/lib/auth/session";
 import { dbError } from "@/lib/api/error-response";
-import { adaptPrescription, usesWeight } from "@/lib/training/swap-prescription";
+import { adaptPrescription, usesWeight, exerciseMeasure, isUnilateral } from "@/lib/training/swap-prescription";
+import { fitsPhase } from "@/lib/library/exercise-row";
+import type { LibraryRow } from "@/lib/library/exercise-row";
 
 /**
  * GET /api/sessions/[id]
@@ -47,7 +49,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       exerciseIds.length
         ? supabase
             .from("exercise_library")
-            .select("exercise_id, exercise_name, cue, movement_pattern, injury_considerations, equipment_needed, equipment_all, equipment_groups, logging_tier, region, laterality, library_version, chain_memberships")
+            .select("exercise_id, exercise_name, cue, movement_pattern, category, injury_considerations, equipment_needed, equipment_all, equipment_groups, logging_tier, region, laterality, library_version, chain_memberships")
             .in("exercise_id", exerciseIds)
         : Promise.resolve({ data: [], error: null }),
       supabase
@@ -87,18 +89,32 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   // today," so every pattern-matched alternative is offered regardless of
   // what's on file, and the athlete picks whatever they actually have access
   // to right now.
-  const patterns = Array.from(
-    new Set((libraryRows ?? []).map((r) => r.movement_pattern).filter((p): p is string => !!p))
+  // Alternatives = every active v2 exercise in the SAME category whose phase
+  // tag fits this session's phase (empty/null phases = all phases).
+  const categories = Array.from(
+    new Set((libraryRows ?? []).map((r) => r.category).filter((c): c is string => !!c))
   );
-  const { data: alternativeRows, error: alternativesError } = patterns.length
+  let phaseGoal: string | null = null;
+  if (session.phase_id) {
+    const { data: phaseRow } = await supabase
+      .from("macrocycle_phases")
+      .select("goal")
+      .eq("id", session.phase_id)
+      .maybeSingle();
+    phaseGoal = (phaseRow?.goal as string | undefined) ?? null;
+  }
+  const { data: alternativeRowsRaw, error: alternativesError } = categories.length
     ? await supabase
         .from("exercise_library")
-        .select("exercise_id, exercise_name, movement_pattern, category, laterality, logging_tier, injury_considerations, equipment_needed, equipment_all")
-        .in("movement_pattern", patterns)
+        .select("exercise_id, exercise_name, movement_pattern, category, phases, laterality, logging_tier, injury_considerations, equipment_needed, equipment_all")
+        .in("category", categories)
         .eq("is_active", true) // retired exercises are never offered as a swap
         .eq("library_version", 2)
     : { data: [], error: null };
   if (alternativesError) return dbError("sessions/[id]", alternativesError);
+  const alternativeRows = (alternativeRowsRaw ?? []).filter(
+    (r) => !phaseGoal || fitsPhase({ phases: (r.phases as string[] | null) ?? null } as LibraryRow, phaseGoal)
+  );
 
   // True when the movement is loaded with dumbbells — drives the "enter the
   // weight PER dumbbell" hint in the logging UI.
@@ -115,10 +131,12 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       tier: 1 | 2 | 3;
       category: string | null;
       laterality: string | null;
+      measure: "reps" | "seconds" | "distance";
+      unilateral: boolean;
     }>
   >();
   for (const row of alternativeRows ?? []) {
-    const pattern = row.movement_pattern as string;
+    const pattern = row.category as string;
     const list = alternativesByPattern.get(pattern) ?? [];
     list.push({
       exercise_id: row.exercise_id as string,
@@ -132,6 +150,8 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       }),
       category: (row.category as string | null) ?? null,
       laterality: (row.laterality as string | null) ?? null,
+      measure: exerciseMeasure(row),
+      unilateral: isUnilateral(row),
     });
     alternativesByPattern.set(pattern, list);
   }
@@ -211,8 +231,10 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
       tempo: prescribed.tempo ?? null,
       rest: prescribed.rest ?? null,
       coach_notes: prescribed.notes ?? null,
-      alternatives: libraryRow?.movement_pattern
-        ? (alternativesByPattern.get(libraryRow.movement_pattern as string) ?? [])
+      measure: libraryRow ? exerciseMeasure(libraryRow) : "reps",
+      unilateral: libraryRow ? isUnilateral(libraryRow) : false,
+      alternatives: libraryRow?.category
+        ? (alternativesByPattern.get(libraryRow.category as string) ?? [])
             .filter((alt) => alt.exercise_id !== exerciseId)
             .map((alt) => ({
               ...alt,

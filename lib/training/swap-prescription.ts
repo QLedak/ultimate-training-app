@@ -26,7 +26,7 @@ export function usesWeight(row: { equipment_needed?: unknown; equipment_all?: un
 export function exerciseMeasure(row: { exercise_name?: string | null; category?: string | null }): Measure {
   const name = row.exercise_name ?? "";
   // Isometrics and holds are timed. "Hang" alone is not (hang cleans are rep-based).
-  if (/\b(hold|plank|wall sit|isometric|squeeze|dead hang)\b/i.test(name)) return "seconds";
+  if (/\b(hold|plank|wall sit|isometric|iso|squeeze|dead hang)\b/i.test(name)) return "seconds";
   if (/\b\d+(?:-\d+)?\s*(?:yd|yds|yard|yards|m)\b/i.test(name)) return "distance";
   if (/\b(sprint|carry|bound|skip|shuttle)\b/i.test(name) && row.category !== "Plyometrics") return "distance";
   return "reps";

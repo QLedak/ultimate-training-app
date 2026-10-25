@@ -144,7 +144,7 @@ export function Guided({
             loading={submitting}
             onPress={() => onFinish(payload, anySkipped ? "partially_completed" : "completed")}
           />
-          <Button title="Keep going" variant="secondary" onPress={() => setFinishing(false)} />
+          <Button title="Go back and edit sets" variant="secondary" onPress={() => setFinishing(false)} />
         </View>
       </SafeAreaView>
     );

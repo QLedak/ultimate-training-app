@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import {
   applyToAllSets, buildFinalPayload, buildSteps, effectiveOf, firstUnloggedIndex, initStates, logSet, logSupersetSet, stepValue, swapPatch, updateSet, updateExercise,
 } from "../mobile/src/workout/state";
+import { splitSeconds } from "../mobile/src/workout/TimePicker.logic";
 import { parseTimedTarget } from "../mobile/src/shared/parse-prescription";
 import { currentPhaseInfo } from "../mobile/src/lib/phase";
 import { workoutIcon } from "../mobile/src/lib/workoutIcons";
@@ -611,4 +612,54 @@ import { resetEmailProblem } from "../mobile/src/lib/signup.core";
   assert.ok(tokenRoute.includes("sessionAthleteId !== params.id"), "athletes can only register their own phone");
   assert.ok(readFileSync("supabase/migrations/0019_push_tokens.sql", "utf8").includes("on delete cascade"), "tokens are removed with the account");
   console.log("push notification tests passed");
+}
+
+// ---- Workout edits: isometrics, per-side timers, warm-ups, swaps, time wheels ----
+{
+  
+  assert.deepEqual(splitSeconds("95"), { m: 1, s: 35 });
+  assert.deepEqual(splitSeconds(""), { m: 0, s: 0 });
+
+  // An isometric written in reps still gets a timer, never a rep logger.
+  const squeeze = ex("ADD", { tier: 2, exercise_name: "Adductor Squeeze Iso", prescribed_target: "3x10", prescribed_weight_hint: null, measure: "seconds" });
+  const sq = initStates([squeeze]);
+  assert.equal(effectiveOf(squeeze, sq.ADD).timedSeconds, 30);
+  assert.equal(sq.ADD.sets[0].reps, "30", "timed sets start at the default hold");
+
+  // Per side: unilateral holds and "/side" targets run once for each side.
+  const side = ex("SP", { tier: 2, exercise_name: "Side Plank", prescribed_target: "3x30s", prescribed_weight_hint: null, measure: "seconds" });
+  assert.equal(effectiveOf(side, initStates([side]).SP).perSide, true);
+  const front = ex("FP", { tier: 2, exercise_name: "Front Plank", prescribed_target: "3x30s", prescribed_weight_hint: null, measure: "seconds" });
+  assert.equal(effectiveOf(front, initStates([front]).FP).perSide, false);
+
+  // Swapping to an iso alternative turns the timer on.
+  const sw = ex("CUR", { tier: 2, prescribed_target: "3x10", prescribed_weight_hint: null,
+    alternatives: [{ exercise_id: "ISO", exercise_name: "Wall Sit", tier: 2, prescribed_target: "3x10", measure: "seconds" }] });
+  const swapped = updateExercise(initStates([sw]), "CUR", swapPatch(sw, initStates([sw]).CUR, "ISO"));
+  assert.equal(effectiveOf(sw, swapped.CUR).timedSeconds, 30);
+
+  // Warm-ups: tracked per exercise, never sent to the server; finished once working sets are logged.
+  const lift = ex("BP", { warmup: [{ sets_reps: "5", suggested_weight: 95 }, { sets_reps: "3", suggested_weight: 115 }] });
+  assert.equal(initStates([lift]).BP.warmupDone, 0);
+  const done = ex("BP2", { warmup: lift.warmup, logged: { weight_used: 100, reps_completed: 5, sets_completed: 1, rir: 2, substituted_exercise_id: null, substitution_reason: null, load_descriptor: null, notes: null, set_results: [{ set_number: 1, weight_used: 100, reps_completed: 5, rir: 2 }] } as any });
+  assert.equal(initStates([done]).BP2.warmupDone, 2);
+
+  // Partial completion: 8 of 10 logs exactly what was done.
+  const pull = ex("PU", { tier: 2, prescribed_target: "3x10", prescribed_weight_hint: null });
+  let pu = initStates([pull]);
+  pu = updateSet(pu, "PU", 0, { reps: "8" });
+  const pr = logSet(pu, pull, 0, "build");
+  assert.equal(buildFinalPayload([pull], pr.states).exercises[0].set_results[0].reps_completed, 8);
+
+  // Logged sets can be edited and the edit reaches the payload.
+  const edited = updateSet(pr.states, "PU", 0, { reps: "9" });
+  assert.equal(edited.PU.sets[0].logged, true);
+  assert.equal(buildFinalPayload([pull], edited).exercises[0].set_results[0].reps_completed, 9);
+
+  // API: alternatives come from the same category and a fitting phase tag.
+  const route = readFileSync("app/api/sessions/[id]/route.ts", "utf8");
+  assert.ok(route.includes('.in("category", categories)'), "alternatives are same-category");
+  assert.ok(route.includes("fitsPhase("), "alternatives respect the phase tag");
+  assert.ok(!route.includes('.in("movement_pattern"'), "no longer limited to one movement pattern");
+  console.log("workout edit tests passed");
 }

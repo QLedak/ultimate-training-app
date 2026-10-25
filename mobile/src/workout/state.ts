@@ -33,14 +33,25 @@ export type Effective = {
   perDumbbell: boolean;
   /** Seconds to hold, or null for rep-based work. Never set for tempo work. */
   timedSeconds: number | null;
+  /** Timed work done on each side (side plank, single-leg holds): the timer runs left then right. */
+  perSide: boolean;
 };
+
+/** Seconds used for an isometric whose prescription is written in reps (e.g. "3x10"). */
+export const DEFAULT_ISO_SECONDS = 30;
 
 export function effectiveOf(exercise: SessionExercise, st?: Pick<GuidedExerciseState, "substituted" | "substitutedExerciseId"> | null): Effective {
   const alt = st?.substituted && st.substitutedExerciseId ? exercise.alternatives.find((a) => a.exercise_id === st.substitutedExerciseId) : undefined;
   const typedIn = !!st?.substituted && !alt; // "something else" typed by the athlete
   const target = alt ? alt.prescribed_target ?? exercise.prescribed_target : exercise.prescribed_target;
   // Tempo work (e.g. 3s down, 3s up) is paced by feel, so it never gets a countdown timer.
-  const timedSeconds = exercise.tempo ? null : parseTimedTarget(target ?? "")?.seconds ?? null;
+  // Isometrics are timed by what the exercise IS, even when the target is written in reps.
+  const measure = alt ? alt.measure : typedIn ? undefined : exercise.measure;
+  const unilateral = alt ? alt.unilateral : typedIn ? false : exercise.unilateral;
+  const name = alt ? alt.exercise_name : exercise.exercise_name;
+  const parsedSeconds = exercise.tempo ? null : parseTimedTarget(target ?? "")?.seconds ?? null;
+  const timedSeconds = exercise.tempo && measure !== "seconds" ? null : parsedSeconds ?? (measure === "seconds" ? DEFAULT_ISO_SECONDS : null);
+  const perSide = timedSeconds != null && (!!unilateral || /\/\s*side|each side|per side|\bside (plank|bridge)\b|\bleft\b.*\bright\b/i.test(`${target ?? ""} ${name}`));
   return {
     id: alt ? alt.exercise_id : exercise.exercise_id,
     name: alt ? alt.exercise_name : exercise.exercise_name,
@@ -49,6 +60,7 @@ export function effectiveOf(exercise: SessionExercise, st?: Pick<GuidedExerciseS
     usesWeight: alt ? !!alt.uses_weight : typedIn ? true : !!exercise.uses_weight || exercise.tier === 1,
     perDumbbell: alt ? !!alt.uses_dumbbells : !!exercise.uses_dumbbells,
     timedSeconds,
+    perSide,
   };
 }
 
@@ -128,6 +140,8 @@ export function initExerciseState(exercise: SessionExercise): GuidedExerciseStat
     loadDescriptor: exercise.logged?.load_descriptor ?? "",
     skipped: false,
     doneIndex: sets.filter((s) => s.logged).length,
+    // Already logged working sets means the warm-up is behind them.
+    warmupDone: sets.some((x) => x.logged) ? exercise.warmup?.length ?? 0 : 0,
   };
 }
 

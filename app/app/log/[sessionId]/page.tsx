@@ -39,6 +39,8 @@ type SessionDetail = {
     rest: string | null;
     coach_notes: string | null;
     alternatives: Array<{ exercise_id: string; exercise_name: string; uses_dumbbells?: boolean }>;
+    // "seconds" for isometrics/holds: always timed, even when the target is written in reps.
+    measure?: "reps" | "seconds" | "distance";
     // True when loaded with dumbbells — shows the "per dumbbell" weight hint.
     uses_dumbbells?: boolean;
     // Active injury areas this exercise is tagged for (nudge to update status).
@@ -105,6 +107,11 @@ const SKIP_REASONS = [
 ];
 
 const inputClass = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none";
+
+/** Timed target of an exercise; isometrics are timed by what they are, not just how the target reads. */
+function timedOf(exercise: { prescribed_target: string | null; measure?: string }): { sets: number | null; seconds: number } | null {
+  return parseTimedTarget(exercise.prescribed_target ?? "") ?? (exercise.measure === "seconds" ? { sets: null, seconds: 30 } : null);
+}
 
 function blankExerciseForm(): ExerciseFormState {
   return {
@@ -703,7 +710,7 @@ function loadProgress(sessionId: string): GuidedProgress | null {
 function defaultSetCount(exercise: SessionDetail["exercises"][number]): number {
   const parsed = parsePrescribedTarget(exercise.prescribed_target ?? "");
   if (parsed.sets) return parsed.sets;
-  const timed = parseTimedTarget(exercise.prescribed_target ?? "");
+  const timed = timedOf(exercise);
   if (timed?.sets) return timed.sets;
   return exercise.tier === 3 ? 1 : 3;
 }
@@ -745,7 +752,7 @@ function initExerciseState(exercise: SessionDetail["exercises"][number]): Guided
       // Timed holds/intervals (3x30s) must NOT prefill reps: for those sets
       // `reps` stores the seconds actually held, and prefilling the target made
       // the countdown open already at 0:00 and let the set be logged untimed.
-      const isTimed = parseTimedTarget(exercise.prescribed_target ?? "") != null;
+      const isTimed = timedOf(exercise) != null;
       s.reps = !isTimed && targetInfo.minReps != null ? String(targetInfo.minReps) : "";
       sets.push(s);
     }
@@ -1563,7 +1570,7 @@ function ExerciseGuidedBody({
   onApplyToAll: () => void;
   onLogSet: (setIndex: number) => void;
 }) {
-  const timed = parseTimedTarget(exercise.prescribed_target ?? "");
+  const timed = timedOf(exercise);
   const [showNotes, setShowNotes] = useState(!!state.notes);
   // If the athlete swapped to a listed alternative, use THAT exercise's
   // equipment to decide whether the per-dumbbell hint applies.
@@ -1695,7 +1702,7 @@ function WarmupChecklist({ warmup }: { warmup: Array<{ sets_reps: string; sugges
 
 /** Swap picker shown right under the prescribed exercise's name at the top of
  * the step: a dropdown whose first option is "keep the prescribed exercise"
- * and whose other options are same-movement-pattern alternatives from the
+ * and whose other options are same-category, phase-appropriate alternatives from the
  * library, plus "Something else" for free text. Choosing anything other than
  * the prescribed exercise marks the exercise as substituted (what gets logged
  * and sent to the server); a short "why" box appears underneath. */
@@ -2004,7 +2011,7 @@ function ExerciseRow({
   onChange: (patch: Partial<ExerciseFormState>) => void;
   onUnlog: () => void;
 }) {
-  const timed = parseTimedTarget(exercise.prescribed_target ?? "");
+  const timed = timedOf(exercise);
 
   return (
     <div className="rounded-md border border-slate-200 p-3">

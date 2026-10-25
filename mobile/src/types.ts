@@ -33,8 +33,13 @@ export type SessionExercise = {
     tier?: 1 | 2 | 3;
     /** Sets/reps rewritten to fit this exercise (reps vs seconds vs distance, per side). */
     prescribed_target?: string | null;
+    /** How the exercise is measured; isometrics are "seconds" and always get a timer. */
+    measure?: "reps" | "seconds" | "distance";
+    unilateral?: boolean;
   }>;
   uses_dumbbells?: boolean;
+  measure?: "reps" | "seconds" | "distance";
+  unilateral?: boolean;
   /** Any loaded movement can take a weight, whatever its logging tier. */
   uses_weight?: boolean;
   active_injury_locations?: string[];
@@ -111,6 +116,8 @@ export type GuidedExerciseState = {
   loadDescriptor: string;
   skipped: boolean;
   doneIndex: number;
+  /** Warm-up sets clicked through so far (display only, never sent to the server). */
+  warmupDone?: number;
 };
 
 export type GuidedProgress = { stepIndex: number; states: Record<string, GuidedExerciseState> };
